@@ -41,7 +41,7 @@
     <div id="preview-panel"><iframe id="preview-frame"></iframe></div>
 
     <script>
-                const GOOGLE_MAPS_API_KEY = 'AIzaSyC8z8NNZsBnFLnNftCYZcefdg7KfwE_D-w';
+                
         const JSONBIN_API_KEY = '$2a$10$hi7HFmFJVUsbakSwraFdXueeos/ENMZJtdTVCpRdOjgV/o/7hs62e';
 
         function extractPlaceIdFromMapsUrl(url) {
@@ -324,6 +324,6 @@
             iframe.src = templateSelector.value;
         }
     </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8z8NNZsBnFLnNftCYZcefdg7KfwE_D-w&libraries=places&callback=initApp"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=__GOOGLE_MAPS_API_KEY__&libraries=places&callback=initApp"></script>
 </body>
 </html>
