@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>Invitation Editor</title>
+    <style>
+        body{display:flex;font-family:sans-serif;margin:0;height:100vh;overflow:hidden;background-color:#f0f2f5}#editor-panel{width:400px;padding:20px;background-color:#fff;border-right:1px solid #ddd;overflow-y:auto;box-shadow:2px 0 10px rgba(0,0,0,.05)}#preview-panel{flex-grow:1;height:100%}iframe{width:100%;height:100%;border:none}.control-group{margin-bottom:20px}label{display:block;margin-bottom:5px;font-weight:700;color:#333}input[type=text],input[type=url],input[type=datetime-local],select,textarea{width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box}textarea{min-height:60px;resize:vertical}h3{border-bottom:2px solid #f0f2f5;padding-bottom:10px;margin:25px 0 15px}.schedule-editor-group{border:1px solid #eee;padding:15px;border-radius:5px;margin-bottom:10px;position:relative}.schedule-editor-group .delete-btn{position:absolute;top:5px;right:5px;background:crimson;color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-weight:700;line-height:20px;text-align:center}.action-button{background-color:#007bff;color:#fff;border:none;padding:10px;width:100%;font-size:14px;border-radius:5px;cursor:pointer;transition:background-color .2s ease}.action-button:hover{background-color:#0056b3} .image-input-group{display:flex;gap:10px;align-items:center} .image-input-group input[type=url]{flex-grow:1} .image-input-group input[type=file]{width:100px}
+        .smart-input{border-left:4px solid #28a745!important}
+    </style>
+</head>
+<body>
+    <div id="editor-panel">
+        <h2>Settings</h2>
+        <div class="control-group"><label>Template</label><select id="template-selector"><option value="templates/wedding-classic.html">Classic Wedding</option></select></div>
+        <h3>Main Section</h3>
+        <div class="control-group"><label for="hero-subtitle">Subtitle</label><input type="text" id="hero-subtitle"></div>
+        <div class="control-group"><label for="hero-names">Names</label><input type="text" id="hero-names"></div>
+        <div class="control-group"><label for="hero-date">Date Text</label><input type="text" id="hero-date"></div>
+        <div class="control-group"><label for="hero-image-url">Main Photo</label><div class="image-input-group"><input type="url" id="hero-image-url" placeholder="Paste URL..."><input type="file" id="hero-image-file" accept="image/*"></div></div>
+        <h3>Countdown</h3>
+        <div class="control-group"><label for="countdown-title">Section Title</label><input type="text" id="countdown-title"></div>
+        <div class="control-group"><label for="date-countdown-input">Countdown Date & Time</label><input type="datetime-local" id="date-countdown-input"></div>
+        <h3>Schedule</h3>
+        <div class="control-group"><label for="schedule-main-title">Section Title</label><input type="text" id="schedule-main-title"></div>
+        <div id="schedule-items-editor"></div>
+        <button id="add-schedule-item" class="action-button">Add Schedule Item</button>
+        <h3>Location</h3>
+        <div class="control-group"><label for="location-search">Smart Location Search</label><input type="text" id="location-search" placeholder="E.g., Per Se, New York" class="smart-input"></div>
+        <div class="control-group"><label for="location-title">Section Title</label><input type="text" id="location-title"></div>
+        <div class="control-group"><label for="location-address">Address Text</label><input type="text" id="location-address"></div>
+        <div class="control-group"><label for="location-image-url">Location Photo</label><div class="image-input-group"><input type="url" id="location-image-url" placeholder="Paste URL..."><input type="file" id="location-image-file" accept="image/*"></div></div>
+        <div class="control-group"><label for="location-map-link">Google Maps Link</label><input type="url" id="location-map-link" placeholder="Paste Google Maps URL..." class="smart-input"></div>
+        <h3>RSVP</h3>
+        <div class="control-group"><label for="rsvp-title">Section Title</label><input type="text" id="rsvp-title"></div>
+        <div class="control-group"><label for="rsvp-subtitle">Subtitle</label><input type="text" id="rsvp-subtitle"></div>
+        <div class="control-group"><label for="rsvp-accept-link">"Accept" Link (e.g., Google Form)</label><input type="url" id="rsvp-accept-link"></div>
+        <div class="control-group"><label for="rsvp-decline-link">"Decline" Link (e.g., Google Form)</label><input type="url" id="rsvp-decline-link"></div>
+        <div class="control-group" style="margin-top: 30px;"><button id="share-button" class="action-button" style="background-color:#28a745;">Generate & Copy Link</button>
+            <p id="status-text" style="text-align:center; margin-top:10px;"></p>
+        </div>
+    </div>
+    <div id="preview-panel"><iframe id="preview-frame"></iframe></div>
+
+    <script>
+                const GOOGLE_MAPS_API_KEY = 'AIzaSyC8z8NNZsBnFLnNftCYZcefdg7KfwE_D-w';
+        const JSONBIN_API_KEY = '$2a$10$hi7HFmFJVUsbakSwraFdXueeos/ENMZJtdTVCpRdOjgV/o/7hs62e';
+
+        function extractPlaceIdFromMapsUrl(url) {
+            const patterns = [
+                /place_id:([a-zA-Z0-9_-]+)/,
+                /data=.*?1s([a-zA-Z0-9_-]+)/,
+                /maps\/place\/[^\/]+\/.*?1s([a-zA-Z0-9_-]+)/,
+                /ftid=([a-zA-Z0-9_-]+)/
+            ];
+            
+            for (let pattern of patterns) {
+                const match = url.match(pattern);
+                if (match) return match[1];
+            }
+            
+            const nameMatch = url.match(/maps\/place\/([^\/\?]+)/);
+            if (nameMatch) {
+                return decodeURIComponent(nameMatch[1].replace(/\+/g, ' '));
+            }
+            
+            return null;
+        }
+
+        async function fetchPlaceDataFromMapsUrl(mapsUrl) {
+            const placeId = extractPlaceIdFromMapsUrl(mapsUrl);
+            if (!placeId) return null;
+            
+            return new Promise((resolve, reject) => {
+                const service = new google.maps.places.PlacesService(document.createElement('div'));
+                
+                if (placeId.length > 20 && /^[a-zA-Z0-9_-]+$/.test(placeId)) {
+                    service.getDetails({
+                        placeId: placeId,
+                        fields: ['name', 'formatted_address', 'photos', 'url']
+                    }, (place, status) => {
+                        if (status === google.maps.places.PlacesServiceStatus.OK && place) {
+                            resolve(place);
+                        } else {
+                            reject(new Error('Place not found'));
+                        }
+                    });
+                } else {
+                    service.textSearch({
+                        query: placeId,
+                        fields: ['name', 'formatted_address', 'photos', 'url']
+                    }, (results, status) => {
+                        if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
+                            resolve(results[0]);
+                        } else {
+                            reject(new Error('Place not found'));
+                        }
+                    });
+                }
+            });
+        }
+
+        function initApp() {
+            const iframe = document.getElementById("preview-frame");
+            const templateSelector = document.getElementById("template-selector");
+            let scheduleCounter = 0;
+
+            const addScheduleEditorItem = (id, time, title, desc) => {
+                const editorContainer = document.getElementById('schedule-items-editor');
+                const group = document.createElement('div');
+                group.className = 'schedule-editor-group';
+                group.dataset.id = id;
+                group.innerHTML = `<button class="delete-btn" title="Delete Item">×</button><input type="text" class="editor-time" placeholder="Time" value="${time}"><input type="text" class="editor-title" placeholder="Title" value="${title}" style="margin:5px 0;"><textarea class="editor-desc" placeholder="Description">${desc}</textarea>`;
+                editorContainer.appendChild(group);
+
+                const itemInPreview = iframe.contentDocument.querySelector(`.schedule-item[data-id='${id}']`);
+                if (itemInPreview) {
+                    group.querySelector('.editor-time').addEventListener('input', (e) => {
+                        const timeEl = itemInPreview.querySelector('.schedule-time');
+                        if (timeEl) timeEl.innerText = e.target.value;
+                    });
+                    group.querySelector('.editor-title').addEventListener('input', (e) => {
+                        const titleEl = itemInPreview.querySelector('h3');
+                        if (titleEl) titleEl.innerText = e.target.value;
+                    });
+                    group.querySelector('.editor-desc').addEventListener('input', (e) => {
+                        const descEl = itemInPreview.querySelector('p');
+                        if (descEl) descEl.innerText = e.target.value;
+                    });
+                    group.querySelector('.delete-btn').addEventListener('click', () => {
+                        itemInPreview.remove();
+                        group.remove();
+                    });
+                }
+            };
+
+            const setupEditor = () => {
+                const doc = iframe.contentDocument;
+
+                const linkText = (inputId, elementId) => {
+                    const input = document.getElementById(inputId);
+                    const element = doc.getElementById(elementId);
+                    if (input && element) {
+                        input.value = element.innerText;
+                        input.addEventListener('input', () => element.innerText = input.value);
+                    }
+                };
+
+                const linkHref = (inputId, elementId) => {
+                    const input = document.getElementById(inputId);
+                    const element = doc.getElementById(elementId);
+                    if (input && element) {
+                        input.value = element.getAttribute('href');
+                        input.addEventListener('input', () => element.setAttribute('href', input.value));
+                    }
+                };
+
+                const linkImage = (urlInputId, fileInputId, elementId, isBg = false) => {
+                    const urlInput = document.getElementById(urlInputId);
+                    const fileInput = document.getElementById(fileInputId);
+                    const element = doc.getElementById(elementId);
+                    if (!urlInput || !fileInput || !element) return;
+                    
+                    if (isBg) {
+                        urlInput.value = doc.defaultView.getComputedStyle(element).backgroundImage.slice(5, -2).replace(/"/g, "");
+                    } else {
+                        urlInput.value = element.src;
+                    }
+
+                    urlInput.addEventListener('input', () => {
+                        if (isBg) element.style.backgroundImage = `url('${urlInput.value}')`;
+                        else element.src = urlInput.value;
+                    });
+
+                    fileInput.addEventListener('change', (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                                urlInput.value = ev.target.result;
+                                urlInput.dispatchEvent(new Event('input'));
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                };
+
+                ['hero-subtitle', 'hero-names', 'hero-date', 'countdown-title', 'schedule-main-title', 'location-title', 'location-address', 'rsvp-title', 'rsvp-subtitle'].forEach(id => linkText(id, id));
+                ['location-map-link', 'rsvp-accept-link', 'rsvp-decline-link'].forEach(id => linkHref(id, id));
+                linkImage('hero-image-url', 'hero-image-file', 'hero-section', true);
+                linkImage('location-image-url', 'location-image-file', 'location-image');
+
+                const countdownInput = document.getElementById('date-countdown-input');
+                countdownInput.addEventListener('input', () => { if (iframe.contentWindow.startCountdown) iframe.contentWindow.startCountdown(countdownInput.value); });
+                
+                const scheduleEditor = document.getElementById('schedule-items-editor');
+                scheduleEditor.innerHTML = '';
+                const scheduleItems = doc.querySelectorAll('.schedule-item');
+                scheduleCounter = scheduleItems.length;
+                scheduleItems.forEach(item => {
+                    addScheduleEditorItem(item.dataset.id, item.querySelector('.schedule-time').innerText, item.querySelector('h3').innerText, item.querySelector('p').innerText);
+                });
+
+                const mapsLinkInput = document.getElementById('location-map-link');
+                if (mapsLinkInput) {
+                    mapsLinkInput.addEventListener('blur', async (e) => {
+                        let url = e.target.value.trim();
+                        if (!url) return;
+
+                        const statusText = document.getElementById('status-text');
+                        
+                        try {
+                            if (url.includes('goo.gl') || url.includes('maps.app.goo.gl')) {
+                                if (statusText) statusText.innerText = 'Разворачиваю короткую ссылку...';
+                                const response = await fetch(`/.netlify/functions/unshorten-url?url=${encodeURIComponent(url)}`);
+                                const data = await response.json();
+                                if (!response.ok || data.error) {
+                                    throw new Error(data.error || 'Не удалось развернуть ссылку.');
+                                }
+                                url = data.longUrl;
+                            }
+                            
+                            if (statusText) statusText.innerText = 'Загружаю данные о месте...';
+                            
+                            const place = await fetchPlaceDataFromMapsUrl(url);
+                            if (place) {
+                                const titleInput = document.getElementById('location-title');
+                                const addressInput = document.getElementById('location-address');
+                                const imageInput = document.getElementById('location-image-url');
+                                
+                                if (titleInput && place.name) {
+                                    titleInput.value = place.name;
+                                    titleInput.dispatchEvent(new Event('input'));
+                                }
+                                
+                                if (addressInput && place.formatted_address) {
+                                    addressInput.value = place.formatted_address;
+                                    addressInput.dispatchEvent(new Event('input'));
+                                }
+                                
+                                if (imageInput && place.photos && place.photos.length > 0) {
+                                    imageInput.value = place.photos[0].getUrl({ 'maxWidth': 1600 });
+                                    imageInput.dispatchEvent(new Event('input'));
+                                }
+                                
+                                if (statusText) statusText.innerText = 'Данные успешно загружены!';
+                                setTimeout(() => {
+                                    if (statusText) statusText.innerText = '';
+                                }, 3000);
+                            } else {
+                                throw new Error('Не удалось найти данные для этого места.');
+                            }
+                        } catch (error) {
+                            console.error('Error loading place data:', error);
+                            if (statusText) {
+                                statusText.innerText = `Ошибка: ${error.message}`;
+                                setTimeout(() => statusText.innerText = '', 4000);
+                            }
+                        }
+                    });
+                }
+            };
+
+            document.getElementById('add-schedule-item').addEventListener('click', () => {
+                scheduleCounter++;
+                const list = iframe.contentDocument.getElementById('schedule-list');
+                const newItem = iframe.contentDocument.createElement('li');
+                newItem.className = 'schedule-item';
+                newItem.dataset.id = scheduleCounter;
+                newItem.innerHTML = `<div class="schedule-time"></div><div class="schedule-event"><h3></h3><p></p></div>`;
+                list.appendChild(newItem);
+                addScheduleEditorItem(scheduleCounter, '', '', '');
+            });
+
+            const searchInput = document.getElementById('location-search');
+            const autocomplete = new google.maps.places.Autocomplete(searchInput, { fields: ["name", "formatted_address", "photos", "url"], types: ["establishment"] });
+            autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+                if (!place.photos) return;
+                ['location-title', 'location-address', 'location-image-url', 'location-map-link'].forEach(id => {
+                    const input = document.getElementById(id);
+                    if (id === 'location-title') input.value = place.name;
+                    if (id === 'location-address') input.value = place.formatted_address;
+                    if (id === 'location-map-link') input.value = place.url;
+                    if (id === 'location-image-url') input.value = place.photos[0].getUrl({ 'maxWidth': 1600 });
+                    input.dispatchEvent(new Event('input'));
+                });
+            });
+
+            document.getElementById('share-button').addEventListener('click', async function() {
+                if (!JSONBIN_API_KEY || JSONBIN_API_KEY === 'PASTE_YOUR_JSONBIN_API_KEY_HERE') {
+                    alert('Error: JSONBIN_API_KEY is not set in index.html.');
+                    return;
+                }
+                const statusText = document.getElementById('status-text');
+                this.disabled = true;
+                statusText.innerText = 'Saving...';
+                
+                try {
+                    const data = { text: {}, links: {}, images: {}, schedule: [], countdownDate: document.getElementById('date-countdown-input').value };
+                    ['hero-subtitle', 'hero-names', 'hero-date', 'countdown-title', 'schedule-main-title', 'location-title', 'location-address', 'rsvp-title', 'rsvp-subtitle'].forEach(id => data.text[id] = document.getElementById(id).value);
+                    ['location-map-link', 'rsvp-accept-link', 'rsvp-decline-link'].forEach(id => data.links[id] = document.getElementById(id).value);
+                    data.images.hero = document.getElementById('hero-image-url').value;
+                    data.images.location = document.getElementById('location-image-url').value;
+                    document.querySelectorAll('.schedule-editor-group').forEach(group => {
+                        data.schedule.push({ time: group.querySelector('.editor-time').value, title: group.querySelector('.editor-title').value, desc: group.querySelector('.editor-desc').value });
+                    });
+                    const response = await fetch('https://api.jsonbin.io/v3/b', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Access-Key': JSONBIN_API_KEY, 'X-Bin-Name': 'invitation-data' },
+                        body: JSON.stringify(data)
+                    });
+                    if(!response.ok) throw new Error(`API Error: ${response.statusText}`);
+                    const result = await response.json();
+                    const shareLink = `${window.location.origin}/templates/wedding-classic.html?id=${result.metadata.id}`;
+                    await navigator.clipboard.writeText(shareLink);
+                    statusText.innerText = 'Link copied to clipboard!';
+                } catch (err) {
+                    statusText.innerText = `Error: ${err.message}`;
+                } finally {
+                    this.disabled = false;
+                }
+            });
+
+            iframe.addEventListener('load', setupEditor);
+            iframe.src = templateSelector.value;
+        }
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8z8NNZsBnFLnNftCYZcefdg7KfwE_D-w&libraries=places&callback=initApp"></script>
+</body>
+</html>
