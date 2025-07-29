@@ -1,34 +1,37 @@
 const fs = require('fs');
-const filePath = './index.html';
+    
+// Список файлов, в которых нужно заменить ключи
+const filesToProcess = ['./index.html', './templates/wedding-classic.html'];
 
 console.log('Starting key replacement...');
 
-// Читаем содержимое файла index.html
-fs.readFile(filePath, 'utf8', (err, data) => {
-    if (err) {
-        console.error('Error reading file:', err);
-        return process.exit(1);
-    }
+const googleKey = process.env.GOOGLE_MAPS_API_KEY;
+const jsonbinKey = process.env.JSONBIN_API_KEY;
 
-    // Проверяем, что переменные окружения доступны
-    const googleKey = process.env.GOOGLE_MAPS_API_KEY;
-    const jsonbinKey = process.env.JSONBIN_API_KEY;
+if (!googleKey || !jsonbinKey) {
+    console.error('Error: API keys not found in environment variables.');
+    return process.exit(1);
+}
 
-    if (!googleKey || !jsonbinKey) {
-        console.error('Error: API keys not found in environment variables.');
-        return process.exit(1);
-    }
-
-    // Выполняем замену
-    let result = data.replace(/__GOOGLE_MAPS_API_KEY__/g, googleKey);
-    result = result.replace(/__JSONBIN_API_KEY__/g, jsonbinKey);
-
-    // Записываем измененное содержимое обратно в файл
-    fs.writeFile(filePath, result, 'utf8', (err) => {
+// Теперь мы проходимся по каждому файлу в списке
+filesToProcess.forEach(filePath => {
+    fs.readFile(filePath, 'utf8', (err, data) => {
         if (err) {
-            console.error('Error writing file:', err);
+            console.error(`Error reading file: ${filePath}`, err);
             return process.exit(1);
         }
-        console.log('API keys have been successfully injected.');
+
+        console.log(`Processing ${filePath}...`);
+        // Выполняем обе замены для каждого файла
+        let result = data.replace(/__GOOGLE_MAPS_API_KEY__/g, googleKey);
+        result = result.replace(/__JSONBIN_API_KEY__/g, jsonbinKey);
+
+        fs.writeFile(filePath, result, 'utf8', (err) => {
+            if (err) {
+                console.error(`Error writing file: ${filePath}`, err);
+                return process.exit(1);
+            }
+            console.log(`API keys have been successfully injected into ${filePath}.`);
+        });
     });
 });
