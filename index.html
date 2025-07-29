@@ -197,10 +197,10 @@
                     addScheduleEditorItem(item.dataset.id, item.querySelector('.schedule-time').innerText, item.querySelector('h3').innerText, item.querySelector('p').innerText);
                 });
 
-                const mapsLinkInput = document.getElementById('location-map-link');
+                                const mapsLinkInput = document.getElementById('location-map-link');
                 if (mapsLinkInput) {
                     mapsLinkInput.addEventListener('blur', async (e) => {
-                        let url = e.target.value.trim();
+                        const url = e.target.value.trim();
                         if (!url) return;
 
                         const statusText = document.getElementById('status-text');
@@ -208,6 +208,7 @@
                         try {
                             if (url.includes('goo.gl') || url.includes('maps.app.goo.gl')) {
                                 if (statusText) statusText.innerText = 'Получаю данные о месте...';
+                                
                                 const response = await fetch(`/.netlify/functions/unshorten-url?url=${encodeURIComponent(url)}`);
                                 const data = await response.json();
                                 if (!response.ok || data.error) {
@@ -215,37 +216,30 @@
                                 }
                                 
                                 const service = new google.maps.places.PlacesService(document.createElement('div'));
-                                service.getDetails({
-                                    placeId: data.placeId,
+                                // ИЩЕМ ПО НАЗВАНИЮ, а не по ID
+                                service.textSearch({
+                                    query: data.placeName,
                                     fields: ['name', 'formatted_address', 'photos', 'url']
-                                }, (place, status) => {
-                                    if (status === google.maps.places.PlacesServiceStatus.OK && place) {
+                                }, (results, status) => {
+                                    if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
+                                        const place = results[0]; // Берем первый результат
                                         const titleInput = document.getElementById('location-title');
                                         const addressInput = document.getElementById('location-address');
                                         const imageInput = document.getElementById('location-image-url');
                                         const mapLinkInput = document.getElementById('location-map-link');
 
-                                        if (titleInput && place.name) {
-                                            titleInput.value = place.name;
-                                            titleInput.dispatchEvent(new Event('input'));
-                                        }
-                                        if (addressInput && place.formatted_address) {
-                                            addressInput.value = place.formatted_address;
-                                            addressInput.dispatchEvent(new Event('input'));
-                                        }
-                                        if (imageInput && place.photos && place.photos.length > 0) {
-                                            imageInput.value = place.photos[0].getUrl({ 'maxWidth': 1600 });
-                                            imageInput.dispatchEvent(new Event('input'));
-                                        }
-                                        if (mapLinkInput && place.url) {
-                                            mapLinkInput.value = place.url;
-                                            mapLinkInput.dispatchEvent(new Event('input'));
-                                        }
+                                        if (titleInput && place.name) titleInput.value = place.name;
+                                        if (addressInput && place.formatted_address) addressInput.value = place.formatted_address;
+                                        if (imageInput && place.photos && place.photos.length > 0) imageInput.value = place.photos[0].getUrl({ 'maxWidth': 1600 });
+                                        if (mapLinkInput && place.url) mapLinkInput.value = place.url;
+
+                                        // Диспетчеризуем события, чтобы обновить превью
+                                        [titleInput, addressInput, imageInput, mapLinkInput].forEach(input => input && input.dispatchEvent(new Event('input')));
                                         
                                         if (statusText) statusText.innerText = 'Данные успешно загружены!';
                                         setTimeout(() => { if (statusText) statusText.innerText = ''; }, 3000);
                                     } else {
-                                        statusText.innerText = 'Ошибка: Место не найдено по ID.';
+                                        statusText.innerText = 'Ошибка: Место не найдено по названию из ссылки.';
                                         setTimeout(() => { if (statusText) statusText.innerText = ''; }, 4000);
                                     }
                                 });
