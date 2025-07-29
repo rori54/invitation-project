@@ -42,7 +42,7 @@
 
     <script>
                 
-        const JSONBIN_API_KEY = '$2a$10$hi7HFmFJVUsbakSwraFdXueeos/ENMZJtdTVCpRdOjgV/o/7hs62e';
+                const JSONBIN_API_KEY = '__JSONBIN_API_KEY__';
 
         function extractPlaceIdFromMapsUrl(url) {
             const patterns = [
@@ -51,27 +51,22 @@
                 /maps\/place\/[^\/]+\/.*?1s([a-zA-Z0-9_-]+)/,
                 /ftid=([a-zA-Z0-9_-]+)/
             ];
-            
             for (let pattern of patterns) {
                 const match = url.match(pattern);
                 if (match) return match[1];
             }
-            
             const nameMatch = url.match(/maps\/place\/([^\/\?]+)/);
             if (nameMatch) {
                 return decodeURIComponent(nameMatch[1].replace(/\+/g, ' '));
             }
-            
             return null;
         }
 
         async function fetchPlaceDataFromMapsUrl(mapsUrl) {
             const placeId = extractPlaceIdFromMapsUrl(mapsUrl);
             if (!placeId) return null;
-            
             return new Promise((resolve, reject) => {
                 const service = new google.maps.places.PlacesService(document.createElement('div'));
-                
                 if (placeId.length > 20 && /^[a-zA-Z0-9_-]+$/.test(placeId)) {
                     service.getDetails({
                         placeId: placeId,
@@ -160,7 +155,10 @@
                     if (!urlInput || !fileInput || !element) return;
                     
                     if (isBg) {
-                        urlInput.value = doc.defaultView.getComputedStyle(element).backgroundImage.slice(5, -2).replace(/"/g, "");
+                        const bgImage = doc.defaultView.getComputedStyle(element).backgroundImage;
+                        if (bgImage && bgImage !== 'none') {
+                           urlInput.value = bgImage.slice(5, -2);
+                        }
                     } else {
                         urlInput.value = element.src;
                     }
@@ -202,7 +200,7 @@
                 const mapsLinkInput = document.getElementById('location-map-link');
                 if (mapsLinkInput) {
                     mapsLinkInput.addEventListener('blur', async (e) => {
-                        const url = e.target.value.trim();
+                        let url = e.target.value.trim();
                         if (!url) return;
 
                         const statusText = document.getElementById('status-text');
@@ -210,7 +208,6 @@
                         try {
                             if (url.includes('goo.gl') || url.includes('maps.app.goo.gl')) {
                                 if (statusText) statusText.innerText = 'Получаю данные о месте...';
-                                
                                 const response = await fetch(`/.netlify/functions/unshorten-url?url=${encodeURIComponent(url)}`);
                                 const data = await response.json();
                                 if (!response.ok || data.error) {
@@ -261,6 +258,8 @@
                             }
                         }
                     });
+                }
+            }; // <-- ПРАВИЛЬНОЕ МЕСТО ДЛЯ ЗАКРЫТИЯ setupEditor
 
             document.getElementById('add-schedule-item').addEventListener('click', () => {
                 scheduleCounter++;
@@ -277,7 +276,7 @@
             const autocomplete = new google.maps.places.Autocomplete(searchInput, { fields: ["name", "formatted_address", "photos", "url"], types: ["establishment"] });
             autocomplete.addListener('place_changed', () => {
                 const place = autocomplete.getPlace();
-                if (!place.photos) return;
+                if (!place || !place.photos) return;
                 ['location-title', 'location-address', 'location-image-url', 'location-map-link'].forEach(id => {
                     const input = document.getElementById(id);
                     if (id === 'location-title') input.value = place.name;
@@ -289,8 +288,8 @@
             });
 
             document.getElementById('share-button').addEventListener('click', async function() {
-                if (!JSONBIN_API_KEY || JSONBIN_API_KEY === 'PASTE_YOUR_JSONBIN_API_KEY_HERE') {
-                    alert('Error: JSONBIN_API_KEY is not set in index.html.');
+                if (!JSONBIN_API_KEY || JSONBIN_API_KEY === 'PASTE_YOUR_JSONBIN_API_KEY_HERE' || JSONBIN_API_KEY === '__JSONBIN_API_KEY__') {
+                    alert('Error: JSONBIN_API_KEY is not set correctly.');
                     return;
                 }
                 const statusText = document.getElementById('status-text');
