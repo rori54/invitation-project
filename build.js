@@ -1,19 +1,17 @@
 const fs = require('fs');
-    
-// Список файлов, в которых нужно заменить ключи
 const filesToProcess = ['./index.html', './templates/wedding-classic.html'];
 
 console.log('Starting key replacement...');
 
 const googleKey = process.env.GOOGLE_MAPS_API_KEY;
-const jsonbinKey = process.env.JSONBIN_API_KEY;
+const jsonbinMasterKey = process.env.JSONBIN_MASTER_KEY;
+const jsonbinAccessKey = process.env.JSONBIN_ACCESS_KEY;
 
-if (!googleKey || !jsonbinKey) {
-    console.error('Error: API keys not found in environment variables.');
+if (!googleKey || !jsonbinMasterKey || !jsonbinAccessKey) {
+    console.error('Error: One or more API keys not found in environment variables.');
     return process.exit(1);
 }
 
-// Теперь мы проходимся по каждому файлу в списке
 filesToProcess.forEach(filePath => {
     fs.readFile(filePath, 'utf8', (err, data) => {
         if (err) {
@@ -22,9 +20,9 @@ filesToProcess.forEach(filePath => {
         }
 
         console.log(`Processing ${filePath}...`);
-        // Выполняем обе замены для каждого файла
         let result = data.replace(/__GOOGLE_MAPS_API_KEY__/g, googleKey);
-        result = result.replace(/__JSONBIN_API_KEY__/g, jsonbinKey);
+        result = result.replace(/__JSONBIN_MASTER_KEY__/g, jsonbinMasterKey);
+        result = result.replace(/__JSONBIN_ACCESS_KEY__/g, jsonbinAccessKey);
 
         fs.writeFile(filePath, result, 'utf8', (err) => {
             if (err) {

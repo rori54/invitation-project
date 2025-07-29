@@ -84,7 +84,7 @@
             try {
                 const response = await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, {
                     headers: {
-                        'X-Access-Key': '__JSONBIN_API_KEY__'
+                        'X-Access-Key': '__JSONBIN_ACCESS_KEY__'
                     }
                 });
                 if (!response.ok) throw new Error('Could not fetch data.');
