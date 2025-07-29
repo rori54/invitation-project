@@ -199,7 +199,7 @@
                     addScheduleEditorItem(item.dataset.id, item.querySelector('.schedule-time').innerText, item.querySelector('h3').innerText, item.querySelector('p').innerText);
                 });
 
-                                const mapsLinkInput = document.getElementById('location-map-link');
+                const mapsLinkInput = document.getElementById('location-map-link');
                 if (mapsLinkInput) {
                     mapsLinkInput.addEventListener('blur', async (e) => {
                         const url = e.target.value.trim();
@@ -261,7 +261,7 @@
                             }
                         }
                     });
-                }
+
             document.getElementById('add-schedule-item').addEventListener('click', () => {
                 scheduleCounter++;
                 const list = iframe.contentDocument.getElementById('schedule-list');
