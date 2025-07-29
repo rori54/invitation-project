@@ -1,3 +1,6 @@
+[build]
+  command = "npm install && sed -i -e \"s|__GOOGLE_MAPS_API_KEY__|${GOOGLE_MAPS_API_KEY}|g\" -e \"s|__JSONBIN_API_KEY__|${JSONBIN_API_KEY}|g\" index.html"
+  publish = "."
+
 [functions]
-  # Указывает Netlify, где находятся ваши серверные функции.
-  directory = "netlify/functions/" 
+  directory = "netlify/functions/"
