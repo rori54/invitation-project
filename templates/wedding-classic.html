@@ -47,19 +47,18 @@
         @media (max-width: 768px) { .content-section { margin-left: 15px; margin-right: 15px; } }
         @media (max-width: 600px) { .hero-content h1 { font-size: 2.8rem; } h2 { font-size: 1.8rem; } .content-section { padding: 30px 20px; margin: 20px 10px; } .schedule-item { flex-direction: column; align-items: flex-start; gap: 10px; } .time-block { padding: 15px; min-width: 60px; } .time-block .number { font-size: 2rem; } #countdown { gap: 10px; } }
 
-        /* ===== ВАШ НОВЫЙ КОД СТИЛЕЙ ДЛЯ КОНВЕРТА ===== */
+        /* ===== НОВЫЙ КОНВЕРТ "4 ПАНЕЛИ" ===== */
         #envelope-wrapper {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            background: #f0f2f5;
             z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
             transition: opacity 1.2s ease-in-out;
         }
         body.intro-active main {
@@ -67,170 +66,97 @@
         }
         #envelope {
             position: relative;
-            width: 80vmin;
-            height: 50vmin;
-            perspective: 1500px;
-            transform-style: preserve-3d;
+            width: 320px;
+            height: 200px;
         }
-        .envelope-base {
+        .flap {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #8B0000 0%, #DC143C 25%, #B22222 50%, #8B0000 100%);
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.3);
-            transform-style: preserve-3d;
-        }
-        .envelope-base::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 1px, transparent 1px), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.05) 1px, transparent 1px), radial-gradient(circle at 40% 60%, rgba(255,255,255,0.08) 1px, transparent 1px);
-            background-size: 15px 15px, 20px 20px, 25px 25px;
-            border-radius: 12px;
-        }
-        .flap-left {
-            position: absolute;
-            left: 0;
-            top: 0;
             width: 50%;
-            height: 100%;
-            background: linear-gradient(135deg, #8B0000 0%, #DC143C 25%, #B22222 50%, #8B0000 100%);
-            transform-origin: left center;
-            transition: transform 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            transform-style: preserve-3d;
-            border-radius: 12px 0 0 12px;
-            box-shadow: inset -2px 0 10px rgba(0,0,0,0.3);
-            z-index: 3;
-        }
-        .flap-right {
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(135deg, #8B0000 0%, #DC143C 25%, #B22222 50%, #8B0000 100%);
-            transform-origin: right center;
-            transition: transform 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            transform-style: preserve-3d;
-            border-radius: 0 12px 12px 0;
-            box-shadow: inset 2px 0 10px rgba(0,0,0,0.3);
-            z-index: 3;
-        }
-        .flap-top {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
             height: 50%;
-            background: linear-gradient(135deg, #8B0000 0%, #DC143C 25%, #B22222 50%, #8B0000 100%);
-            transform-origin: top center;
-            transition: transform 1.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            transform-style: preserve-3d;
-            border-radius: 12px 12px 0 0;
-            box-shadow: inset 0 -2px 10px rgba(0,0,0,0.3);
-            z-index: 4;
+            background: #8fbc8f; /* Зеленый цвет */
+            transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1), opacity 1s;
         }
-        .flap-bottom {
-            position: absolute;
+        .flap-top-left {
+            top: 0;
+            left: 0;
+            background: linear-gradient(to bottom right, #a1d1a1, #8fbc8f);
+            transform-origin: top left;
+        }
+        .flap-top-right {
+            top: 0;
+            right: 0;
+            background: linear-gradient(to bottom left, #a1d1a1, #8fbc8f);
+            transform-origin: top right;
+        }
+        .flap-bottom-left {
             bottom: 0;
             left: 0;
-            width: 100%;
-            height: 50%;
-            background: linear-gradient(135deg, #8B0000 0%, #DC143C 25%, #B22222 50%, #8B0000 100%);
-            transform-origin: bottom center;
-            transition: transform 1.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            transform-style: preserve-3d;
-            border-radius: 0 0 12px 12px;
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
-            z-index: 4;
+            background: linear-gradient(to top right, #a1d1a1, #8fbc8f);
+            transform-origin: bottom left;
+        }
+        .flap-bottom-right {
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(to top left, #a1d1a1, #8fbc8f);
+            transform-origin: bottom right;
         }
         .seal {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 12vmin;
-            height: 12vmin;
-            background: radial-gradient(circle, #FFD700 0%, #FFA500 30%, #FF8C00 70%, #FF6347 100%);
+            width: 70px;
+            height: 70px;
+            background: #c5a98b; /* Акцентный цвет, как у кнопок */
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            text-align: center;
+            padding: 5px;
             font-family: 'Playfair Display', serif;
-            font-weight: 700;
-            font-size: 2vmin;
-            color: #8B0000;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-            box-shadow: 0 0 30px rgba(255,215,0,0.6), inset 0 2px 5px rgba(255,255,255,0.3), inset 0 -2px 5px rgba(0,0,0,0.2);
-            transition: all 0.8s ease;
+            font-size: 14px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.2);
             z-index: 10;
             cursor: pointer;
-            animation: sealGlow 3s ease-in-out infinite alternate;
+            transition: transform 0.8s, opacity 0.8s;
         }
-        @keyframes sealGlow {
-            0% { box-shadow: 0 0 30px rgba(255,215,0,0.6), inset 0 2px 5px rgba(255,255,255,0.3), inset 0 -2px 5px rgba(0,0,0,0.2); }
-            100% { box-shadow: 0 0 50px rgba(255,215,0,0.8), inset 0 2px 8px rgba(255,255,255,0.4), inset 0 -2px 8px rgba(0,0,0,0.3); }
-        }
-        .seal::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: conic-gradient(from 0deg, #FFD700, #FFA500, #FF8C00, #FF6347, #FFD700);
-            border-radius: 50%;
-            z-index: -1;
-            animation: rotate 8s linear infinite;
-        }
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        #envelope.open .flap-left { transform: rotateY(-180deg); }
-        #envelope.open .flap-right { transform: rotateY(180deg); }
-        #envelope.open .flap-top { transform: rotateX(-180deg); }
-        #envelope.open .flap-bottom { transform: rotateX(180deg); }
-        #envelope.open .seal {
+        #envelope.open .flap-top-left {
+            transform: translate(-100%, -100%) rotate(-45deg);
             opacity: 0;
-            transform: translate(-50%, -50%) scale(0.3);
         }
-        .card-front {
-            position: absolute;
-            width: 92%;
-            height: 92%;
-            top: 4%;
-            left: 4%;
-            background: linear-gradient(135deg, #f8f7f5 0%, #ffffff 50%, #f0f0f0 100%);
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            z-index: 1;
+        #envelope.open .flap-top-right {
+            transform: translate(100%, -100%) rotate(45deg);
+            opacity: 0;
+        }
+        #envelope.open .flap-bottom-left {
+            transform: translate(-100%, 100%) rotate(45deg);
+            opacity: 0;
+        }
+        #envelope.open .flap-bottom-right {
+            transform: translate(100%, 100%) rotate(-45deg);
+            opacity: 0;
+        }
+        #envelope.open .seal {
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
         }
         #envelope-wrapper.hidden {
             opacity: 0;
             pointer-events: none;
         }
-        @media (max-width: 768px) {
-            #envelope { width: 90vmin; height: 56vmin; }
-            .seal { width: 15vmin; height: 15vmin; font-size: 2.5vmin; }
-        }
     </style>
 </head>
 <body>
-    <!-- ===== ВАШ НОВЫЙ КОД HTML КОНВЕРТА ===== -->
+    <!-- ===== НОВАЯ HTML-СТРУКТУРА ДЛЯ КОНВЕРТА ===== -->
     <div id="envelope-wrapper">
         <div id="envelope">
-            <div class="envelope-base"></div>
-            <div class="card-front"></div>
-            <div class="flap-left"></div>
-            <div class="flap-right"></div>
-            <div class="flap-top"></div>
-            <div class="flap-bottom"></div>
-            <div class="seal">John & Jane</div>
+            <div class="flap flap-top-left"></div>
+            <div class="flap flap-top-right"></div>
+            <div class="flap flap-bottom-left"></div>
+            <div class="flap flap-bottom-right"></div>
+            <div class="seal">Click to Open</div>
         </div>
     </div>
     <!-- ===== КОНЕЦ КОДА КОНВЕРТА ===== -->
@@ -240,23 +166,21 @@
     <script>
     let countdownInterval;
 
-    // ===== ЛОГИКА ДЛЯ НОВОГО ИНТРО-КОНВЕРТА =====
+    // ===== НОВАЯ ЛОГИКА ДЛЯ КОНВЕРТА "4 ПАНЕЛИ" =====
     function setupIntroAnimation() {
         const envelopeWrapper = document.getElementById('envelope-wrapper');
         const envelope = document.getElementById('envelope');
-        const seal = document.querySelector('.seal');
 
-        if (!envelopeWrapper || !envelope || !seal) return;
+        if (!envelopeWrapper || !envelope) return;
 
         document.body.classList.add('intro-active');
 
-        seal.addEventListener('click', (e) => {
-            e.stopPropagation();
+        envelopeWrapper.addEventListener('click', () => {
             envelope.classList.add('open');
             setTimeout(() => {
                 document.body.classList.remove('intro-active');
                 envelopeWrapper.classList.add('hidden');
-            }, 1500); // Задержка соответствует самой длинной анимации клапана
+            }, 1100); // Задержка соответствует анимации в CSS
         }, { once: true });
     }
 
