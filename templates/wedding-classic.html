@@ -47,7 +47,7 @@
         @media (max-width: 768px) { .content-section { margin-left: 15px; margin-right: 15px; } }
         @media (max-width: 600px) { .hero-content h1 { font-size: 2.8rem; } h2 { font-size: 1.8rem; } .content-section { padding: 30px 20px; margin: 20px 10px; } .schedule-item { flex-direction: column; align-items: flex-start; gap: 10px; } .time-block { padding: 15px; min-width: 60px; } .time-block .number { font-size: 2rem; } #countdown { gap: 10px; } }
 
-                /* ===== СТИЛИ ДЛЯ ИНТРО-КОНВЕРТА ===== */
+        /* ===== ВАШИ НОВЫЕ СТИЛИ ДЛЯ КОНВЕРТА ===== */
         #envelope-wrapper {
             position: fixed;
             top: 0;
@@ -62,13 +62,9 @@
             cursor: pointer;
             transition: opacity 1.2s ease-in-out;
         }
-
-        /* Скрываем основной контент, пока интро активно */
         body.intro-active main {
             opacity: 0;
         }
-
-        /* Контейнер для 3D-анимации */
         #envelope {
             position: relative;
             width: 80vmin;
@@ -76,22 +72,15 @@
             perspective: 1500px;
             transform-style: preserve-3d;
         }
-
-        /* Основание конверта */
         .envelope-base {
             position: absolute;
             width: 100%;
             height: 100%;
             background: linear-gradient(135deg, #8B0000 0%, #DC143C 25%, #B22222 50%, #8B0000 100%);
             border-radius: 12px;
-            box-shadow: 
-                0 20px 60px rgba(0,0,0,0.5),
-                inset 0 1px 0 rgba(255,255,255,0.1),
-                inset 0 -1px 0 rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.3);
             transform-style: preserve-3d;
         }
-
-        /* Текстура бархата */
         .envelope-base::before {
             content: '';
             position: absolute;
@@ -99,15 +88,10 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 1px, transparent 1px),
-                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.05) 1px, transparent 1px),
-                radial-gradient(circle at 40% 60%, rgba(255,255,255,0.08) 1px, transparent 1px);
+            background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 1px, transparent 1px), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.05) 1px, transparent 1px), radial-gradient(circle at 40% 60%, rgba(255,255,255,0.08) 1px, transparent 1px);
             background-size: 15px 15px, 20px 20px, 25px 25px;
             border-radius: 12px;
         }
-
-        /* Левый клапан */
         .flap-left {
             position: absolute;
             left: 0;
@@ -122,8 +106,6 @@
             box-shadow: inset -2px 0 10px rgba(0,0,0,0.3);
             z-index: 3;
         }
-
-        /* Правый клапан */
         .flap-right {
             position: absolute;
             right: 0;
@@ -138,8 +120,6 @@
             box-shadow: inset 2px 0 10px rgba(0,0,0,0.3);
             z-index: 3;
         }
-
-        /* Верхний клапан */
         .flap-top {
             position: absolute;
             top: 0;
@@ -154,8 +134,6 @@
             box-shadow: inset 0 -2px 10px rgba(0,0,0,0.3);
             z-index: 4;
         }
-
-        /* Нижний клапан */
         .flap-bottom {
             position: absolute;
             bottom: 0;
@@ -170,8 +148,6 @@
             box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
             z-index: 4;
         }
-
-        /* Печать */
         .seal {
             position: absolute;
             top: 50%;
@@ -189,21 +165,16 @@
             font-size: 2vmin;
             color: #8B0000;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-            box-shadow: 
-                0 0 30px rgba(255,215,0,0.6),
-                inset 0 2px 5px rgba(255,255,255,0.3),
-                inset 0 -2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 0 30px rgba(255,215,0,0.6), inset 0 2px 5px rgba(255,255,255,0.3), inset 0 -2px 5px rgba(0,0,0,0.2);
             transition: all 0.8s ease;
             z-index: 10;
             cursor: pointer;
             animation: sealGlow 3s ease-in-out infinite alternate;
         }
-
         @keyframes sealGlow {
             0% { box-shadow: 0 0 30px rgba(255,215,0,0.6), inset 0 2px 5px rgba(255,255,255,0.3), inset 0 -2px 5px rgba(0,0,0,0.2); }
             100% { box-shadow: 0 0 50px rgba(255,215,0,0.8), inset 0 2px 8px rgba(255,255,255,0.4), inset 0 -2px 8px rgba(0,0,0,0.3); }
         }
-
         .seal::before {
             content: '';
             position: absolute;
@@ -216,35 +187,18 @@
             z-index: -1;
             animation: rotate 8s linear infinite;
         }
-
         @keyframes rotate {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        /* Состояние "открыто" */
-        #envelope.open .flap-left {
-            transform: rotateY(-180deg);
-        }
-
-        #envelope.open .flap-right {
-            transform: rotateY(180deg);
-        }
-
-        #envelope.open .flap-top {
-            transform: rotateX(-180deg);
-        }
-
-        #envelope.open .flap-bottom {
-            transform: rotateX(180deg);
-        }
-
+        #envelope.open .flap-left { transform: rotateY(-180deg); }
+        #envelope.open .flap-right { transform: rotateY(180deg); }
+        #envelope.open .flap-top { transform: rotateX(-180deg); }
+        #envelope.open .flap-bottom { transform: rotateX(180deg); }
         #envelope.open .seal {
             opacity: 0;
             transform: translate(-50%, -50%) scale(0.3);
         }
-
-        /* Карточка внутри */
         .card-front {
             position: absolute;
             width: 92%;
@@ -256,29 +210,18 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             z-index: 1;
         }
-
-        /* Анимация исчезновения всего блока */
         #envelope-wrapper.hidden {
             opacity: 0;
             pointer-events: none;
         }
-
-        /* Адаптивность */
         @media (max-width: 768px) {
-            #envelope {
-                width: 90vmin;
-                height: 56vmin;
-            }
-            .seal {
-                width: 15vmin;
-                height: 15vmin;
-                font-size: 2.5vmin;
-            }
+            #envelope { width: 90vmin; height: 56vmin; }
+            .seal { width: 15vmin; height: 15vmin; font-size: 2.5vmin; }
         }
     </style>
 </head>
 <body>
-        <!-- ===== НАЧАЛО КОДА КОНВЕРТА ===== -->
+    <!-- ===== ВАШ НОВЫЙ КОД КОНВЕРТА ===== -->
     <div id="envelope-wrapper">
         <div id="envelope">
             <div class="envelope-base"></div>
@@ -290,7 +233,6 @@
             <div class="seal">John & Jane</div>
         </div>
     </div>
-<!-- ===== КОНЕЦ КОДА КОНВЕРТА ===== -->
     <!-- ===== КОНЕЦ КОДА КОНВЕРТА ===== -->
 
     <main id="page-content"></main>
@@ -298,7 +240,7 @@
     <script>
     let countdownInterval;
 
-    // ===== ЛОГИКА ДЛЯ ИНТРО-КОНВЕРТА =====
+    // ===== ЛОГИКА ДЛЯ НОВОГО ИНТРО-КОНВЕРТА =====
     function setupIntroAnimation() {
         const envelopeWrapper = document.getElementById('envelope-wrapper');
         const envelope = document.getElementById('envelope');
@@ -308,21 +250,17 @@
 
         document.body.classList.add('intro-active');
 
-        // Анимация при клике на печать
         seal.addEventListener('click', (e) => {
             e.stopPropagation();
             envelope.classList.add('open');
-            
-            // Ждем завершения анимации раскрытия клапанов
             setTimeout(() => {
                 document.body.classList.remove('intro-active');
                 envelopeWrapper.classList.add('hidden');
-            }, 1500);
+            }, 1500); // Задержка соответствует самой длинной анимации клапана
         }, { once: true });
     }
 
-    // ===== ИСПРАВЛЕННЫЕ ФУНКЦИИ ДЛЯ КОРРЕКТНОГО ОТОБРАЖЕНИЯ =====
-
+    // ===== ИСПРАВЛЕННЫЕ ФУНКЦИИ ДЛЯ КОРРЕКТНОГО ОТОБРАЖЕНИЯ ВЫСОТЫ =====
     const getBlockStyles = (c, settings, type) => {
         const styles = [];
         if (type !== 'hero' || settings.style === 'modern') {
@@ -345,7 +283,6 @@
     };
     
     // ===== ОСТАЛЬНЫЕ ФУНКЦИИ ГЕНЕРАЦИИ HTML (без изменений) =====
-
     const processText = (text) => (text || '').replace(/\n/g, '<br>');
     const createCountdownHTML = (c, s) => `<section class="content-section" style="${getBlockStyles(c, s, 'countdown')}"><h2 id="countdown-title">${c.title}</h2><div id="countdown"><div class="time-block"><div id="days" class="number">00</div><div>Days</div></div><div class="time-block"><div id="hours" class="number">00</div><div>Hours</div></div><div class="time-block"><div id="minutes" class="number">00</div><div>Minutes</div></div><div class="time-block"><div id="seconds" class="number">00</div><div>Seconds</div></div></div></section>`;
     const createScheduleHTML = (c, s) => `<section class="content-section" style="${getBlockStyles(c, s, 'schedule')}"><h2>${c.title}</h2><ul class="schedule-list">${c.items.map(i => `<li class="schedule-item"><div class="schedule-time">${i.time}</div><div class="schedule-event"><h3>${i.title}</h3><p>${processText(i.desc)}</p></div></li>`).join('')}</ul></section>`;
@@ -356,7 +293,6 @@
     const createParagraphHTML = (c, s) => `<section class="content-section paragraph-block" style="${getBlockStyles(c, s, 'paragraph')}"><p>${processText(c.text)}</p></section>`;
     
     // ===== ОСНОВНАЯ ЛОГИКА СТРАНИЦЫ =====
-
     function renderPage(blocks, settings, rsvpLink = '#') {
         if (!blocks || !settings) return;
         document.body.className = '';
@@ -398,7 +334,7 @@
     }
 
     async function loadInvitationData() {
-        setupIntroAnimation(); // Запускаем подготовку анимации
+        setupIntroAnimation();
         document.body.style.opacity = 1; 
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
@@ -410,6 +346,16 @@
                 const data = (await r.json()).record;
                 const pageData = data[pageType];
                 if (!pageData) throw new Error(`Specified page data ('${pageType}') not found.`);
+
+                // Динамически подставляем имена на печать конверта
+                const seal = document.querySelector('.seal');
+                if (seal && pageData.blocks) {
+                    const heroBlock = pageData.blocks.find(b => b.type === 'hero');
+                    if (heroBlock && heroBlock.content.names) {
+                        seal.textContent = heroBlock.content.names;
+                    }
+                }
+                
                 const rsvpTemplateFile = data.rsvp.template;
                 const rsvpLink = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)}${rsvpTemplateFile}?id=${id}&page=rsvp`;
                 renderPage(pageData.blocks, pageData.settings, rsvpLink);
@@ -417,9 +363,14 @@
         }
     }
     
+    // ===== ИСПРАВЛЕННАЯ ЛОГИКА ДЛЯ РЕДАКТОРА И ФИНАЛЬНОЙ СТРАНИЦЫ =====
     if (window.self !== window.top) { // Если в iframe (превью в редакторе)
         document.body.style.opacity = 1;
-        // НЕ запускаем анимацию в превью, чтобы не мешала
+        // ИСПРАВЛЕНИЕ: Прячем конверт в режиме редактирования, чтобы он не мешал
+        const envelopeWrapper = document.getElementById('envelope-wrapper');
+        if (envelopeWrapper) {
+            envelopeWrapper.style.display = 'none';
+        }
     } else { // Если открыто как самостоятельная страница
         window.addEventListener('load', loadInvitationData);
     }
