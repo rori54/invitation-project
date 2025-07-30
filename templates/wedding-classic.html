@@ -47,118 +47,425 @@
         @media (max-width: 768px) { .content-section { margin-left: 15px; margin-right: 15px; } }
         @media (max-width: 600px) { .hero-content h1 { font-size: 2.8rem; } h2 { font-size: 1.8rem; } .content-section { padding: 30px 20px; margin: 20px 10px; } .schedule-item { flex-direction: column; align-items: flex-start; gap: 10px; } .time-block { padding: 15px; min-width: 60px; } .time-block .number { font-size: 2rem; } #countdown { gap: 10px; } }
 
-        /* ===== НОВЫЙ КОНВЕРТ "4 ПАНЕЛИ" ===== */
-        #envelope-wrapper {
-            position: fixed;
-            top: 0;
-            left: 0;
+            /* =================== CSS СТИЛИ =================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .envelope-container {
+            position: relative;
+            width: 90vw;
+            height: 60vh;
+            max-width: 900px;
+            max-height: 600px;
+            min-width: 400px;
+            min-height: 300px;
+        }
+
+        .envelope {
+            position: relative;
             width: 100%;
             height: 100%;
-            background: #f0f2f5;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 1.2s ease-in-out;
+            background: #2c2c54;
         }
-        body.intro-active main {
-            opacity: 0;
-        }
-        #envelope {
-            position: relative;
-            width: 320px;
-            height: 200px;
-        }
-        .flap {
+
+        /* 4 части конверта точно как на скриншоте */
+        .envelope-flap {
             position: absolute;
-            width: 50%;
+            background: linear-gradient(145deg, 
+                #8B0000 0%, 
+                #DC143C 25%, 
+                #B22222 50%, 
+                #8B0000 75%, 
+                #660000 100%);
+            transition: all 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 
+                inset 0 1px 3px rgba(255, 255, 255, 0.2),
+                inset 0 -1px 3px rgba(0, 0, 0, 0.3),
+                0 5px 15px rgba(0, 0, 0, 0.4);
+            
+            /* Бархатная текстура */
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(0, 0, 0, 0.1) 0%, transparent 50%);
+        }
+
+        /* Верхняя часть - треугольник */
+        .top-flap {
+            width: 100%;
             height: 50%;
-            background: #8fbc8f; /* Зеленый цвет */
-            transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1), opacity 1s;
-        }
-        .flap-top-left {
             top: 0;
             left: 0;
-            background: linear-gradient(to bottom right, #a1d1a1, #8fbc8f);
-            transform-origin: top left;
+            clip-path: polygon(0% 100%, 50% 0%, 100% 100%);
+            transform-origin: center bottom;
         }
-        .flap-top-right {
+
+        /* Правая часть - треугольник */
+        .right-flap {
+            width: 50%;
+            height: 100%;
             top: 0;
             right: 0;
-            background: linear-gradient(to bottom left, #a1d1a1, #8fbc8f);
-            transform-origin: top right;
+            clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+            transform-origin: left center;
         }
-        .flap-bottom-left {
+
+        /* Нижняя часть - треугольник */
+        .bottom-flap {
+            width: 100%;
+            height: 50%;
             bottom: 0;
             left: 0;
-            background: linear-gradient(to top right, #a1d1a1, #8fbc8f);
-            transform-origin: bottom left;
+            clip-path: polygon(0% 0%, 50% 100%, 100% 0%);
+            transform-origin: center top;
         }
-        .flap-bottom-right {
-            bottom: 0;
-            right: 0;
-            background: linear-gradient(to top left, #a1d1a1, #8fbc8f);
-            transform-origin: bottom right;
+
+        /* Левая часть - треугольник */
+        .left-flap {
+            width: 50%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            clip-path: polygon(100% 0%, 0% 50%, 100% 100%);
+            transform-origin: right center;
         }
-        .seal {
+
+        /* Анимации открытия - части расходятся по углам */
+        .envelope.opened .top-flap {
+            transform: translateY(-100vh) rotate(-15deg);
+        }
+
+        .envelope.opened .right-flap {
+            transform: translateX(100vw) rotate(15deg);
+        }
+
+        .envelope.opened .bottom-flap {
+            transform: translateY(100vh) rotate(15deg);
+        }
+
+        .envelope.opened .left-flap {
+            transform: translateX(-100vw) rotate(-15deg);
+        }
+
+        /* Восковая печать */
+        .wax-seal {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 70px;
-            height: 70px;
-            background: #c5a98b; /* Акцентный цвет, как у кнопок */
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 5px;
-            font-family: 'Playfair Display', serif;
-            font-size: 14px;
-            color: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.2);
-            z-index: 10;
+            width: 140px;
+            height: 140px;
             cursor: pointer;
-            transition: transform 0.8s, opacity 0.8s;
+            z-index: 100;
+            transition: all 0.4s ease;
         }
-        #envelope.open .flap-top-left {
-            transform: translate(-100%, -100%) rotate(-45deg);
-            opacity: 0;
+
+        .seal-inner {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, 
+                #8B0000 0%, 
+                #DC143C 30%, 
+                #B22222 60%, 
+                #8B0000 100%);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 
+                0 0 25px rgba(220, 20, 60, 0.6),
+                inset 0 -8px 15px rgba(0, 0, 0, 0.4),
+                inset 0 8px 15px rgba(255, 255, 255, 0.2);
+            
+            /* Бархатная текстура для печати */
+            background-image: 
+                radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 60%),
+                radial-gradient(circle at 70% 70%, rgba(0, 0, 0, 0.1) 0%, transparent 60%);
         }
-        #envelope.open .flap-top-right {
-            transform: translate(100%, -100%) rotate(45deg);
-            opacity: 0;
+
+        .wax-seal:hover .seal-inner {
+            transform: scale(1.05);
+            box-shadow: 
+                0 0 35px rgba(220, 20, 60, 0.8),
+                inset 0 -10px 20px rgba(0, 0, 0, 0.5),
+                inset 0 10px 20px rgba(255, 255, 255, 0.3);
         }
-        #envelope.open .flap-bottom-left {
-            transform: translate(-100%, 100%) rotate(45deg);
-            opacity: 0;
+
+        .wax-seal:active .seal-inner {
+            transform: scale(0.95);
         }
-        #envelope.open .flap-bottom-right {
-            transform: translate(100%, 100%) rotate(-45deg);
-            opacity: 0;
+
+        /* Текст на печати */
+        .seal-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #FFD700;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            letter-spacing: 1px;
+            font-family: 'Georgia', serif;
         }
-        #envelope.open .seal {
-            transform: translate(-50%, -50%) scale(0);
-            opacity: 0;
+
+        .seal-border {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+            border: 2px solid #FFD700;
+            border-radius: 50%;
+            opacity: 0.8;
         }
-        #envelope-wrapper.hidden {
+
+        /* Контент сайта */
+        .website-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                #FFF8DC 0%, 
+                #F5F5DC 25%, 
+                #FFFACD 50%, 
+                #F0E68C 75%, 
+                #BDB76B 100%);
+            display: none;
+            justify-content: center;
+            align-items: center;
             opacity: 0;
-            pointer-events: none;
+            transform: scale(0.8);
+            transition: all 1s ease-in-out;
+        }
+
+        .website-content.show {
+            display: flex;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .content-inner {
+            text-align: center;
+            padding: 40px;
+            max-width: 80%;
+        }
+
+        .wedding-title {
+            font-size: 4em;
+            color: #8B0000;
+            margin-bottom: 20px;
+            font-family: 'Georgia', serif;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
+            font-weight: bold;
+        }
+
+        .wedding-subtitle {
+            font-size: 1.8em;
+            color: #B22222;
+            margin-bottom: 40px;
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        .wedding-details {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .date {
+            font-size: 2.5em;
+            color: #8B0000;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .time {
+            font-size: 1.8em;
+            color: #B22222;
+            margin-bottom: 10px;
+        }
+
+        .location {
+            font-size: 1.5em;
+            color: #654321;
+            font-style: italic;
+        }
+
+        .wedding-message {
+            font-size: 1.3em;
+            color: #8B4513;
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            .envelope-container {
+                width: 95vw;
+                height: 70vh;
+                min-width: 300px;
+            }
+            
+            .wax-seal {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .seal-text {
+                font-size: 12px;
+            }
+            
+            .wedding-title {
+                font-size: 2.5em;
+            }
+            
+            .wedding-subtitle {
+                font-size: 1.3em;
+            }
+            
+            .date {
+                font-size: 1.8em;
+            }
+            
+            .time {
+                font-size: 1.3em;
+            }
+            
+            .location {
+                font-size: 1.1em;
+            }
+            
+            .wedding-message {
+                font-size: 1em;
+            }
+            
+            .content-inner {
+                padding: 20px;
+                max-width: 95%;
+            }
+            
+            .wedding-details {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .envelope-container {
+                width: 98vw;
+                height: 75vh;
+            }
+            
+            .wax-seal {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .seal-text {
+                font-size: 10px;
+            }
+            
+            .wedding-title {
+                font-size: 2em;
+            }
+        }
+
+        /* Альтернативный синий бархатный цвет */
+        .blue-velvet .envelope-flap {
+            background: linear-gradient(145deg, 
+                #000080 0%, 
+                #4169E1 25%, 
+                #1E90FF 50%, 
+                #000080 75%, 
+                #000040 100%);
+        }
+
+        .blue-velvet .seal-inner {
+            background: radial-gradient(circle, 
+                #000080 0%, 
+                #4169E1 30%, 
+                #1E90FF 60%, 
+                #000080 100%);
+            box-shadow: 
+                0 0 25px rgba(65, 105, 225, 0.6),
+                inset 0 -8px 15px rgba(0, 0, 0, 0.4),
+                inset 0 8px 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .blue-velvet .wax-seal:hover .seal-inner {
+            box-shadow: 
+                0 0 35px rgba(65, 105, 225, 0.8),
+                inset 0 -10px 20px rgba(0, 0, 0, 0.5),
+                inset 0 10px 20px rgba(255, 255, 255, 0.3);
         }
     </style>
 </head>
 <body>
-    <!-- ===== НОВАЯ HTML-СТРУКТУРА ДЛЯ КОНВЕРТА ===== -->
-    <div id="envelope-wrapper">
-        <div id="envelope">
-            <div class="flap flap-top-left"></div>
-            <div class="flap flap-top-right"></div>
-            <div class="flap flap-bottom-left"></div>
-            <div class="flap flap-bottom-right"></div>
-            <div class="seal">Click to Open</div>
+    <!-- ===== ВАШ НОВЫЙ КОД КОНВЕРТА ===== -->
+    <!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Свадебное приглашение John & Jane</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="envelope-container">
+        <div class="envelope" id="envelope">
+            <!-- 4 части конверта как на скриншоте -->
+            <div class="envelope-flap top-flap" id="topFlap"></div>
+            <div class="envelope-flap right-flap" id="rightFlap"></div>
+            <div class="envelope-flap bottom-flap" id="bottomFlap"></div>
+            <div class="envelope-flap left-flap" id="leftFlap"></div>
+            
+            <!-- Восковая печать -->
+            <div class="wax-seal" id="waxSeal">
+                <div class="seal-inner">
+                    <div class="seal-text">John & Jane</div>
+                    <div class="seal-border"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Контент страницы сайта -->
+        <div class="website-content" id="websiteContent">
+            <div class="content-inner">
+                <h1 class="wedding-title">John & Jane</h1>
+                <div class="wedding-subtitle">С радостью приглашают вас на свою свадьбу</div>
+                <div class="wedding-details">
+                    <div class="date">15 августа 2025</div>
+                    <div class="time">16:00</div>
+                    <div class="location">Ресторан "Золотое кольцо"</div>
+                </div>
+                <div class="wedding-message">
+                    Ваше присутствие сделает этот день еще более особенным
+                </div>
+            </div>
         </div>
     </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
     <!-- ===== КОНЕЦ КОДА КОНВЕРТА ===== -->
 
     <main id="page-content"></main>
@@ -166,23 +473,239 @@
     <script>
     let countdownInterval;
 
-    // ===== НОВАЯ ЛОГИКА ДЛЯ КОНВЕРТА "4 ПАНЕЛИ" =====
-    function setupIntroAnimation() {
-        const envelopeWrapper = document.getElementById('envelope-wrapper');
-        const envelope = document.getElementById('envelope');
+    // =================== JAVASCRIPT ФУНКЦИИ ===================
 
-        if (!envelopeWrapper || !envelope) return;
-
-        document.body.classList.add('intro-active');
-
-        envelopeWrapper.addEventListener('click', () => {
-            envelope.classList.add('open');
-            setTimeout(() => {
-                document.body.classList.remove('intro-active');
-                envelopeWrapper.classList.add('hidden');
-            }, 1100); // Задержка соответствует анимации в CSS
-        }, { once: true });
+class WeddingEnvelopeController {
+    constructor() {
+        this.envelope = document.getElementById('envelope');
+        this.waxSeal = document.getElementById('waxSeal');
+        this.websiteContent = document.getElementById('websiteContent');
+        this.isOpened = false;
+        this.isMobile = window.innerWidth <= 768;
+        
+        this.init();
     }
+
+    init() {
+        this.setupEventListeners();
+        this.handleResponsive();
+        this.addColorVariant();
+    }
+
+    setupEventListeners() {
+        // Основной обработчик клика по печати
+        this.waxSeal.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.openEnvelope();
+        });
+
+        // Touch события для мобильных устройств
+        this.waxSeal.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.addPressEffect();
+        });
+
+        this.waxSeal.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.removePressEffect();
+            this.openEnvelope();
+        });
+
+        // Mouse события для десктопа
+        this.waxSeal.addEventListener('mousedown', () => {
+            this.addPressEffect();
+        });
+
+        this.waxSeal.addEventListener('mouseup', () => {
+            this.removePressEffect();
+        });
+
+        this.waxSeal.addEventListener('mouseleave', () => {
+            this.removePressEffect();
+        });
+
+        // Обработка изменения размера экрана
+        window.addEventListener('resize', () => {
+            this.handleResponsive();
+        });
+    }
+
+    addPressEffect() {
+        const sealInner = this.waxSeal.querySelector('.seal-inner');
+        sealInner.style.transform = 'scale(0.95)';
+        sealInner.style.transition = 'transform 0.1s ease';
+    }
+
+    removePressEffect() {
+        const sealInner = this.waxSeal.querySelector('.seal-inner');
+        sealInner.style.transform = 'scale(1)';
+        sealInner.style.transition = 'transform 0.3s ease';
+    }
+
+    openEnvelope() {
+        if (this.isOpened) return;
+        
+        this.isOpened = true;
+        
+        // Добавляем звуковой эффект (опционально)
+        this.playOpenSound();
+        
+        // Запускаем анимацию открытия
+        this.animateEnvelopeOpening();
+        
+        // Скрываем печать
+        this.hideSeal();
+        
+        // Показываем контент с задержкой
+        setTimeout(() => {
+            this.showWebsiteContent();
+        }, 1800);
+    }
+
+    animateEnvelopeOpening() {
+        this.envelope.classList.add('opened');
+        
+        // Добавляем дополнительные эффекты для каждой части
+        const flaps = this.envelope.querySelectorAll('.envelope-flap');
+        flaps.forEach((flap, index) => {
+            setTimeout(() => {
+                flap.style.opacity = '0.8';
+            }, index * 200);
+        });
+    }
+
+    hideSeal() {
+        this.waxSeal.style.transition = 'all 1s ease-out';
+        this.waxSeal.style.transform = 'translate(-50%, -50%) scale(0) rotate(360deg)';
+        this.waxSeal.style.opacity = '0';
+        
+        setTimeout(() => {
+            this.waxSeal.style.display = 'none';
+        }, 1000);
+    }
+
+    showWebsiteContent() {
+        this.websiteContent.classList.add('show');
+        this.animateContentElements();
+    }
+
+    animateContentElements() {
+        const elements = [
+            '.wedding-title',
+            '.wedding-subtitle', 
+            '.wedding-details',
+            '.wedding-message'
+        ];
+        
+        elements.forEach((selector, index) => {
+            const element = this.websiteContent.querySelector(selector);
+            if (element) {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(30px)';
+                
+                setTimeout(() => {
+                    element.style.transition = 'all 0.8s ease-out';
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }, (index + 1) * 300);
+            }
+        });
+    }
+
+    handleResponsive() {
+        this.isMobile = window.innerWidth <= 768;
+        
+        // Дополнительные настройки для мобильных устройств
+        if (this.isMobile) {
+            document.body.style.fontSize = '14px';
+        } else {
+            document.body.style.fontSize = '16px';
+        }
+    }
+
+    addColorVariant() {
+        // Случайный выбор цвета (красный или синий бархат)
+        const isBlueVariant = Math.random() > 0.5;
+        if (isBlueVariant) {
+            document.body.classList.add('blue-velvet');
+        }
+    }
+
+    playOpenSound() {
+        // Создаем простой звуковой эффект через Web Audio API
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.5);
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        } catch (error) {
+            // Звук не критичен, игнорируем ошибки
+            console.log('Audio not supported');
+        }
+    }
+}
+
+// Функция для смены цветовой схемы
+function switchColorScheme(scheme) {
+    document.body.classList.remove('blue-velvet');
+    if (scheme === 'blue') {
+        document.body.classList.add('blue-velvet');
+    }
+}
+
+// Утилиты для дополнительной настройки
+const EnvelopeUtils = {
+    // Изменение текста на печати
+    changeNames: function(firstName, secondName) {
+        const sealText = document.querySelector('.seal-text');
+        if (sealText) {
+            sealText.textContent = `${firstName} & ${secondName}`;
+        }
+        
+        const websiteTitle = document.querySelector('.wedding-title');
+        if (websiteTitle) {
+            websiteTitle.textContent = `${firstName} & ${secondName}`;
+        }
+    },
+    
+    // Изменение даты свадьбы
+    changeWeddingDate: function(date, time, location) {
+        const dateEl = document.querySelector('.date');
+        const timeEl = document.querySelector('.time');
+        const locationEl = document.querySelector('.location');
+        
+        if (dateEl) dateEl.textContent = date;
+        if (timeEl) timeEl.textContent = time;
+        if (locationEl) locationEl.textContent = location;
+    }
+};
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Создаем экземпляр контроллера
+    window.envelopeController = new WeddingEnvelopeController();
+    
+    // Пример использования утилит (раскомментируйте при необходимости)
+    // EnvelopeUtils.changeNames('Анна', 'Петр');
+    // EnvelopeUtils.changeWeddingDate('20 сентября 2025', '18:00', 'Загородный клуб "Усадьба"');
+    // switchColorScheme('blue'); // или 'red'
+});
+
+// Экспорт для возможного использования в других модулях
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { WeddingEnvelopeController, EnvelopeUtils, switchColorScheme };
+}
 
     // ===== ИСПРАВЛЕННЫЕ ФУНКЦИИ ДЛЯ КОРРЕКТНОГО ОТОБРАЖЕНИЯ ВЫСОТЫ =====
     const getBlockStyles = (c, settings, type) => {
@@ -271,6 +794,7 @@
                 const pageData = data[pageType];
                 if (!pageData) throw new Error(`Specified page data ('${pageType}') not found.`);
 
+                // Динамически подставляем имена на печать конверта
                 const seal = document.querySelector('.seal');
                 if (seal && pageData.blocks) {
                     const heroBlock = pageData.blocks.find(b => b.type === 'hero');
@@ -289,6 +813,7 @@
     // ===== ИСПРАВЛЕННАЯ ЛОГИКА ДЛЯ РЕДАКТОРА И ФИНАЛЬНОЙ СТРАНИЦЫ =====
     if (window.self !== window.top) { // Если в iframe (превью в редакторе)
         document.body.style.opacity = 1;
+        // ИСПРАВЛЕНИЕ: Прячем конверт в режиме редактирования, чтобы он не мешал
         const envelopeWrapper = document.getElementById('envelope-wrapper');
         if (envelopeWrapper) {
             envelopeWrapper.style.display = 'none';
