@@ -138,7 +138,7 @@
     editRsvpBtn.addEventListener('click', () => { if (currentTemplate !== rsvpFormData.template) { saveCurrentPageData(); switchEditorMode(rsvpFormData); } });
     function initApp() { if (LOCK_STYLE_CHOICE) { document.querySelector('.global-settings').style.display = 'none'; } initSortable(); setupEventListeners(); iframe.onload = () => { renderEditor(); renderPreview(); setupResizeObserver(); }; switchEditorMode(mainPageData); }
     
-    window.addEventListener('load', initApp);
+    <!-- window.addEventListener('load', initApp); -->
     </script>
     <!-- 
       Этот скрипт остается. Он нужен для работы автозаполнения "Smart Location Search".
