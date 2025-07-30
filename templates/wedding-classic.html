@@ -117,28 +117,32 @@
         document.body.style.opacity = 1; 
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
-        const pageType = params.get('page');
+        // ИСПРАВЛЕНО: 'page' может отсутствовать, по умолчанию 'main'
+        const pageType = params.get('page') || 'main'; 
 
-        if (id && pageType) {
+        if (id) {
             try {
+                // ВАЖНО: Заглушка __JSONBIN_ACCESS_KEY__ будет заменена при сборке
                 const r = await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, { headers: { 'X-Access-Key': '__JSONBIN_ACCESS_KEY__' }});
                 if (!r.ok) throw new Error('Could not load invitation data.');
                 const data = (await r.json()).record;
+
+                // ИСПРАВЛЕНО: Загружаем данные для нужной страницы ('main' или 'rsvp')
                 const pageData = data[pageType];
-                if (!pageData) throw new Error('Specified page data not found.');
+                if (!pageData) throw new Error(`Specified page data ('${pageType}') not found.`);
                 
-                const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+                // Формируем ссылку на RSVP форму динамически
                 const rsvpTemplateFile = data.rsvp.template;
-                const rsvpLink = `${window.location.origin}${basePath}/${rsvpTemplateFile}?id=${id}&page=rsvp`;
+                const rsvpLink = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)}${rsvpTemplateFile}?id=${id}&page=rsvp`;
 
                 renderPage(pageData.blocks, pageData.settings, rsvpLink);
             } catch (e) { document.getElementById('page-content').innerHTML = `<h1>Error Loading Invitation</h1><p>${e.message}</p>`; }
         }
     }
     
-    if (window.self !== window.top) {
+    if (window.self !== window.top) { // Если открыто в iframe (превью)
         document.body.style.opacity = 1;
-    } else {
+    } else { // Если открыто как самостоятельная страница
         window.addEventListener('load', loadInvitationData);
     }
     </script>

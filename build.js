@@ -1,55 +1,46 @@
-// Импорт 'node-fetch' больше не нужен, fetch доступен глобально.
+// Файл: build.js (Финальная, исправленная версия)
 
-exports.handler = async (event) => {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
-  }
+const fs = require('fs');
 
-  try {
-    const dataToSave = JSON.parse(event.body);
-    
-    // Берем ключи и URL сайта из переменных окружения Netlify.
-    const { JSONBIN_MASTER_KEY, URL } = process.env;
+// ИСПРАВЛЕНО: Добавлен rsvp-form.html в список
+const filesToProcess = [
+    './index.html', 
+    './templates/wedding-classic.html', 
+    './templates/rsvp-form.html'
+];
 
-    if (!JSONBIN_MASTER_KEY) {
-      // Эта ошибка будет видна в логах функции на Netlify
-      throw new Error('Server Error: JSONBIN_MASTER_KEY is not configured.');
-    }
+console.log('Starting key replacement...');
 
-    const response = await fetch('https://api.jsonbin.io/v3/b', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Master-Key': JSONBIN_MASTER_KEY,
-        'X-Bin-Name': 'invitation-bundle'
-      },
-      body: JSON.stringify(dataToSave)
+const googleKey = process.env.GOOGLE_MAPS_API_KEY;
+const jsonbinAccessKey = process.env.JSONBIN_ACCESS_KEY; // Ключ только для ЧТЕНИЯ
+
+// ПРОВЕРКА ИСПРАВЛЕНА: Нам больше не нужен мастер-ключ здесь
+if (!googleKey || !jsonbinAccessKey) {
+    console.error('Error: GOOGLE_MAPS_API_KEY or JSONBIN_ACCESS_KEY not found in environment variables.');
+    return process.exit(1);
+}
+
+filesToProcess.forEach(filePath => {
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error(`Error reading file: ${filePath}`, err);
+            return process.exit(1);
+        }
+
+        console.log(`Processing ${filePath}...`);
+        
+        let result = data.replace(/__GOOGLE_MAPS_API_KEY__/g, googleKey);
+        result = result.replace(/__JSONBIN_ACCESS_KEY__/g, jsonbinAccessKey);
+        
+        // УДАЛЕНО: Больше не вставляем небезопасный мастер-ключ
+        // result = result.replace(/__JSONBIN_MASTER_KEY__/g, jsonbinMasterKey);
+
+        fs.writeFile(filePath, result, 'utf8', (err) => {
+            if (err) {
+                console.error(`Error writing file: ${filePath}`, err);
+                return process.exit(1);
+            }
+            console.log(`Public API keys have been successfully injected into ${filePath}.`);
+        });
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('JSONBin API Error:', errorData);
-      throw new Error(errorData.message || 'Failed to create bin on JSONBin');
-    }
-
-    const result = await response.json();
-    const binId = result.metadata.id;
-    
-    // Формируем ссылку ДИНАМИЧЕСКИ, используя URL сайта из переменных Netlify
-    const mainTemplateFile = dataToSave.main.template || 'wedding-classic.html';
-    const shareLink = `${URL}/templates/${mainTemplateFile}?id=${binId}&page=main`;
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ link: shareLink }),
-    };
-
-  } catch (err) {
-    console.error('Function Error:', err);
-    return {
-      statusCode: 500,
-      // Возвращаем чистое сообщение об ошибке, а не всю страницу
-      body: JSON.stringify({ error: err.message }),
-    };
-  }
-};
+});

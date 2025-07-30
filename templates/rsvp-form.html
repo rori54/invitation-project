@@ -57,6 +57,7 @@
         document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? `url('${settings.backgroundImage}')` : 'none';
 
         const container = document.getElementById('page-content');
+        // ВАЖНО: Замените 'your_form_id' на ваш реальный ID из сервиса Formspree.io, чтобы получать ответы на почту.
         container.innerHTML = `<div class="content-section"><form action="https://formspree.io/f/your_form_id" method="POST"></form></div>`;
         const form = container.querySelector('form');
         
@@ -87,19 +88,20 @@
 
         if (id && pageType) {
             try {
+                // ВАЖНО: Заглушка __JSONBIN_ACCESS_KEY__ будет заменена при сборке
                 const r = await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, { headers: { 'X-Access-Key': '__JSONBIN_ACCESS_KEY__' }});
                 if (!r.ok) throw new Error('Could not load form data.');
                 const data = (await r.json()).record;
                 const pageData = data[pageType];
-                if (!pageData) throw new Error('Specified page data not found.');
+                if (!pageData) throw new Error(`Specified page data ('${pageType}') not found.`);
                 renderPage(pageData.blocks, pageData.settings);
             } catch (e) { document.getElementById('page-content').innerHTML = `<h1>Error Loading Form</h1><p>${e.message}</p>`; }
         }
     }
     
-    if (window.self !== window.top) { 
+    if (window.self !== window.top) { // Если открыто в iframe (превью)
         document.body.style.opacity = 1;
-    } else {
+    } else { // Если открыто как самостоятельная страница
         window.addEventListener('load', loadInvitationData);
     }
     </script>
