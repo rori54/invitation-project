@@ -47,7 +47,7 @@
         @media (max-width: 768px) { .content-section { margin-left: 15px; margin-right: 15px; } }
         @media (max-width: 600px) { .hero-content h1 { font-size: 2.8rem; } h2 { font-size: 1.8rem; } .content-section { padding: 30px 20px; margin: 20px 10px; } .schedule-item { flex-direction: column; align-items: flex-start; gap: 10px; } .time-block { padding: 15px; min-width: 60px; } .time-block .number { font-size: 2rem; } #countdown { gap: 10px; } }
 
-        /* ===== ВАШИ НОВЫЕ СТИЛИ ДЛЯ КОНВЕРТА ===== */
+        /* ===== ВАШ НОВЫЙ КОД СТИЛЕЙ ДЛЯ КОНВЕРТА ===== */
         #envelope-wrapper {
             position: fixed;
             top: 0;
@@ -221,7 +221,7 @@
     </style>
 </head>
 <body>
-    <!-- ===== ВАШ НОВЫЙ КОД КОНВЕРТА ===== -->
+    <!-- ===== ВАШ НОВЫЙ КОД HTML КОНВЕРТА ===== -->
     <div id="envelope-wrapper">
         <div id="envelope">
             <div class="envelope-base"></div>
@@ -347,7 +347,6 @@
                 const pageData = data[pageType];
                 if (!pageData) throw new Error(`Specified page data ('${pageType}') not found.`);
 
-                // Динамически подставляем имена на печать конверта
                 const seal = document.querySelector('.seal');
                 if (seal && pageData.blocks) {
                     const heroBlock = pageData.blocks.find(b => b.type === 'hero');
@@ -366,7 +365,6 @@
     // ===== ИСПРАВЛЕННАЯ ЛОГИКА ДЛЯ РЕДАКТОРА И ФИНАЛЬНОЙ СТРАНИЦЫ =====
     if (window.self !== window.top) { // Если в iframe (превью в редакторе)
         document.body.style.opacity = 1;
-        // ИСПРАВЛЕНИЕ: Прячем конверт в режиме редактирования, чтобы он не мешал
         const envelopeWrapper = document.getElementById('envelope-wrapper');
         if (envelopeWrapper) {
             envelopeWrapper.style.display = 'none';
