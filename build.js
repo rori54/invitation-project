@@ -1,5 +1,5 @@
 const fs = require('fs');
-const filesToProcess = ['./index.html', './templates/wedding-classic.html'];
+const filesToProcess = ['./index.html', './templates/wedding-classic.html', './templates/rsvp-form.html'];
 
 console.log('Starting key replacement...');
 

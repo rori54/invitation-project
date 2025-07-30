@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSVP Form</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root{--accent-color:#c5a98b;--background-color:#f8f7f5}
+        body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.7;background-color:var(--background-color);color:#333;opacity:0;transition:opacity .5s ease-in-out; padding: 20px 0; background-size: cover; background-position: center; background-attachment: fixed;}
+        .content-section{margin: 0 auto; padding:0 20px; text-align:center; position:relative;}
+        h1,h2,h3{font-family:'Playfair Display',serif;text-align:center}
+        h1 { font-size: 2.5rem; }
+        h2{font-size:2.2rem;margin-bottom:30px}
+        form{width:100%}
+        .form-block{text-align:left;background:#fff;padding:30px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.07);margin-bottom:25px; margin-left: auto; margin-right: auto; box-sizing: border-box;}
+        .form-block label{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:15px;display:block}
+        .form-block label.required::after{content:'*';color:crimson;margin-left:5px}
+        .form-block input[type="text"],.form-block textarea{width:100%;padding:12px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;font-family:'Montserrat',sans-serif;font-size:1rem}
+        .form-block textarea{min-height:100px;resize:vertical}
+        .form-block .radio-options-list{list-style:none;padding:0;margin:0}
+        .form-block .radio-options-list li{margin-bottom:12px}
+        .form-block .radio-options-list label{font-family:'Montserrat',sans-serif;font-size:1rem;display:flex;align-items:center;cursor:pointer;font-weight:400}
+        .form-block .radio-options-list label.required::after{content:''}
+        .form-block .radio-options-list input[type="radio"]{margin-right:10px;width:auto; transform: scale(1.2);}
+        .form-header-block { text-align: center; margin-left: auto; margin-right: auto; padding: 20px 0; }
+        .form-header-block img { max-width: 100%; height: auto; object-fit: cover; border-radius: 8px; margin-bottom: 20px; }
+        .form-header-block p { white-space: pre-wrap; }
+        .form-footer-block { text-align: center; margin-top: 40px; }
+        .submit-button-wrapper { text-align: center; margin-top: 30px; }
+        .submit-button{display:inline-block;background:var(--accent-color);color:#fff!important;padding:15px 40px;text-decoration:none;border-radius:50px;transition:transform .2s ease;font-size:1.2rem;border:none;cursor:pointer;font-family:'Playfair Display',serif}
+        .submit-button:hover{transform:scale(1.05)}
+        .style-modern .form-block, .style-modern .form-header-block, .style-modern .form-footer-block { background: rgba(255, 255, 255, 0.9); box-shadow: none; }
+        .style-modern .form-header-block h1, .style-modern .form-footer-block h2 { text-shadow: 1px 1px 3px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { body { padding: 10px 0; } h1 { font-size: 2rem; } h2 { font-size: 1.8rem; } .form-block label { font-size: 1.2rem; } .content-section { padding: 0 15px; } .form-block { padding: 20px; } }
+    </style>
+</head>
+<body>
+    <main id="page-content"></main>
+    <script>
+    const getBlockStyles = (c, settings) => { let styles = `max-width: ${settings.maxWidth || '800px'};`; if (c.height) styles += ` min-height: ${c.height};`; return styles; };
+    const processText = (text) => (text || '').replace(/\n/g, '<br>');
+    
+    const createFormHeaderHTML = (c, s) => `<div class="form-header-block" style="${getBlockStyles(c, s)}">${c.imageUrl ? `<img src="${c.imageUrl}" alt="Header">` : ''}<h1>${c.title}</h1><p>${processText(c.subtitle)}</p></div>`;
+    const createInputQuestionHTML = (c, s) => `<div class="form-block" style="${getBlockStyles(c, s)}"><label for="${c.id}" class="${c.required ? 'required' : ''}">${c.title}</label><input type="text" id="${c.id}" name="${c.title}" ${c.required ? 'required' : ''}></div>`;
+    const createTextareaQuestionHTML = (c, s) => `<div class="form-block" style="${getBlockStyles(c, s)}"><label for="${c.id}" class="${c.required ? 'required' : ''}">${c.title}</label><textarea id="${c.id}" name="${c.title}" ${c.required ? 'required' : ''}></textarea></div>`;
+    const createRadioQuestionHTML = (c, s) => `<div class="form-block" style="${getBlockStyles(c, s)}"><label class="${c.required ? 'required' : ''}">${c.title}</label><ul class="radio-options-list">${c.options.map(opt => `<li><label><input type="radio" name="${c.id}" value="${opt.text}" ${c.required ? 'required' : ''}><span>${opt.text}</span></label></li>`).join('')}</ul></div>`;
+    const createFormFooterHTML = (c, s) => `<div class="form-footer-block" style="${getBlockStyles(c, s)}"><h2>${c.text}</h2></div>`;
+
+    function renderPage(blocks, settings) {
+        if (!blocks || !settings) return;
+
+        document.body.className = '';
+        if (settings.style) { document.body.classList.add(`style-${settings.style}`); }
+        document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? `url('${settings.backgroundImage}')` : 'none';
+
+        const container = document.getElementById('page-content');
+        container.innerHTML = `<div class="content-section"><form action="https://formspree.io/f/your_form_id" method="POST"></form></div>`;
+        const form = container.querySelector('form');
+        
+        let formHTML = '';
+        let footerHTML = '';
+        let hasFooter = false;
+
+        blocks.forEach(block => {
+            if (block.type === 'form-footer') { footerHTML = createFormFooterHTML(block.content, settings); hasFooter = true; return; }
+            switch(block.type) {
+                case 'form-header': formHTML += createFormHeaderHTML(block.content, settings); break;
+                case 'input-question': formHTML += createInputQuestionHTML(block.content, settings); break;
+                case 'textarea-question': formHTML += createTextareaQuestionHTML(block.content, settings); break;
+                case 'radio-question': formHTML += createRadioQuestionHTML(block.content, settings); break;
+            }
+        });
+
+        formHTML += `<div class="submit-button-wrapper"><button type="submit" class="submit-button">Send Response</button></div>`;
+        if (hasFooter) { formHTML += footerHTML; }
+        form.innerHTML = formHTML;
+    }
+
+    async function loadInvitationData() {
+        document.body.style.opacity = 1;
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        const pageType = params.get('page');
+
+        if (id && pageType) {
+            try {
+                const r = await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, { headers: { 'X-Access-Key': '__JSONBIN_ACCESS_KEY__' }});
+                if (!r.ok) throw new Error('Could not load form data.');
+                const data = (await r.json()).record;
+                const pageData = data[pageType];
+                if (!pageData) throw new Error('Specified page data not found.');
+                renderPage(pageData.blocks, pageData.settings);
+            } catch (e) { document.getElementById('page-content').innerHTML = `<h1>Error Loading Form</h1><p>${e.message}</p>`; }
+        }
+    }
+    
+    if (window.self !== window.top) { 
+        document.body.style.opacity = 1;
+    } else {
+        window.addEventListener('load', loadInvitationData);
+    }
+    </script>
+</body>
+</html>
