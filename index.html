@@ -225,12 +225,55 @@
     editMainBtn.addEventListener('click', () => { if (currentTemplate !== mainPageData.template) { saveCurrentPageData(); switchEditorMode(mainPageData); } });
     editRsvpBtn.addEventListener('click', () => { if (currentTemplate !== rsvpFormData.template) { saveCurrentPageData(); switchEditorMode(rsvpFormData); } });
     
-    function initApp() {
-        if (LOCK_STYLE_CHOICE) { document.querySelector('.global-settings').style.display = 'none'; }
+    // Файл: index.html (ФИНАЛЬНАЯ И ПРАВИЛЬНАЯ ВЕРСИЯ initApp)
+
+    async function initApp() {
+        const params = new URLSearchParams(window.location.search);
+        const binIdToLoad = params.get('id'); // Ищем ID в адресной строке
+        let isCustomerMode = !!binIdToLoad; // Если ID есть, это режим покупателя
+
+        // Если это режим покупателя...
+        if (isCustomerMode) {
+            const statusText = document.getElementById('status-text');
+            statusText.innerText = 'Loading your template...';
+            try {
+                // ...загружаем данные его шаблона из облака
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${binIdToLoad}/latest`, { 
+                    headers: { 'X-Access-Key': '__JSONBIN_ACCESS_KEY__' }
+                });
+                if (!response.ok) {
+                    throw new Error('Could not load your purchased template. Please check the link.');
+                }
+                const data = (await response.json()).record;
+
+                // Перезаписываем стандартные данные на данные из загруженного шаблона
+                mainPageData = data.main;
+                rsvpFormData = data.rsvp;
+                statusText.innerText = '';
+
+            } catch (err) {
+                // В случае ошибки показываем сообщение
+                document.body.innerHTML = `<h1>Error Loading Template</h1><p>${err.message}</p>`;
+                return; // Прерываем дальнейшую загрузку
+            }
+        }
+
+        // Прячем настройки стиля, если это режим покупателя
+        // или если это заблокировано глобальной переменной
+        if (isCustomerMode || LOCK_STYLE_CHOICE) {
+            const globalSettings = document.querySelector('.global-settings');
+            if(globalSettings) globalSettings.style.display = 'none';
+        }
+
+        // Остальной код инициализации остается без изменений
         initSortable();
         setupEventListeners();
         initializeMapsForEditor(); 
-        iframe.onload = () => { renderEditor(); renderPreview(); setupResizeObserver(); };
+        iframe.onload = () => {
+            renderEditor(); 
+            renderPreview(); 
+            setupResizeObserver();
+        };
         switchEditorMode(mainPageData);
     }
     </script>
