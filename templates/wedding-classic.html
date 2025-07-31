@@ -16,7 +16,6 @@
         h1,h2,h3{font-family:'Playfair Display',serif;text-align:center}
         h2{font-size:2.2rem;margin-top: 0; margin-bottom:30px}
 
-        /* ===== ИЗМЕНЕНИЯ ДЛЯ HERO BLOCK ===== */
         .hero-block {
             display: flex;
             flex-direction: column;
@@ -28,7 +27,6 @@
             background-size: cover;
             overflow: hidden;
             width: 100%;
-            /* Высота управляется через переменную или aspect-ratio */
             height: var(--hero-height, auto);
             aspect-ratio: var(--hero-aspect-ratio, 16 / 9);
         }
@@ -52,7 +50,7 @@
             position:relative;
             z-index: 2;
             width: 90%;
-            max-width: 1000px; /* Ограничиваем ширину контента */
+            max-width: 1000px;
         }
         .hero-content h1{font-size:4rem;margin:10px 0; line-height: 1.2;}
         .hero-content p{font-size:1.2rem;letter-spacing:2px; margin: 0;}
@@ -75,7 +73,6 @@
             line-height: 1.6;
             letter-spacing: 0.5px;
         }
-        /* ===== КОНЕЦ ИЗМЕНЕНИЙ ===== */
         .style-modern .content-section {background: rgba(255, 255, 255, 0.85); box-shadow: none; color: #333;}
         .style-modern #page-content > .content-section:first-child { border-radius: 8px; }
         .style-modern .hero-block { background-image: none !important; margin: 0 auto; }
@@ -118,9 +115,8 @@
     
     <script>
     let countdownInterval;
-    function setupIntroAnimation() { /* ... */ }
-
-    // ===== ИЗМЕНЕНИЯ В JAVASCRIPT =====
+    
+    // ===== ИСПРАВЛЕНИЕ В JAVASCRIPT =====
     const createHeroHTML = (c, s) => {
         let innerBlocksHTML = '';
         if (c.innerBlocks && c.innerBlocks.length > 0) {
@@ -134,16 +130,14 @@
         const styles = [
             `background-image: url('${c.imageUrl}')`,
             `background-position: ${c.backgroundPosition || 'center center'}`,
-            // Устанавливаем высоту, если она задана, иначе aspect-ratio будет работать
             c.height ? `--hero-height: ${c.height}` : null,
-            // Если высота не задана, можно управлять aspect-ratio
             !c.height && c.aspectRatio ? `--hero-aspect-ratio: ${c.aspectRatio}` : null,
             !c.height && c.aspectRatioMobile ? `--hero-aspect-ratio-mobile: ${c.aspectRatioMobile}` : null
         ].filter(Boolean).join('; ');
 
-        return `<header class="hero-block" style="${styleAttribute}"><div class="hero-content"><p>${c.subtitle}</p><h1>${c.names}</h1><p>${c.date}</p>${innerBlocksHTML}</div></header>`;
+        // ВОТ ЗДЕСЬ БЫЛА ОШИБКА: Заменено `styleAttribute` на `styles`
+        return `<header class="hero-block" style="${styles}"><div class="hero-content"><p>${c.subtitle}</p><h1>${c.names}</h1><p>${c.date}</p>${innerBlocksHTML}</div></header>`;
     };
-    // ===== КОНЕЦ ИЗМЕНЕНИЙ В JAVASCRIPT =====
 
     const processText = (text) => (text || '').replace(/\n/g, '<br>');
     function setupIntroAnimation() { const envelopeWrapper = document.getElementById('envelope-wrapper'); const modelViewer = document.getElementById('envelope-3d'); if (!envelopeWrapper || !modelViewer || typeof confetti !== 'function') return; document.body.classList.add('intro-active'); modelViewer.addEventListener('load', () => { modelViewer.classList.add('loaded'); }); const fireConfetti = () => { const defaults = { spread: 360, ticks: 150, gravity: 0, decay: 0.95, startVelocity: 35, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] }; confetti({ ...defaults, particleCount: 60, scalar: 1.2, shapes: ['star'] }); confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] }); }; envelopeWrapper.addEventListener('click', () => { fireConfetti(); modelViewer.style.transform = 'scale(0)'; modelViewer.style.opacity = '0'; setTimeout(() => { document.body.classList.remove('intro-active'); envelopeWrapper.classList.add('hidden'); }, 500); }, { once: true }); }
