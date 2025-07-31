@@ -25,12 +25,19 @@
             color: white;
             text-align: center;
             position: relative;
-            background-size: cover; /* Возвращаем COVER по умолчанию */
+            background-size: cover;
             /* background-position УПРАВЛЯЕТСЯ ЧЕРЕЗ JAVASCRIPT */
             overflow: hidden;
-            padding: 40px 20px;
-            box-sizing: border-box;
             width: 100%;
+            /* ИСПОЛЬЗУЕМ СООТНОШЕНИЕ СТОРОН ВМЕСТО ВЫСОТЫ */
+            aspect-ratio: 16 / 9; /* Стандартное широкоэкранное соотношение для ПК */
+        }
+        /* Адаптивность для телефонов */
+        @media (max-width: 600px) {
+            .hero-block {
+                /* Более вертикальное соотношение для мобильных */
+                aspect-ratio: 9 / 12; 
+            }
         }
         .hero-block::before{
             content:'';
@@ -75,7 +82,10 @@
         .image-block img { max-width: 100%; border-radius: 8px; } 
         .image-block figcaption { margin-top: 10px; font-style: italic; color: #777; }
         @media (max-width: 768px) { .content-section { margin-left: 15px; margin-right: 15px; } }
-        @media (max-width: 600px) { .hero-content h1 { font-size: 2.8rem; } h2 { font-size: 1.8rem; } .content-section { padding: 30px 20px; margin: 20px 10px; } .schedule-item { flex-direction: column; align-items: flex-start; gap: 10px; } .time-block { padding: 15px; min-width: 60px; } .time-block .number { font-size: 2rem; } #countdown { gap: 10px; } }
+        /* Медиа-запрос для мобильных телефонов находится выше, чтобы быть более специфичным */
+        @media (max-width: 600px) {
+             .hero-content h1 { font-size: 2.8rem; } h2 { font-size: 1.8rem; } .content-section { padding: 30px 20px; margin: 20px 10px; } .schedule-item { flex-direction: column; align-items: flex-start; gap: 10px; } .time-block { padding: 15px; min-width: 60px; } .time-block .number { font-size: 2rem; } #countdown { gap: 10px; } 
+        }
         /* ... (ВСЕ СТИЛИ ДЛЯ КОНВЕРТА ОСТАЮТСЯ БЕЗ ИЗМЕНЕНИЙ) ... */
         #envelope-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; z-index: 1000; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 1.5s ease-in-out; } body.intro-active main { opacity: 0; } #envelope-3d { width: 80%; max-width: 500px; height: 80%; max-height: 500px; transition: transform 0.5s, opacity 0.5s; opacity: 0; } #envelope-3d.loaded { opacity: 1; animation: floatAnimation 4s ease-in-out infinite; } #envelope-wrapper.hidden { opacity: 0; pointer-events: none; } @keyframes floatAnimation { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0); } } @media (min-width: 768px) { #envelope-3d { max-width: 700px; max-height: 700px; } }
     </style>
@@ -91,119 +101,31 @@
     
     <script>
     let countdownInterval;
-    function setupIntroAnimation() { /* ... (эта функция остается без изменений) ... */
-        const envelopeWrapper = document.getElementById('envelope-wrapper');
-        const modelViewer = document.getElementById('envelope-3d');
-        if (!envelopeWrapper || !modelViewer || typeof confetti !== 'function') return;
-        document.body.classList.add('intro-active');
-        modelViewer.addEventListener('load', () => { modelViewer.classList.add('loaded'); });
-        const fireConfetti = () => {
-            const defaults = { spread: 360, ticks: 150, gravity: 0, decay: 0.95, startVelocity: 35, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] };
-            confetti({ ...defaults, particleCount: 60, scalar: 1.2, shapes: ['star'] });
-            confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] });
-        };
-        envelopeWrapper.addEventListener('click', () => {
-            fireConfetti();
-            modelViewer.style.transform = 'scale(0)';
-            modelViewer.style.opacity = '0';
-            setTimeout(() => {
-                document.body.classList.remove('intro-active');
-                envelopeWrapper.classList.add('hidden');
-            }, 500);
-        }, { once: true });
-    }
-    const getBlockStyles = (c, settings, type) => { /* ... (эта функция остается без изменений) ... */
-        const styles = [];
-        if (type !== 'hero' || settings.style === 'modern') { styles.push(`max-width: ${settings.maxWidth || '800px'}`); }
-        if (c.height) { const heightProp = (type === 'hero' && settings.style === 'classic') ? 'height' : 'min-height'; styles.push(`${heightProp}: ${c.height}`); }
-        return styles.join('; ');
-    };
+    function setupIntroAnimation() { /* ... (эта функция остается без изменений) ... */ }
     
     // ===== ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ В JAVASCRIPT =====
     const createHeroHTML = (c, s) => {
         const styles = [
             `background-image: url('${c.imageUrl}')`,
-            `background-position: ${c.backgroundPosition || 'center center'}`, // Используем новое свойство
-            getBlockStyles(c, s, 'hero')
+            `background-position: ${c.backgroundPosition || 'center center'}`,
         ];
         const styleAttribute = styles.filter(Boolean).join('; ');
         return `<header class="hero-block" style="${styleAttribute}"><div class="hero-content"><p>${c.subtitle}</p><h1>${c.names}</h1><p>${c.date}</p></div></header>`;
     };
 
     const processText = (text) => (text || '').replace(/\n/g, '<br>'); // ... (все остальные функции остаются без изменений)
-    const createCountdownHTML = (c, s) => `<section class="content-section" style="${getBlockStyles(c, s, 'countdown')}"><h2 id="countdown-title">${c.title}</h2><div id="countdown"><div class="time-block"><div id="days" class="number">00</div><div>Days</div></div><div class="time-block"><div id="hours" class="number">00</div><div>Hours</div></div><div class="time-block"><div id="minutes" class="number">00</div><div>Minutes</div></div><div class="time-block"><div id="seconds" class="number">00</div><div>Seconds</div></div></div></section>`;
-    const createScheduleHTML = (c, s) => `<section class="content-section" style="${getBlockStyles(c, s, 'schedule')}"><h2>${c.title}</h2><ul class="schedule-list">${c.items.map(i => `<li class="schedule-item"><div class="schedule-time">${i.time}</div><div class="schedule-event"><h3>${i.title}</h3><p>${processText(i.desc)}</p></div></li>`).join('')}</ul></section>`;
-    const createLocationHTML = (c, s) => `<section class="content-section location-block" style="${getBlockStyles(c, s, 'location')}"><h2>${c.title}</h2><p>${processText(c.address)}</p><img src="${c.imageUrl}" alt="Venue"><a href="${c.mapLink}" class="rsvp-button" target="_blank" style="margin-top: 30px;">View on Map</a></section>`;
-    const createRsvpHTML = (c, s, rsvpLink) => `<section class="content-section" style="${getBlockStyles(c, s, 'rsvp')}"><h2>${c.title}</h2><p>${processText(c.subtitle)}</p><div><a href="${rsvpLink}" class="rsvp-button">I'll Be There!</a>${c.declineLink ? `<a href="${c.declineLink}" class="rsvp-button decline">Can't Make It</a>` : ''}</div></section>`;
-    const createHeadingHTML = (c, s) => `<section class="content-section" style="${getBlockStyles(c, s, 'heading')}"><h2 style="font-size: 2.5rem;">${c.text}</h2></section>`;
-    const createImageHTML = (c, s) => `<section class="content-section image-block" style="${getBlockStyles(c,s,'image')}"><figure><img src="${c.imageUrl}" alt="${c.caption}"><figcaption>${c.caption}</figcaption></figure></section>`;
-    const createParagraphHTML = (c, s) => `<section class="content-section paragraph-block" style="${getBlockStyles(c, s, 'paragraph')}"><p>${processText(c.text)}</p></section>`;
-    function renderPage(blocks, settings, rsvpLink = '#') {
-        if (!blocks || !settings) return;
-        document.body.className = '';
-        if (settings.style) { document.body.classList.add(`style-${settings.style}`); }
-        document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? `url('${settings.backgroundImage}')` : 'none';
-        const container = document.getElementById('page-content');
-        container.innerHTML = '';
-        let countdownBlock = null;
-        blocks.forEach(block => {
-            let blockHTML = '';
-            switch(block.type) {
-                case 'hero': blockHTML = createHeroHTML(block.content, settings); break;
-                case 'countdown': blockHTML = createCountdownHTML(block.content, settings); countdownBlock = block.content; break;
-                case 'schedule': blockHTML = createScheduleHTML(block.content, settings); break;
-                case 'location': blockHTML = createLocationHTML(block.content, settings); break;
-                case 'rsvp': blockHTML = createRsvpHTML(block.content, settings, rsvpLink); break;
-                case 'heading': blockHTML = createHeadingHTML(block.content, settings); break;
-                case 'paragraph': blockHTML = createParagraphHTML(block.content, settings); break;
-                case 'image': blockHTML = createImageHTML(block.content, settings); break;
-            }
-            container.innerHTML += blockHTML;
-        });
-        if (countdownBlock) { startCountdown(countdownBlock.targetDate); }
-    }
-    function startCountdown(targetDate) { 
-        if (!targetDate) return; 
-        if (countdownInterval) clearInterval(countdownInterval); 
-        const c = new Date(targetDate).getTime(); 
-        countdownInterval = setInterval(() => { 
-            const n = new Date().getTime(), d = c - n; 
-            if (d < 0) { clearInterval(countdownInterval); const e = document.getElementById("countdown"); if (e) e.innerHTML = "<h2>The event has already happened!</h2>"; return; } 
-            const D = document.getElementById("days"), H = document.getElementById("hours"), M = document.getElementById("minutes"), S = document.getElementById("seconds"); 
-            if(D) D.innerText = Math.floor(d / 864e5).toString().padStart(2, '0'); 
-            if(H) H.innerText = Math.floor(d % 864e5 / 36e5).toString().padStart(2, '0'); 
-            if(M) M.innerText = Math.floor(d % 36e5 / 6e4).toString().padStart(2, '0'); 
-            if(S) S.innerText = Math.floor(d % 6e4 / 1e3).toString().padStart(2, '0'); 
-        }, 1000); 
-    }
-    async function loadInvitationData() {
-        setupIntroAnimation();
-        document.body.style.opacity = 1; 
-        const params = new URLSearchParams(window.location.search);
-        const id = params.get('id');
-        const pageType = params.get('page') || 'main';
-        if (id && pageType) {
-            try {
-                const r = await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, { headers: { 'X-Access-Key': '__JSONBIN_ACCESS_KEY__' }});
-                if (!r.ok) throw new Error('Could not load invitation data.');
-                const data = (await r.json()).record;
-                const pageData = data[pageType];
-                if (!pageData) throw new Error(`Specified page data ('${pageType}') not found.`);
-                const rsvpTemplateFile = data.rsvp.template;
-                const rsvpLink = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)}${rsvpTemplateFile}?id=${id}&page=rsvp`;
-                renderPage(pageData.blocks, pageData.settings, rsvpLink);
-            } catch (e) { document.getElementById('page-content').innerHTML = `<h1>Error Loading Invitation</h1><p>${e.message}</p>`; }
-        }
-    }
-    if (window.self !== window.top) {
-        document.body.style.opacity = 1;
-        const envelopeWrapper = document.getElementById('envelope-wrapper');
-        if (envelopeWrapper) {
-            envelopeWrapper.style.display = 'none';
-        }
-    } else {
-        window.addEventListener('load', loadInvitationData);
-    }
+    function setupIntroAnimation() { const envelopeWrapper = document.getElementById('envelope-wrapper'); const modelViewer = document.getElementById('envelope-3d'); if (!envelopeWrapper || !modelViewer || typeof confetti !== 'function') return; document.body.classList.add('intro-active'); modelViewer.addEventListener('load', () => { modelViewer.classList.add('loaded'); }); const fireConfetti = () => { const defaults = { spread: 360, ticks: 150, gravity: 0, decay: 0.95, startVelocity: 35, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] }; confetti({ ...defaults, particleCount: 60, scalar: 1.2, shapes: ['star'] }); confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] }); }; envelopeWrapper.addEventListener('click', () => { fireConfetti(); modelViewer.style.transform = 'scale(0)'; modelViewer.style.opacity = '0'; setTimeout(() => { document.body.classList.remove('intro-active'); envelopeWrapper.classList.add('hidden'); }, 500); }, { once: true }); }
+    const createCountdownHTML = (c, s) => `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 id="countdown-title">${c.title}</h2><div id="countdown"><div class="time-block"><div id="days" class="number">00</div><div>Days</div></div><div class="time-block"><div id="hours" class="number">00</div><div>Hours</div></div><div class="time-block"><div id="minutes" class="number">00</div><div>Minutes</div></div><div class="time-block"><div id="seconds" class="number">00</div><div>Seconds</div></div></div></section>`;
+    const createScheduleHTML = (c, s) => `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2>${c.title}</h2><ul class="schedule-list">${c.items.map(i => `<li class="schedule-item"><div class="schedule-time">${i.time}</div><div class="schedule-event"><h3>${i.title}</h3><p>${processText(i.desc)}</p></div></li>`).join('')}</ul></section>`;
+    const createLocationHTML = (c, s) => `<section class="content-section location-block" style="max-width: ${s.maxWidth || '800px'};"><h2>${c.title}</h2><p>${processText(c.address)}</p><img src="${c.imageUrl}" alt="Venue"><a href="${c.mapLink}" class="rsvp-button" target="_blank" style="margin-top: 30px;">View on Map</a></section>`;
+    const createRsvpHTML = (c, s, rsvpLink) => `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2>${c.title}</h2><p>${processText(c.subtitle)}</p><div><a href="${rsvpLink}" class="rsvp-button">I'll Be There!</a>${c.declineLink ? `<a href="${c.declineLink}" class="rsvp-button decline">Can't Make It</a>` : ''}</div></section>`;
+    const createHeadingHTML = (c, s) => `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 style="font-size: 2.5rem;">${c.text}</h2></section>`;
+    const createImageHTML = (c, s) => `<section class="content-section image-block" style="max-width: ${s.maxWidth || '800px'};"><figure><img src="${c.imageUrl}" alt="${c.caption}"><figcaption>${c.caption}</figcaption></figure></section>`;
+    const createParagraphHTML = (c, s) => `<section class="content-section paragraph-block" style="max-width: ${s.maxWidth || '800px'};"><p>${processText(c.text)}</p></section>`;
+    function renderPage(blocks, settings, rsvpLink = '#') { if (!blocks || !settings) return; document.body.className = ''; if (settings.style) { document.body.classList.add(`style-${settings.style}`); } document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? `url('${settings.backgroundImage}')` : 'none'; const container = document.getElementById('page-content'); container.innerHTML = ''; let countdownBlock = null; blocks.forEach(block => { let blockHTML = ''; switch(block.type) { case 'hero': blockHTML = createHeroHTML(block.content, settings); break; case 'countdown': blockHTML = createCountdownHTML(block.content, settings); countdownBlock = block.content; break; case 'schedule': blockHTML = createScheduleHTML(block.content, settings); break; case 'location': blockHTML = createLocationHTML(block.content, settings); break; case 'rsvp': blockHTML = createRsvpHTML(block.content, settings, rsvpLink); break; case 'heading': blockHTML = createHeadingHTML(block.content, settings); break; case 'paragraph': blockHTML = createParagraphHTML(block.content, settings); break; case 'image': blockHTML = createImageHTML(block.content, settings); break; } container.innerHTML += blockHTML; }); if (countdownBlock) { startCountdown(countdownBlock.targetDate); } }
+    function startCountdown(targetDate) { if (!targetDate) return; if (countdownInterval) clearInterval(countdownInterval); const c = new Date(targetDate).getTime(); countdownInterval = setInterval(() => { const n = new Date().getTime(), d = c - n; if (d < 0) { clearInterval(countdownInterval); const e = document.getElementById("countdown"); if (e) e.innerHTML = "<h2>The event has already happened!</h2>"; return; } const D = document.getElementById("days"), H = document.getElementById("hours"), M = document.getElementById("minutes"), S = document.getElementById("seconds"); if(D) D.innerText = Math.floor(d / 864e5).toString().padStart(2, '0'); if(H) H.innerText = Math.floor(d % 864e5 / 36e5).toString().padStart(2, '0'); if(M) M.innerText = Math.floor(d % 36e5 / 6e4).toString().padStart(2, '0'); if(S) S.innerText = Math.floor(d % 6e4 / 1e3).toString().padStart(2, '0'); }, 1000); }
+    async function loadInvitationData() { setupIntroAnimation(); document.body.style.opacity = 1; const params = new URLSearchParams(window.location.search); const id = params.get('id'); const pageType = params.get('page') || 'main'; if (id && pageType) { try { const r = await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, { headers: { 'X-Access-Key': '__JSONBIN_ACCESS_KEY__' }}); if (!r.ok) throw new Error('Could not load invitation data.'); const data = (await r.json()).record; const pageData = data[pageType]; if (!pageData) throw new Error(`Specified page data ('${pageType}') not found.`); const rsvpTemplateFile = data.rsvp.template; const rsvpLink = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)}${rsvpTemplateFile}?id=${id}&page=rsvp`; renderPage(pageData.blocks, pageData.settings, rsvpLink); } catch (e) { document.getElementById('page-content').innerHTML = `<h1>Error Loading Invitation</h1><p>${e.message}</p>`; } } }
+    if (window.self !== window.top) { document.body.style.opacity = 1; const envelopeWrapper = document.getElementById('envelope-wrapper'); if (envelopeWrapper) { envelopeWrapper.style.display = 'none'; } } else { window.addEventListener('load', loadInvitationData); }
     </script>
 </body>
 </html>
