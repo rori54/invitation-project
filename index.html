@@ -57,7 +57,90 @@
 
     function renderEditor() { const container = document.getElementById('editor-content'); const currentlyOpen = [...container.querySelectorAll('.editor-block-content.is-open')].map(el => el.closest('.editor-block').dataset.id); container.innerHTML = ''; pageBlocks.forEach(block => { const tpl = document.getElementById('editor-block-template').content.cloneNode(true); const editorBlock = tpl.querySelector('.editor-block'); editorBlock.dataset.id = block.id; const title = block.type.charAt(0).toUpperCase() + block.type.slice(1).replace(/-/g, ' '); editorBlock.querySelector('.editor-block-title').textContent = title; const contentDiv = editorBlock.querySelector('.editor-block-content'); contentDiv.innerHTML = createEditorFieldsForBlock(block); if (currentlyOpen.includes(block.id)) { contentDiv.classList.add('is-open'); editorBlock.querySelector('.toggle-btn').textContent = '▲'; } container.appendChild(tpl); }); initializeMapsForEditor(); }
     function initializeMapsForEditor() { if (typeof google === 'undefined' || typeof google.maps === 'undefined' || typeof google.maps.places === 'undefined') { console.warn("Google Maps script not loaded, autocomplete disabled."); return; } document.querySelectorAll('.smart-location-search').forEach(input => { if (input.dataset.mapsInitialized) return; input.dataset.mapsInitialized = 'true'; const autocomplete = new google.maps.places.Autocomplete(input, { fields: ["name", "formatted_address", "photos", "url"], types: ["establishment"] }); autocomplete.addListener('place_changed', () => { const place = autocomplete.getPlace(); if (!place) return; const blockDiv = input.closest('.editor-block'); const blockId = blockDiv.dataset.id; const blockIndex = pageBlocks.findIndex(b => b.id === blockId); if (blockIndex === -1) return; const block = pageBlocks[blockIndex]; block.content.title = place.name || block.content.title; block.content.address = place.formatted_address || block.content.address; block.content.mapLink = place.url || block.content.mapLink; if (place.photos && place.photos.length > 0) { block.content.imageUrl = place.photos[0].getUrl({ 'maxWidth': 1600 }); } renderEditor(); renderPreview(); }); }); }
-    function setupEventListeners() { const editorContent = document.getElementById('editor-content'); editorContent.addEventListener('input', (e) => { const input = e.target; const blockDiv = input.closest('.editor-block'); if (!blockDiv) return; const blockId = blockDiv.dataset.id; const blockIndex = pageBlocks.findIndex(b => b.id === blockId); if (blockIndex === -1) return; if (input.matches('[data-key]')) { const key = input.dataset.key; const value = input.type === 'checkbox' ? input.checked : input.value; pageBlocks[blockIndex].content[key] = value; } else if (input.matches('.sub-item-input')) { const subItemDiv = input.closest('.sub-item-editor'); const subItemId = subItemDiv.dataset.itemId; const subItemKey = input.dataset.itemKey; const listKey = pageBlocks[blockIndex].content.items ? 'items' : 'options'; const subItemIndex = pageBlocks[blockIndex].content[listKey].findIndex(i => i.id === subItemId); if (subItemIndex > -1) pageBlocks[blockIndex].content[listKey][subItemIndex][subItemKey] = input.value; } else if (input.matches('.inner-block-input')) { const innerIndex = parseInt(input.dataset.index, 10); const innerKey = input.dataset.key; pageBlocks[blockIndex].content.innerBlocks[innerIndex].content[innerKey] = input.value; } renderPreview(); }); editorContent.addEventListener('click', (e) => { const target = e.target; const blockDiv = target.closest('.editor-block'); if (!blockDiv) return; const blockId = blockDiv.dataset.id; const blockIndex = pageBlocks.findIndex(b => b.id === blockId); if (target.closest('.delete-block-btn')) { if (confirm('Are you sure you want to delete this block?')) { pageBlocks.splice(blockIndex, 1); renderEditor(); renderPreview(); } } else if (target.matches('.add-inner-block-btn')) { const type = target.dataset.innerType; if (!pageBlocks[blockIndex].content.innerBlocks) { pageBlocks[blockIndex].content.innerBlocks = []; } const newInnerBlock = { type: type, content: { text: `New ${type}` } }; pageBlocks[blockIndex].content.innerBlocks.push(newInnerBlock); renderEditor(); renderPreview(); } else if (target.matches('.delete-inner-block-btn')) { const innerIndex = parseInt(target.closest('.inner-block-editor').dataset.index, 10); pageBlocks[blockIndex].content.innerBlocks.splice(innerIndex, 1); renderEditor(); renderPreview(); } else if (target.closest('.add-sub-item-btn')) { const listKey = target.dataset.listKey; const newItem = listKey === 'items' ? { id: `s-${Date.now()}`, time: 'New Time', title: 'New Event', desc: '' } : { id: `opt-${Date.now()}`, text: 'New Option' }; pageBlocks[blockIndex].content[listKey].push(newItem); renderEditor(); renderPreview(); } else if (target.closest('.delete-sub-item-btn')) { const subItemDiv = target.closest('.sub-item-editor'); const subItemId = subItemDiv.dataset.itemId; const listKey = pageBlocks[blockIndex].content.items ? 'items' : 'options'; pageBlocks[blockIndex].content[listKey] = pageBlocks[blockIndex].content[listKey].filter(i => i.id !== subItemId); renderEditor(); renderPreview(); } else if (target.closest('.editor-block-header')) { const content = blockDiv.querySelector('.editor-block-content'); if (content) { content.classList.toggle('is-open'); blockDiv.querySelector('.toggle-btn').textContent = content.classList.contains('is-open') ? '▲' : '▼'; } } }); }
+    
+    // ИСПРАВЛЕНИЕ: Добавлен корректный обработчик для вложенных блоков
+    function setupEventListeners() {
+        const editorContent = document.getElementById('editor-content');
+        editorContent.addEventListener('input', (e) => {
+            const input = e.target;
+            const blockDiv = input.closest('.editor-block');
+            if (!blockDiv) return;
+            const blockId = blockDiv.dataset.id;
+            const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
+            if (blockIndex === -1) return;
+
+            if (input.matches('.inner-block-input')) {
+                const innerBlockDiv = input.closest('.inner-block-editor');
+                const innerIndex = parseInt(innerBlockDiv.dataset.index, 10);
+                const innerKey = input.dataset.key;
+                if (pageBlocks[blockIndex].content.innerBlocks[innerIndex]) {
+                     pageBlocks[blockIndex].content.innerBlocks[innerIndex].content[innerKey] = input.value;
+                }
+            } else if (input.matches('[data-key]')) {
+                const key = input.dataset.key;
+                const value = input.type === 'checkbox' ? input.checked : input.value;
+                pageBlocks[blockIndex].content[key] = value;
+            } else if (input.matches('.sub-item-input')) {
+                const subItemDiv = input.closest('.sub-item-editor');
+                const subItemId = subItemDiv.dataset.itemId;
+                const subItemKey = input.dataset.itemKey;
+                const listKey = pageBlocks[blockIndex].content.items ? 'items' : 'options';
+                const subItemIndex = pageBlocks[blockIndex].content[listKey].findIndex(i => i.id === subItemId);
+                if (subItemIndex > -1) pageBlocks[blockIndex].content[listKey][subItemIndex][subItemKey] = input.value;
+            }
+            renderPreview();
+        });
+
+        editorContent.addEventListener('click', (e) => {
+            const target = e.target;
+            const blockDiv = target.closest('.editor-block');
+            if (!blockDiv) return;
+            const blockId = blockDiv.dataset.id;
+            const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
+
+            if (target.closest('.delete-block-btn')) {
+                if (confirm('Are you sure you want to delete this block?')) {
+                    pageBlocks.splice(blockIndex, 1);
+                    renderEditor();
+                    renderPreview();
+                }
+            } else if (target.matches('.add-inner-block-btn')) {
+                const type = target.dataset.innerType;
+                if (!pageBlocks[blockIndex].content.innerBlocks) {
+                    pageBlocks[blockIndex].content.innerBlocks = [];
+                }
+                const newInnerBlock = { type: type, content: { text: `New ${type}` } };
+                pageBlocks[blockIndex].content.innerBlocks.push(newInnerBlock);
+                renderEditor();
+                renderPreview();
+            } else if (target.matches('.delete-inner-block-btn')) {
+                const innerIndex = parseInt(target.closest('.inner-block-editor').dataset.index, 10);
+                pageBlocks[blockIndex].content.innerBlocks.splice(innerIndex, 1);
+                renderEditor();
+                renderPreview();
+            } else if (target.closest('.add-sub-item-btn')) {
+                const listKey = target.dataset.listKey;
+                const newItem = listKey === 'items' ? { id: `s-${Date.now()}`, time: 'New Time', title: 'New Event', desc: '' } : { id: `opt-${Date.now()}`, text: 'New Option' };
+                pageBlocks[blockIndex].content[listKey].push(newItem);
+                renderEditor();
+                renderPreview();
+            } else if (target.closest('.delete-sub-item-btn')) {
+                const subItemDiv = target.closest('.sub-item-editor');
+                const subItemId = subItemDiv.dataset.itemId;
+                const listKey = pageBlocks[blockIndex].content.items ? 'items' : 'options';
+                pageBlocks[blockIndex].content[listKey] = pageBlocks[blockIndex].content[listKey].filter(i => i.id !== subItemId);
+                renderEditor();
+                renderPreview();
+            } else if (target.closest('.editor-block-header')) {
+                const content = blockDiv.querySelector('.editor-block-content');
+                if (content) {
+                    content.classList.toggle('is-open');
+                    blockDiv.querySelector('.toggle-btn').textContent = content.classList.contains('is-open') ? '▲' : '▼';
+                }
+            }
+        });
+    }
+
     const addBlockModal = document.getElementById('add-block-modal'); document.getElementById('add-block-btn').addEventListener('click', () => addBlockModal.classList.add('is-visible')); document.getElementById('modal-close-btn').addEventListener('click', () => addBlockModal.classList.remove('is-visible')); addBlockModal.addEventListener('click', (e) => { if (e.target === addBlockModal) { addBlockModal.classList.remove('is-visible'); } }); document.getElementById('add-block-options').addEventListener('click', (e) => { if (e.target.tagName === 'BUTTON' && e.target.dataset.type) { pageBlocks.push(getNewBlockData(e.target.dataset.type)); renderEditor(); renderPreview(); addBlockModal.classList.remove('is-visible'); } });
     function setupResizeObserver() { if (previewResizeObserver) { previewResizeObserver.disconnect(); } const previewBody = iframe.contentWindow.document.body; if (!previewBody) return; previewResizeObserver = new ResizeObserver(() => { iframe.style.height = previewBody.scrollHeight + 'px'; }); previewResizeObserver.observe(previewBody); iframe.style.height = previewBody.scrollHeight + 'px'; }
     function renderPreview() { if (iframe.contentWindow && typeof iframe.contentWindow.renderPage === 'function') { iframe.contentWindow.renderPage(pageBlocks, pageSettings); } }
@@ -91,7 +174,6 @@
                 setupResizeObserver();
             };
             switchEditorMode(mainPageData);
-            // Попытка инициализации карт после того, как основной редактор уже работает
             if (typeof google !== 'undefined' && google.maps) {
                 initializeMapsForEditor();
             }
@@ -114,13 +196,11 @@
         }
     }
 
-    // Эта функция будет вызвана Google Maps после загрузки
     function mapsReady() {
         console.log("Google Maps script has loaded.");
         initializeMapsForEditor();
     }
 
-    // Запускаем инициализацию редактора немедленно
     initEditor();
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=__GOOGLE_MAPS_API_KEY__&libraries=places&callback=mapsReady"></script>

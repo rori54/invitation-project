@@ -15,8 +15,11 @@
         #page-content > .hero-block + .content-section { margin-top: 30px; border-radius: 8px; }
         h1,h2,h3{font-family:'Playfair Display',serif;text-align:center}
         h2{font-size:2.2rem;margin-top: 0; margin-bottom:30px}
-        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; background-size: cover; overflow: hidden; width: 100%; height: var(--hero-height, auto); aspect-ratio: var(--hero-aspect-ratio, 16 / 9); }
-        @media (max-width: 600px) { .hero-block { aspect-ratio: var(--hero-aspect-ratio-mobile, 9 / 12); } }
+        
+        /* ИСПРАВЛЕНИЕ: CSS для hero-block теперь задает aspect-ratio по умолчанию, JS будет его переопределять при необходимости */
+        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; background-size: cover; overflow: hidden; width: 100%; aspect-ratio: 16 / 9; /* Стандартное соотношение по умолчанию */ }
+        @media (max-width: 600px) { .hero-block { aspect-ratio: 9 / 12; /* Мобильное соотношение по умолчанию */ } }
+
         .hero-block::before{ content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); z-index: 1; }
         .hero-content{ position:relative; z-index: 2; width: 90%; max-width: 1000px; }
         .hero-content h1{font-size:4rem;margin:10px 0; line-height: 1.2;}
@@ -67,6 +70,7 @@
     <script>
     let countdownInterval;
     
+    // ИСПРАВЛЕНИЕ: Функция теперь правильно генерирует инлайновые стили
     const createHeroHTML = (c, s) => {
         let innerBlocksHTML = '';
         if (c.innerBlocks && c.innerBlocks.length > 0) {
@@ -76,15 +80,22 @@
                 return '';
             }).join('')}</div>`;
         }
+        
         const styles = [
             `background-image: url('${c.imageUrl}')`,
             `background-position: ${c.backgroundPosition || 'center center'}`,
-            c.height ? `--hero-height: ${c.height}` : null,
-            !c.height && c.aspectRatio ? `--hero-aspect-ratio: ${c.aspectRatio}` : null,
-            !c.height && c.aspectRatioMobile ? `--hero-aspect-ratio-mobile: ${c.aspectRatioMobile}` : null
-        ].filter(Boolean).join('; ');
+        ];
 
-        return `<header class="hero-block" style="${styles}"><div class="hero-content"><p>${c.subtitle}</p><h1>${c.names}</h1><p>${c.date}</p>${innerBlocksHTML}</div></header>`;
+        // Если задана высота, используем ее и принудительно отключаем aspect-ratio из CSS
+        if (c.height && c.height.trim() !== '') {
+            styles.push(`height: ${c.height}`);
+            styles.push(`aspect-ratio: auto`);
+        }
+        // Если высота не задана, блок будет использовать aspect-ratio из файла стилей.
+
+        const styleAttribute = styles.filter(Boolean).join('; ');
+
+        return `<header class="hero-block" style="${styleAttribute}"><div class="hero-content"><p>${c.subtitle}</p><h1>${c.names}</h1><p>${c.date}</p>${innerBlocksHTML}</div></header>`;
     };
 
     const processText = (text) => (text || '').replace(/\n/g, '<br>');
