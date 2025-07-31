@@ -6,125 +6,56 @@
     <title>Wedding Invitation</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- НОВОЕ: Загрузка всех выбранных шрифтов -->
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Allura&family=Sacramento&family=Alex+Brush&family=Satisfy&family=Kaushan+Script&family=Pacifico&family=Caveat:wght@400;700&family=Cookie&family=Playfair+Display:wght@400;700&family=Crimson+Text:wght@400;700&family=Cormorant+Garamond:wght@400;700&family=EB+Garamond:wght@400;700&family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;700&family=Merriweather:wght@400;700&family=Vollkorn:wght@400;700&family=Cinzel:wght@400;700&family=Abril+Fatface&family=Amatic+SC:wght@400;700&family=Fredoka+One&family=Lobster&family=Montserrat:wght@300;400;700&family=Raleway:wght@300;400;700&family=Lato:wght@300;400;700&family=Open+Sans:wght@300;400;700&family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
-    
     <style>
-        /* НОВОЕ: CSS переменные для глобального управления дизайном */
-        :root {
-            --accent-color: #c5a98b;
-            --background-color: #f8f7f5;
-            --font-heading: "Playfair Display", serif;
-            --font-body: "Montserrat", sans-serif;
-        }
-
-        body {
-            margin: 0;
-            font-family: var(--font-body); /* Применяем шрифт для тела */
-            line-height: 1.7;
-            background-color: var(--background-color);
-            color: #333;
-            opacity: 0;
-            transition: opacity .5s ease-in-out;
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }
-        .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; position: relative; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); box-sizing: border-box;}
-        #page-content > .content-section:first-child { margin-top: 0; border-radius: 0; }
-        #page-content > .hero-block + .content-section { margin-top: 30px; border-radius: 8px; }
-        
-        /* Применяем шрифт для заголовков */
-        h1,h2,h3 { font-family: var(--font-heading); text-align:center }
-        .hero-content h1 { font-size:4rem; margin:10px 0; line-height: 1.2; }
-        h2{font-size:2.2rem;margin-top: 0; margin-bottom:30px}
-        
-        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; overflow: hidden; width: 100%; aspect-ratio: 16/9; }
+        body { margin: 0; background-color: #f8f7f5; opacity: 0; transition: opacity .5s ease-in-out; font-family: 'Montserrat', sans-serif; line-height: 1.6; }
+        .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; position: relative; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); max-width: 800px; box-sizing: border-box;}
+        h1, h2, h3, h4, h5, h6 { margin: 0; padding: 0; }
+        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; overflow: hidden; width: 100%; color: #fff; }
         .hero-background-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
         .hero-block::before{ content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); z-index: 1; }
-        .hero-content{ position:relative; z-index: 2; width: 90%; max-width: 1000px; }
-        .hero-content p{font-size:1.2rem;letter-spacing:2px; margin: 0;}
-        
-        /* Стили для параграфа с заголовком */
+        .hero-content{ position:relative; z-index: 2; width: 90%; max-width: 1000px; padding: 40px 0; }
+        .hero-content h1 { line-height: 1.2; margin: 10px 0; }
+        .hero-content p { letter-spacing: 2px; margin: 0; }
         .paragraph-block { text-align: left; }
-        .paragraph-block h3 { font-size: 1.8em; margin-bottom: 15px; text-align: left; }
-        .paragraph-block p { font-size: 1.1em; line-height: 1.8; white-space: pre-wrap; margin: 0; }
-        
-        #countdown{display:flex;justify-content:center;gap:20px;text-align:center}
-        .time-block{background:#f4f4f4;padding:20px;border-radius:5px;min-width:80px}
-        .time-block .number{font-size:2.5rem;font-weight:700;color:var(--accent-color)} /* Применяем акцентный цвет */
-        
-        .schedule-list{list-style:none;padding:0;text-align:left; max-width: 600px; margin: 0 auto;}
-        .schedule-item{display:flex;gap:20px;border-bottom:1px solid #eee;padding:20px 0}
+        .paragraph-block h3 { margin-bottom: 15px; }
+        .countdown-container{display:flex;justify-content:center;gap:20px;text-align:center; margin-top: 30px;}
+        .schedule-list{list-style:none;padding:0;text-align:left; max-width: 600px; margin: 30px auto 0; }
+        .schedule-item{display:flex; gap:20px; border-bottom:1px solid #eee; padding:20px 0}
         .schedule-item:last-child{border-bottom:none}
-        .schedule-time{font-weight:700;color:var(--accent-color);font-size:1.2rem;min-width:80px} /* Применяем акцентный цвет */
-        .schedule-event h3{margin:0;font-size:1.4rem;text-align:left}
-        .schedule-event p{margin:5px 0 0; white-space: pre-wrap;}
-        
-        .rsvp-button{display:inline-block;background:var(--accent-color);color:#fff!important;padding:15px 30px;text-decoration:none;border-radius:50px;transition:transform .2s ease;font-size:1.1rem; margin: 10px;}
-        .rsvp-button:hover{transform:scale(1.05)}
-
-        @media (max-width: 600px) {
-             .hero-content h1 { font-size: 2.8rem; } h2 { font-size: 1.8rem; } .content-section { padding: 30px 20px; margin: 20px 10px; }
-        }
+        .schedule-event { flex-grow: 1; }
+        .schedule-event h3 { text-align: left; }
+        .rsvp-button{display:inline-block; color:#fff!important; padding:15px 30px;text-decoration:none;border-radius:50px; margin: 10px;}
     </style>
 </head>
 <body>
     <main id="page-content"></main>
     <script>
-    const processText = (text) => (text || '').replace(/\n/g, '<br>');
+        function getStyleString(styleObj) {
+            if (!styleObj) return '';
+            let styles = '';
+            if (styleObj.fontFamily) styles += `font-family: '${styleObj.fontFamily}', sans-serif; `;
+            if (styleObj.color) styles += `color: ${styleObj.color}; `;
+            if (styleObj.fontSize) styles += `font-size: ${styleObj.fontSize}em; `;
+            if (styleObj.fontWeight) styles += `font-weight: ${styleObj.fontWeight}; `;
+            return styles.trim();
+        }
+        const processText = (text) => (text || '').replace(/\n/g, '<br>');
+        function createHeroHTML(c) { const headerStyle = c.aspectRatio ? `aspect-ratio: ${c.aspectRatio};` : 'height: 50vh;'; return `<header class="hero-block" style="${headerStyle}">${c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'};" alt="">` : ''}<div class="hero-content"><p style="${getStyleString(c.subtitleStyle)}">${c.subtitle}</p><h1 style="${getStyleString(c.namesStyle)}">${c.names}</h1><p style="${getStyleString(c.dateStyle)}">${c.date}</p></div></header>`; }
+        function createParagraphHTML(c) { return `<section class="content-section paragraph-block">${c.heading ? `<h3 style="${getStyleString(c.headingStyle)}">${c.heading}</h3>` : ''}<p style="${getStyleString(c.textStyle)}">${processText(c.text)}</p></section>`; }
+        function createCountdownHTML(c) { return `<section class="content-section"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><div class="countdown-container"><div class="time-block"><div style="${getStyleString(c.numberStyle)}">00</div><div style="${getStyleString(c.labelStyle)}">Days</div></div><div class="time-block"><div style="${getStyleString(c.numberStyle)}">00</div><div style="${getStyleString(c.labelStyle)}">Hours</div></div><div class="time-block"><div style="${getStyleString(c.numberStyle)}">00</div><div style="${getStyleString(c.labelStyle)}">Minutes</div></div><div class="time-block"><div style="${getStyleString(c.numberStyle)}">00</div><div style="${getStyleString(c.labelStyle)}">Seconds</div></div></div></section>`;}
+        function createScheduleHTML(c) { return `<section class="content-section"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><ul class="schedule-list">${(c.items || []).map(i => `<li class="schedule-item"><div class="schedule-time" style="${getStyleString(c.timeStyle)}">${i.time}</div><div class="schedule-event"><h3 style="${getStyleString(c.eventTitleStyle)}">${i.title}</h3><p style="${getStyleString(c.eventDescStyle)}">${processText(i.desc)}</p></div></li>`).join('')}</ul></section>`; }
+        function createLocationHTML(c) { return `<section class="content-section"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><p style="${getStyleString(c.addressStyle)}">${processText(c.address)}</p>${c.imageUrl ? `<img src="${c.imageUrl}" alt="" style="width:100%; border-radius: 8px; margin-top: 20px;">` : ''}<a href="${c.mapLink}" class="rsvp-button" style="background-color: ${(c.buttonStyle && c.buttonStyle.accentColor) || '#C5A98B'}; margin-top: 30px;">View on Map</a></section>`; }
+        function createRsvpHTML(c) { return `<section class="content-section"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><p style="${getStyleString(c.subtitleStyle)}">${processText(c.subtitle)}</p><a href="#" class="rsvp-button" style="background-color: ${(c.buttonStyle && c.buttonStyle.accentColor) || '#C5A98B'};">I'll Be There!</a></section>`; }
 
-    const createHeroHTML = (c, s) => {
-        const imageHTML = c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'};" alt="">` : '';
-        const headerStyles = c.aspectRatio ? `aspect-ratio: ${c.aspectRatio}` : '';
-        return `<header class="hero-block" style="${headerStyles}">${imageHTML}<div class="hero-content"><p>${c.subtitle}</p><h1>${c.names}</h1><p>${c.date}</p></div></header>`;
-    };
-    
-    const createParagraphHTML = (c, s) => {
-        const headingHTML = c.heading ? `<h3>${c.heading}</h3>` : '';
-        return `<section class="content-section paragraph-block" style="max-width: ${s.maxWidth || '800px'};">${headingHTML}<p>${processText(c.text)}</p></section>`;
-    };
-
-    const createCountdownHTML = (c, s) => `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2>${c.title}</h2><div id="countdown"><div class="time-block"><div id="days" class="number">00</div><div>Days</div></div><div class="time-block"><div id="hours" class="number">00</div><div>Hours</div></div><div class="time-block"><div id="minutes" class="number">00</div><div>Minutes</div></div><div class="time-block"><div id="seconds" class="number">00</div><div>Seconds</div></div></div></section>`;
-    const createScheduleHTML = (c, s) => `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2>${c.title}</h2><ul class="schedule-list">${(c.items || []).map(i => `<li class="schedule-item"><div class="schedule-time">${i.time}</div><div class="schedule-event"><h3>${i.title}</h3><p>${processText(i.desc)}</p></div></li>`).join('')}</ul></section>`;
-    const createLocationHTML = (c, s) => `<section class="content-section location-block" style="max-width: ${s.maxWidth || '800px'};"><h2>${c.title}</h2><p>${processText(c.address)}</p><img src="${c.imageUrl}" alt="Venue"><a href="${c.mapLink}" class="rsvp-button" target="_blank" style="margin-top: 30px;">View on Map</a></section>`;
-    const createRsvpHTML = (c, s) => `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2>${c.title}</h2><p>${processText(c.subtitle)}</p><div><a href="#" class="rsvp-button">I'll Be There!</a></div></section>`;
-    const createHeadingHTML = (c, s) => `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 style="font-size: 2.5rem;">${c.text}</h2></section>`;
-    const createImageHTML = (c, s) => `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><figure><img src="${c.imageUrl}" alt="${c.caption}" style="max-width:100%; border-radius:8px;"><figcaption style="margin-top:10px;font-style:italic;color:#777;">${c.caption}</figcaption></figure></section>`;
-    
-    function renderPage(blocks, settings) {
-        if (!blocks || !settings) return;
-        
-        // НОВОЕ: Применяем глобальные стили из настроек
-        const root = document.documentElement;
-        root.style.setProperty('--accent-color', settings.accentColor || '#c5a98b');
-        root.style.setProperty('--font-heading', settings.headingFont || 'Playfair Display');
-        root.style.setProperty('--font-body', settings.bodyFont || 'Montserrat');
-
-        document.body.className = '';
-        if (settings.style) document.body.classList.add(`style-${settings.style}`);
-        document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? `url('${settings.backgroundImage}')` : 'none';
-        
-        const container = document.getElementById('page-content');
-        container.innerHTML = '';
-        
-        blocks.forEach(block => {
-            let blockHTML = '';
-            switch(block.type) {
-                case 'hero': blockHTML = createHeroHTML(block.content, settings); break;
-                case 'countdown': blockHTML = createCountdownHTML(block.content, settings); break;
-                case 'schedule': blockHTML = createScheduleHTML(block.content, settings); break;
-                case 'location': blockHTML = createLocationHTML(block.content, settings); break;
-                case 'rsvp': blockHTML = createRsvpHTML(block.content, settings); break;
-                case 'heading': blockHTML = createHeadingHTML(block.content, settings); break;
-                case 'paragraph': blockHTML = createParagraphHTML(block.content, settings); break;
-                case 'image': blockHTML = createImageHTML(block.content, settings); break;
-            }
-            container.innerHTML += blockHTML;
-        });
-
-        document.body.style.opacity = 1;
-    }
+        function renderPage(blocks, settings) {
+            if (!blocks) return;
+            const container = document.getElementById('page-content');
+            container.innerHTML = '';
+            const blockRenderers = { hero: createHeroHTML, paragraph: createParagraphHTML, countdown: createCountdownHTML, schedule: createScheduleHTML, location: createLocationHTML, rsvp: createRsvpHTML };
+            blocks.forEach(block => { if (blockRenderers[block.type]) { container.innerHTML += blockRenderers[block.type](block.content); } });
+            document.body.style.opacity = 1;
+        }
     </script>
 </body>
 </html>
