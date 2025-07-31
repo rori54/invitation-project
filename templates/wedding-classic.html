@@ -6,28 +6,60 @@
     <title>Wedding Invitation</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Allura&family=Sacramento&family=Alex+Brush&family=Satisfy&family=Kaushan+Script&family=Pacifico&family=Caveat:wght@400;700&family=Cookie&family=Playfair+Display:wght@400;700&family=Crimson+Text:wght@400;700&family=Cormorant+Garamond:wght@400;700&family=EB+Garamond:wght@400;700&family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;700&family=Merriweather:wght@400;700&family=Vollkorn:wght@400;700&family=Cinzel:wght@400;700&family=Abril+Fatface&family=Amatic+SC:wght@400;700&family=Fredoka+One&family=Lobster&family=Montserrat:wght@300;400;700&family=Raleway:wght@300;400;700&family=Lato:wght@300;400;700&family=Open+Sans:wght@300;400;700&family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; background-color: #f8f7f5; opacity: 0; transition: opacity .5s ease-in-out; font-family: 'Montserrat', sans-serif; line-height: 1.6; }
-        .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; position: relative; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); max-width: 800px; box-sizing: border-box;}
-        h1, h2, h3, h4, h5, h6, p { margin: 0; padding: 0; }
-        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; overflow: hidden; width: 100%; color: #fff; }
+        :root{--accent-color:#c5a98b;--background-color:#f8f7f5}
+        body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.7;background-color:var(--background-color);color:#333;opacity:0;transition:opacity .5s ease-in-out; background-size: cover; background-position: center; background-attachment: fixed;}
+        .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; position: relative; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); box-sizing: border-box;}
+        #page-content > .content-section:first-child { margin-top: 0; border-radius: 0; }
+        #page-content > .hero-block + .content-section { margin-top: 30px; border-radius: 8px; }
+        h1,h2,h3{font-family:'Playfair Display',serif;text-align:center}
+        h2{font-size:2.2rem;margin-top: 0; margin-bottom:30px}
+        
+        /* ИЗМЕНЕНИЕ: Задаем aspect-ratio по умолчанию. Он будет переопределяться инлайновым стилем. */
+        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; overflow: hidden; width: 100%; aspect-ratio: 16 / 9; }
+        @media (max-width: 600px) { .hero-block { aspect-ratio: 9 / 12; } }
+        
         .hero-background-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+
         .hero-block::before{ content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); z-index: 1; }
-        .hero-content{ position:relative; z-index: 2; width: 90%; max-width: 1000px; padding: 40px 0; }
-        .hero-content h1 { line-height: 1.2; margin: 10px 0; }
-        .hero-content p { letter-spacing: 2px; margin: 0; }
-        .paragraph-block { text-align: left; }
-        .paragraph-block h3 { margin-bottom: 15px; }
-        .countdown-container{display:flex;justify-content:center;gap:20px;text-align:center; margin-top: 30px;}
-        .schedule-list{list-style:none;padding:0;text-align:left; max-width: 600px; margin: 30px auto 0; }
-        .schedule-item{display:flex; gap:20px; border-bottom:1px solid #eee; padding:20px 0}
+        .hero-content{ position:relative; z-index: 2; width: 90%; max-width: 1000px; }
+        .hero-content h1{font-size:4rem;margin:10px 0; line-height: 1.2;}
+        .hero-content p{font-size:1.2rem;letter-spacing:2px; margin: 0;}
+        .hero-inner-blocks { margin-top: 25px; }
+        .hero-inner-blocks .inner-heading { font-family:'Playfair Display',serif; font-size: 2rem; font-weight: 700; margin: 15px 0 5px; line-height: 1.3; }
+        .hero-inner-blocks .inner-paragraph { font-family: 'Montserrat', sans-serif; font-size: 1rem; margin: 0 auto 15px; max-width: 600px; white-space: pre-wrap; line-height: 1.6; letter-spacing: 0.5px; }
+        .style-modern .content-section {background: rgba(255, 255, 255, 0.85); box-shadow: none; color: #333;}
+        .style-modern #page-content > .content-section:first-child { border-radius: 8px; }
+        .style-modern .hero-block { margin: 0 auto; }
+        .style-modern .hero-block::before { background: rgba(0,0,0,0.2); }
+        .style-modern .hero-content h1, .style-modern .hero-content p, .style-modern .hero-inner-blocks * { text-shadow: 1px 1px 4px rgba(0,0,0,0.6); }
+        .style-modern #countdown .time-block { background: rgba(255, 255, 255, 0.5); }
+        #countdown{display:flex;justify-content:center;gap:20px;text-align:center}
+        .time-block{background:#f4f4f4;padding:20px;border-radius:5px;min-width:80px}
+        .time-block .number{font-size:2.5rem;font-weight:700;color:var(--accent-color)}
+        .schedule-list{list-style:none;padding:0;text-align:left; max-width: 600px; margin: 0 auto;}
+        .schedule-item{display:flex;gap:20px;border-bottom:1px solid #eee;padding:20px 0}
         .schedule-item:last-child{border-bottom:none}
-        .schedule-event { flex-grow: 1; }
-        .schedule-event h3 { text-align: left; }
-        .rsvp-button{display:inline-block; color:#fff!important; padding:15px 30px;text-decoration:none;border-radius:50px; margin: 10px;}
+        .schedule-time{font-weight:700;color:var(--accent-color);font-size:1.2rem;min-width:80px}
+        .schedule-event h3{margin:0;font-size:1.4rem;text-align:left}
+        .schedule-event p{margin:5px 0 0; white-space: pre-wrap;}
+        .location-block p { margin-bottom: 20px; white-space: pre-wrap; }
+        .location-block img { width: 100%; height: auto; max-height: 400px; object-fit: cover; border-radius: 8px; }
+        .rsvp-button{display:inline-block;background:var(--accent-color);color:#fff!important;padding:15px 30px;text-decoration:none;border-radius:50px;transition:transform .2s ease;font-size:1.1rem; margin: 10px;}
+        .rsvp-button.decline{background-color:#888}
+        .rsvp-button:hover{transform:scale(1.05)}
+        .paragraph-block p { font-size: 1.1em; line-height: 1.8; text-align: left; white-space: pre-wrap; }
+        .image-block figure { margin: 0; }
+        .image-block img { max-width: 100%; border-radius: 8px; }
+        .image-block figcaption { margin-top: 10px; font-style: italic; color: #777; }
+        @media (max-width: 768px) { .content-section { margin-left: 15px; margin-right: 15px; } }
+        @media (max-width: 600px) {
+             .hero-content h1 { font-size: 2.8rem; } h2 { font-size: 1.8rem; } .content-section { padding: 30px 20px; margin: 20px 10px; } .schedule-item { flex-direction: column; align-items: flex-start; gap: 10px; } .time-block { padding: 15px; min-width: 60px; } .time-block .number { font-size: 2rem; } #countdown { gap: 10px; } .hero-inner-blocks .inner-heading { font-size: 1.5rem; } .hero-inner-blocks .inner-paragraph { font-size: 0.9rem; }
+        }
         #envelope-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; z-index: 1000; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 1.5s ease-in-out; } body.intro-active main { opacity: 0; } #envelope-3d { width: 80%; max-width: 500px; height: 80%; max-height: 500px; transition: transform 0.5s, opacity 0.5s; opacity: 0; } #envelope-3d.loaded { opacity: 1; animation: floatAnimation 4s ease-in-out infinite; } #envelope-wrapper.hidden { opacity: 0; pointer-events: none; } @keyframes floatAnimation { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { translateY(0); } } @media (min-width: 768px) { #envelope-3d { max-width: 700px; max-height: 700px; } }
     </style>
+    
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
@@ -36,79 +68,57 @@
         <model-viewer id="envelope-3d" src="/templates/envelope.glb" alt="An interactive 3D envelope" camera-controls disable-zoom interaction-prompt="none" camera-orbit="0deg 75deg 105%" style="width: 100%; height: 100%; background: none;"></model-viewer>
     </div>
     <main id="page-content"></main>
+    
     <script>
-        let countdownInterval;
-
-        function getStyleString(styleObj) {
-            if (!styleObj) return '';
-            let styles = '';
-            if (styleObj.fontFamily) styles += `font-family: '${styleObj.fontFamily}', sans-serif; `;
-            if (styleObj.color) styles += `color: ${styleObj.color}; `;
-            if (styleObj.fontSize) styles += `font-size: ${styleObj.fontSize}em; `;
-            if (styleObj.fontWeight) styles += `font-weight: ${styleObj.fontWeight}; `;
-            return styles.trim();
+    let countdownInterval;
+    
+    // ИЗМЕНЕНИЕ: Упрощенная и надежная логика на основе aspect-ratio
+    const createHeroHTML = (c, s) => {
+        let innerBlocksHTML = '';
+        if (c.innerBlocks && c.innerBlocks.length > 0) {
+            innerBlocksHTML = `<div class="hero-inner-blocks">${c.innerBlocks.map(b => {
+                if (b.type === 'heading') return `<h3 class="inner-heading">${b.content.text}</h3>`;
+                if (b.type === 'paragraph') return `<p class="inner-paragraph">${processText(b.content.text)}</p>`;
+                return '';
+            }).join('')}</div>`;
         }
+        
+        const imageHTML = c.imageUrl 
+            ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'};" alt="Wedding background">`
+            : '';
 
-        const processText = (text) => (text || '').replace(/\n/g, '<br>');
-
-        function createHeroHTML(c) { const headerStyle = c.aspectRatio ? `aspect-ratio: ${c.aspectRatio};` : 'height: 50vh;'; return `<header class="hero-block" style="${headerStyle}">${c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'};" alt="">` : ''}<div class="hero-content"><p style="${getStyleString(c.subtitleStyle)}">${c.subtitle}</p><h1 style="${getStyleString(c.namesStyle)}">${c.names}</h1><p style="${getStyleString(c.dateStyle)}">${c.date}</p></div></header>`; }
-        function createParagraphHTML(c) { return `<section class="content-section paragraph-block">${c.heading ? `<h3 style="${getStyleString(c.headingStyle)}">${c.heading}</h3>` : ''}<p style="${getStyleString(c.textStyle)}">${processText(c.text)}</p></section>`; }
-        function createCountdownHTML(c) { return `<section class="content-section" data-target-date="${c.targetDate || ''}"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><div class="countdown-container"><div class="time-block"><div id="days" style="${getStyleString(c.numberStyle)}">00</div><div style="${getStyleString(c.labelStyle)}">Days</div></div><div class="time-block"><div id="hours" style="${getStyleString(c.numberStyle)}">00</div><div style="${getStyleString(c.labelStyle)}">Hours</div></div><div class="time-block"><div id="minutes" style="${getStyleString(c.numberStyle)}">00</div><div style="${getStyleString(c.labelStyle)}">Minutes</div></div><div class="time-block"><div id="seconds" style="${getStyleString(c.numberStyle)}">00</div><div style="${getStyleString(c.labelStyle)}">Seconds</div></div></div></section>`;}
-        function createScheduleHTML(c) { return `<section class="content-section"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><ul class="schedule-list">${(c.items || []).map(i => `<li class="schedule-item"><div class="schedule-time" style="${getStyleString(c.timeStyle)}">${i.time}</div><div class="schedule-event"><h3 style="${getStyleString(c.eventTitleStyle)}">${i.title}</h3><p style="${getStyleString(c.eventDescStyle)}">${processText(i.desc)}</p></div></li>`).join('')}</ul></section>`; }
-        function createLocationHTML(c) { return `<section class="content-section"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><p style="${getStyleString(c.addressStyle)}">${processText(c.address)}</p>${c.imageUrl ? `<img src="${c.imageUrl}" alt="" style="width:100%; border-radius: 8px; margin-top: 20px;">` : ''}<a href="${c.mapLink}" target="_blank" class="rsvp-button" style="background-color: ${(c.buttonStyle && c.buttonStyle.accentColor) || '#C5A98B'}; margin-top: 30px;">View on Map</a></section>`; }
-        function createRsvpHTML(c) { return `<section class="content-section"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><p style="${getStyleString(c.subtitleStyle)}">${processText(c.subtitle)}</p><a href="#" class="rsvp-button" style="background-color: ${(c.buttonStyle && c.buttonStyle.accentColor) || '#C5A98B'};">I'll Be There!</a></section>`; }
-
-        // ИСПРАВЛЕНО: Восстановлена функция startCountdown
-        function startCountdown(targetDate) {
-            if (!targetDate) return;
-            if (countdownInterval) clearInterval(countdownInterval);
-            const targetTime = new Date(targetDate).getTime();
-            countdownInterval = setInterval(() => {
-                const now = new Date().getTime();
-                const distance = targetTime - now;
-                if (distance < 0) {
-                    clearInterval(countdownInterval);
-                    return;
-                }
-                const D = document.getElementById("days"), H = document.getElementById("hours"), M = document.getElementById("minutes"), S = document.getElementById("seconds");
-                if(D) D.innerText = Math.floor(distance / 864e5).toString().padStart(2, '0');
-                if(H) H.innerText = Math.floor((distance % 864e5) / 36e5).toString().padStart(2, '0');
-                if(M) M.innerText = Math.floor((distance % 36e5) / 6e4).toString().padStart(2, '0');
-                if(S) S.innerText = Math.floor((distance % 6e4) / 1e3).toString().padStart(2, '0');
-            }, 1000);
+        const headerStyles = [];
+        // Если для блока задано соотношение сторон, применяем его.
+        // Это переопределит CSS по умолчанию и гарантирует одинаковое отображение.
+        if (c.aspectRatio && c.aspectRatio.trim() !== '') {
+            headerStyles.push(`aspect-ratio: ${c.aspectRatio}`);
         }
+        const styleAttribute = headerStyles.join('; ');
 
-        // ИСПРАВЛЕНО: Восстановлена функция setupIntroAnimation
-        function setupIntroAnimation() { const envelopeWrapper = document.getElementById('envelope-wrapper'); const modelViewer = document.getElementById('envelope-3d'); if (!envelopeWrapper || !modelViewer || typeof confetti !== 'function') return; document.body.classList.add('intro-active'); modelViewer.addEventListener('load', () => { modelViewer.classList.add('loaded'); }); const fireConfetti = () => { const defaults = { spread: 360, ticks: 150, gravity: 0, decay: 0.95, startVelocity: 35, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] }; confetti({ ...defaults, particleCount: 60, scalar: 1.2, shapes: ['star'] }); confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] }); }; envelopeWrapper.addEventListener('click', () => { fireConfetti(); modelViewer.style.transform = 'scale(0)'; modelViewer.style.opacity = '0'; setTimeout(() => { document.body.classList.remove('intro-active'); envelopeWrapper.classList.add('hidden'); }, 500); }, { once: true }); }
+        return `<header class="hero-block" style="${styleAttribute}">
+                    ${imageHTML}
+                    <div class="hero-content">
+                        <p>${c.subtitle}</p>
+                        <h1>${c.names}</h1>
+                        <p>${c.date}</p>
+                        ${innerBlocksHTML}
+                    </div>
+                </header>`;
+    };
 
-        function renderPage(blocks, settings) {
-            if (!blocks) return;
-            const container = document.getElementById('page-content');
-            container.innerHTML = '';
-            const blockRenderers = { hero: createHeroHTML, paragraph: createParagraphHTML, countdown: createCountdownHTML, schedule: createScheduleHTML, location: createLocationHTML, rsvp: createRsvpHTML };
-            
-            blocks.forEach(block => {
-                if (blockRenderers[block.type]) {
-                    container.innerHTML += blockRenderers[block.type](block.content);
-                }
-            });
-            
-            const countdownBlock = document.querySelector('[data-target-date]');
-            if(countdownBlock) {
-                startCountdown(countdownBlock.dataset.targetDate);
-            }
-
-            document.body.style.opacity = 1;
-        }
-
-        // ИСПРАВЛЕНО: Восстановлена логика для iframe
-        if (window.self !== window.top) { // Если открыто в iframe (превью)
-            document.body.style.opacity = 1;
-            const envelopeWrapper = document.getElementById('envelope-wrapper');
-            if (envelopeWrapper) { envelopeWrapper.style.display = 'none'; }
-        } else { // Если открыто как самостоятельная страница
-            setupIntroAnimation();
-        }
+    const processText = (text) => (text || '').replace(/\n/g, '<br>');
+    function setupIntroAnimation() { const envelopeWrapper = document.getElementById('envelope-wrapper'); const modelViewer = document.getElementById('envelope-3d'); if (!envelopeWrapper || !modelViewer || typeof confetti !== 'function') return; document.body.classList.add('intro-active'); modelViewer.addEventListener('load', () => { modelViewer.classList.add('loaded'); }); const fireConfetti = () => { const defaults = { spread: 360, ticks: 150, gravity: 0, decay: 0.95, startVelocity: 35, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] }; confetti({ ...defaults, particleCount: 60, scalar: 1.2, shapes: ['star'] }); confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] }); }; envelopeWrapper.addEventListener('click', () => { fireConfetti(); modelViewer.style.transform = 'scale(0)'; modelViewer.style.opacity = '0'; setTimeout(() => { document.body.classList.remove('intro-active'); envelopeWrapper.classList.add('hidden'); }, 500); }, { once: true }); }
+    const createCountdownHTML = (c, s) => `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 id="countdown-title">${c.title}</h2><div id="countdown"><div class="time-block"><div id="days" class="number">00</div><div>Days</div></div><div class="time-block"><div id="hours" class="number">00</div><div>Hours</div></div><div class="time-block"><div id="minutes" class="number">00</div><div>Minutes</div></div><div class="time-block"><div id="seconds" class="number">00</div><div>Seconds</div></div></div></section>`;
+    const createScheduleHTML = (c, s) => `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2>${c.title}</h2><ul class="schedule-list">${c.items.map(i => `<li class="schedule-item"><div class="schedule-time">${i.time}</div><div class="schedule-event"><h3>${i.title}</h3><p>${processText(i.desc)}</p></div></li>`).join('')}</ul></section>`;
+    const createLocationHTML = (c, s) => `<section class="content-section location-block" style="max-width: ${s.maxWidth || '800px'};"><h2>${c.title}</h2><p>${processText(c.address)}</p><img src="${c.imageUrl}" alt="Venue"><a href="${c.mapLink}" class="rsvp-button" target="_blank" style="margin-top: 30px;">View on Map</a></section>`;
+    const createRsvpHTML = (c, s, rsvpLink) => `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2>${c.title}</h2><p>${processText(c.subtitle)}</p><div><a href="${rsvpLink}" class="rsvp-button">I'll Be There!</a>${c.declineLink ? `<a href="${c.declineLink}" class="rsvp-button decline">Can't Make It</a>` : ''}</div></section>`;
+    const createHeadingHTML = (c, s) => `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 style="font-size: 2.5rem;">${c.text}</h2></section>`;
+    const createImageHTML = (c, s) => `<section class="content-section image-block" style="max-width: ${s.maxWidth || '800px'};"><figure><img src="${c.imageUrl}" alt="${c.caption}"><figcaption>${c.caption}</figcaption></figure></section>`;
+    const createParagraphHTML = (c, s) => `<section class="content-section paragraph-block" style="max-width: ${s.maxWidth || '800px'};"><p>${processText(c.text)}</p></section>`;
+    function renderPage(blocks, settings, rsvpLink = '#') { if (!blocks || !settings) return; document.body.className = ''; if (settings.style) { document.body.classList.add(`style-${settings.style}`); } document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? `url('${settings.backgroundImage}')` : 'none'; const container = document.getElementById('page-content'); container.innerHTML = ''; let countdownBlock = null; blocks.forEach(block => { let blockHTML = ''; switch(block.type) { case 'hero': blockHTML = createHeroHTML(block.content, settings); break; case 'countdown': blockHTML = createCountdownHTML(block.content, settings); countdownBlock = block.content; break; case 'schedule': blockHTML = createScheduleHTML(block.content, settings); break; case 'location': blockHTML = createLocationHTML(block.content, settings); break; case 'rsvp': blockHTML = createRsvpHTML(block.content, settings, rsvpLink); break; case 'heading': blockHTML = createHeadingHTML(block.content, settings); break; case 'paragraph': blockHTML = createParagraphHTML(block.content, settings); break; case 'image': blockHTML = createImageHTML(block.content, settings); break; } container.innerHTML += blockHTML; }); if (countdownBlock) { startCountdown(countdownBlock.targetDate); } }
+    function startCountdown(targetDate) { if (!targetDate) return; if (countdownInterval) clearInterval(countdownInterval); const c = new Date(targetDate).getTime(); countdownInterval = setInterval(() => { const n = new Date().getTime(), d = c - n; if (d < 0) { clearInterval(countdownInterval); const e = document.getElementById("countdown"); if (e) e.innerHTML = "<h2>The event has already happened!</h2>"; return; } const D = document.getElementById("days"), H = document.getElementById("hours"), M = document.getElementById("minutes"), S = document.getElementById("seconds"); if(D) D.innerText = Math.floor(d / 864e5).toString().padStart(2, '0'); if(H) H.innerText = Math.floor(d % 864e5 / 36e5).toString().padStart(2, '0'); if(M) M.innerText = Math.floor(d % 36e5 / 6e4).toString().padStart(2, '0'); if(S) S.innerText = Math.floor(d % 6e4 / 1e3).toString().padStart(2, '0'); }, 1000); }
+    async function loadInvitationData() { document.body.style.opacity = 1; const params = new URLSearchParams(window.location.search); const id = params.get('id'); const pageType = params.get('page') || 'main'; if (id && pageType) { try { const r = await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, { headers: { 'X-Access-Key': '__JSONBIN_ACCESS_KEY__' }}); if (!r.ok) throw new Error('Could not load invitation data.'); const data = (await r.json()).record; const pageData = data[pageType]; if (!pageData) throw new Error(`Specified page data ('${pageType}') not found.`); const rsvpTemplateFile = data.rsvp.template; const rsvpLink = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)}${rsvpTemplateFile}?id=${id}&page=rsvp`; renderPage(pageData.blocks, pageData.settings, rsvpLink); } catch (e) { document.getElementById('page-content').innerHTML = `<h1>Error Loading Invitation</h1><p>${e.message}</p>`; } } }
+    if (window.self !== window.top) { document.body.style.opacity = 1; const envelopeWrapper = document.getElementById('envelope-wrapper'); if (envelopeWrapper) { envelopeWrapper.style.display = 'none'; } } else { setupIntroAnimation(); window.addEventListener('load', loadInvitationData); }
     </script>
 </body>
 </html>
