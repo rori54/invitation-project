@@ -5,172 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
-        html { font-family: sans-serif; scroll-behavior: smooth; } body { margin: 0; display: grid; grid-template-columns: 420px 1fr; background-color: #f0f2f5; } #editor-panel { grid-column: 1; background-color: #fff; border-right: 1px solid #ddd; display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; } #preview-panel { grid-column: 2; padding: 20px; box-sizing: border-box; display: flex; justify-content: center; } #preview-wrapper { width: 100%; background: white; box-shadow: 0 5px 25px rgba(0,0,0,0.15); border-radius: 8px; overflow: hidden; height: fit-content; } iframe { width: 100%; height: 100%; border: none; display: block; } #editor-header { padding: 15px; border-bottom: 2px solid #f0f2f5; } #editor-header .template-switcher { display: flex; gap: 10px; margin-top: 10px; } #editor-header .template-switcher button { flex: 1; padding: 8px; font-size: 14px; background-color: #e9ecef; border: 1px solid #dee2e6; border-radius: 4px; cursor: pointer; } #editor-header .template-switcher button.active { background-color: #007bff; color: white; border-color: #007bff; } .global-settings { margin-top: 15px; } #editor-content { flex-grow: 1; overflow-y: auto; padding: 20px; min-height: 0; } #editor-footer { padding: 20px; border-top: 1px solid #eee; } .editor-block { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.05); } .editor-block-header { display: flex; align-items: center; padding: 10px; background-color: #f9f9f9; cursor: pointer; border-bottom: 1px solid #eee; } .drag-handle { cursor: grab; margin-right: 10px; color: #aaa; } .editor-block-title { font-weight: bold; flex-grow: 1; } .editor-block-controls button { background: none; border: none; cursor: pointer; font-size: 16px; padding: 5px; color: #888; } .delete-block-btn { color: crimson !important; } .editor-block-content { padding: 15px; display: none; } .editor-block-content.is-open { display: block; }
-        .control-group { margin-bottom: 15px; } .control-group label { display: block; margin-bottom: 5px; font-weight: 700; color: #333; } .control-group label input[type="checkbox"] { width: auto; margin-right: 8px; vertical-align: middle; } input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; } input.smart-location-search { border-left: 4px solid #28a745; } textarea { min-height: 80px; }
-        .style-controls { border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px; margin-top: 5px; background-color: #fdfdfd; } .style-controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; } .style-controls .control-group { margin-bottom: 0; } input[type="color"] { padding: 2px; min-height: 38px; } .style-controls label { font-size: 0.9em; font-weight: 600; color: #555; } hr.style-separator { border: none; border-top: 1px dashed #ccc; margin: 15px 0; }
-        .optional-element-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; } .optional-element-header label { margin-bottom: 0; }
-        .inner-blocks-container { border-top: 2px solid #007bff; margin-top: 20px; padding-top: 15px; } .inner-block-editor { background: #f0f2f5; padding: 10px; border-radius: 5px; margin-bottom: 10px; border-left: 3px solid #007bff; } .inner-block-editor .delete-inner-block-btn { float: right; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-weight: bold; cursor: pointer; line-height: 22px; text-align: center; } .add-inner-block-controls button { background-color: #e9ecef; border: 1px dashed #ccc; padding: 8px; margin-right: 5px; cursor: pointer; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; display: none; align-items: center; justify-content: center; } .modal-overlay.is-visible { display: flex; } .modal-content { background: white; padding: 30px; border-radius: 8px; width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; } .modal-close { float: right; font-size: 28px; font-weight: bold; cursor: pointer; } #add-block-options button { display: block; width: 100%; padding: 12px; margin-bottom: 10px; text-align: left; background: #f0f2f5; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        html { font-family: sans-serif; scroll-behavior: smooth; } body { margin: 0; display: grid; grid-template-columns: 400px 1fr; background-color: #f0f2f5; } #editor-panel { grid-column: 1; background-color: #fff; border-right: 1px solid #ddd; display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; } #preview-panel { grid-column: 2; padding: 20px; box-sizing: border-box; display: flex; justify-content: center; } #preview-wrapper { width: 100%; background: white; box-shadow: 0 5px 25px rgba(0,0,0,0.15); border-radius: 8px; overflow: hidden; height: fit-content; } iframe { width: 100%; height: 100%; border: none; display: block; } #editor-header { padding: 15px; border-bottom: 2px solid #f0f2f5; } #editor-header .template-switcher { display: flex; gap: 10px; margin-top: 10px; } #editor-header .template-switcher button { flex: 1; padding: 8px; font-size: 14px; background-color: #e9ecef; border: 1px solid #dee2e6; border-radius: 4px; cursor: pointer; } #editor-header .template-switcher button.active { background-color: #007bff; color: white; border-color: #007bff; } .global-settings { margin-top: 15px; } .global-settings .control-group { margin-bottom: 10px; } #global-bg-image-group { display: none; } #editor-content { flex-grow: 1; overflow-y: auto; padding: 20px; min-height: 0; } #editor-footer { padding: 20px; border-top: 1px solid #eee; } .editor-block { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.05); } .editor-block-header { display: flex; align-items: center; padding: 10px; background-color: #f9f9f9; cursor: pointer; border-bottom: 1px solid #eee; } .drag-handle { cursor: grab; margin-right: 10px; color: #aaa; } .editor-block-title { font-weight: bold; flex-grow: 1; } .editor-block-controls button { background: none; border: none; cursor: pointer; font-size: 16px; padding: 5px; color: #888; } .delete-block-btn { color: crimson !important; } .editor-block-content { padding: 15px; display: none; } .editor-block-content.is-open { display: block; } .control-group { margin-bottom: 15px; } .control-group label input[type="checkbox"] { width: auto; margin-right: 8px; } label { display: block; margin-bottom: 5px; font-weight: 700; color: #333; } input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; } input.smart-location-search { border-left: 4px solid #28a745; } textarea { min-height: 80px; } .action-button { background-color: #007bff; color: white; border: none; padding: 12px; width: 100%; font-size: 16px; border-radius: 5px; cursor: pointer; transition: background-color 0.2s ease; } .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; display: none; align-items: center; justify-content: center; } .modal-overlay.is-visible { display: flex; } .modal-content { background: white; padding: 30px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-height: 85vh; overflow-y: auto; } .modal-close { float: right; font-size: 28px; font-weight: bold; cursor: pointer; } #add-block-options button { display: block; width: 100%; padding: 12px; margin-bottom: 10px; text-align: left; background: #f0f2f5; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; font-size: 16px; } .sub-item-editor { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-bottom: 5px; padding: 5px; background: #fafafa; border-radius: 4px; } .sub-item-editor input { flex-grow: 1; min-width: 100px; } .sub-item-editor textarea { width: 100%; min-height: 40px; margin-top: 5px; } .sub-item-editor .delete-sub-item-btn { margin-left: auto; background: #eee; color: #777; border: 1px solid #ddd; border-radius: 4px; width: 25px; height: 25px; font-weight: bold; flex-shrink: 0; }
+        .inner-blocks-container { border-top: 2px solid #007bff; margin-top: 20px; padding-top: 15px; } .inner-block-editor { background: #f0f2f5; padding: 10px; border-radius: 5px; margin-bottom: 10px; border-left: 3px solid #007bff; } .inner-block-editor label { font-size: 0.8em; color: #555; } .inner-block-editor .delete-inner-block-btn { float: right; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-weight: bold; cursor: pointer; line-height: 22px; text-align: center; } .add-inner-block-controls button { background-color: #e9ecef; border: 1px dashed #ccc; padding: 8px; margin-right: 5px; cursor: pointer; }
+        @media (max-width: 1024px) { body { grid-template-columns: 320px 1fr; } } @media (max-width: 768px) { body { display: flex; flex-direction: column; } #editor-panel { position: relative; height: auto; max-height: 60vh; border-right: none; border-bottom: 2px solid #ddd; } #preview-panel { padding: 10px; } }
     </style>
 </head>
 <body>
-    <div id="editor-panel"> <div id="editor-header"><h2>Editor</h2><div class="template-switcher"><button id="edit-main-btn" class="active">Invitation</button><button id="edit-rsvp-btn">RSVP Form</button></div><div class="global-settings"><div class="control-group"><label for="global-style-select">Page Style</label><select id="global-style-select"><option value="classic">Classic (Cards)</option><option value="modern">Modern (Shared Background)</option></select></div><div class="control-group" id="global-bg-image-group"><label for="global-bg-image-input">Background Image URL</label><input type="url" id="global-bg-image-input" placeholder="https://images.unsplash.com/photo-..."></div><div class="control-group"><label for="global-width-input">Global Block Width</label><input type="text" id="global-width-input" placeholder="e.g., 800px or 90%"></div></div></div> <div id="editor-content"></div> <div id="editor-footer"><button id="add-block-btn" class="action-button" style="margin-bottom: 15px; background-color: #28a745;">+ Add New Block</button><button id="share-button" class="action-button">Generate & Copy Link</button><p id="status-text" style="text-align:center; margin-top:10px;"></p></div> </div> <div id="preview-panel"><div id="preview-wrapper"><iframe id="preview-frame" scrolling="no"></iframe></div></div> <template id="editor-block-template"><div class="editor-block"><div class="editor-block-header"><span class="drag-handle">☰</span><span class="editor-block-title">Block Title</span><div class="editor-block-controls"><button class="toggle-btn">▼</button><button class="delete-block-btn" title="Delete Block">×</button></div></div><div class="editor-block-content"></div></div></template> <div id="add-block-modal" class="modal-overlay"><div class="modal-content"><span class="modal-close" id="modal-close-btn">×</span><h3>Choose a Block to Add</h3><div id="add-block-options"><button data-type="hero">Hero</button><button data-type="text-block">Text Block</button><button data-type="image">Image</button><hr><button data-type="schedule">Schedule</button><button data-type="location">Location</button><button data-type="countdown">Countdown</button><button data-type="rsvp">RSVP Button</button><hr><button data-type="form-header">Form: Header</button><button data-type="input-question">Form: Text Input</button><button data-type="textarea-question">Form: Text Area</button><button data-type="radio-question">Form: Radio Choice</button><button data-type="form-footer">Form: Footer</button></div></div></div>
+    <div id="editor-panel"> <div id="editor-header"><h2>Editor</h2><div class="template-switcher"><button id="edit-main-btn" class="active">Invitation</button><button id="edit-rsvp-btn">RSVP Form</button></div><div class="global-settings"><div class="control-group"><label for="global-style-select">Page Style</label><select id="global-style-select"><option value="classic">Classic (Cards)</option><option value="modern">Modern (Shared Background)</option></select></div><div class="control-group" id="global-bg-image-group"><label for="global-bg-image-input">Background Image URL</label><input type="url" id="global-bg-image-input" placeholder="https://images.unsplash.com/photo-..."></div><div class="control-group"><label for="global-width-input">Global Block Width</label><input type="text" id="global-width-input" placeholder="e.g., 800px or 90%"></div></div></div> <div id="editor-content"></div> <div id="editor-footer"><button id="add-block-btn" class="action-button" style="margin-bottom: 15px; background-color: #28a745;">+ Add New Block</button><button id="share-button" class="action-button">Generate & Copy Link</button><p id="status-text" style="text-align:center; margin-top:10px;"></p></div> </div> <div id="preview-panel"><div id="preview-wrapper"><iframe id="preview-frame" scrolling="no"></iframe></div></div> <template id="editor-block-template"><div class="editor-block"><div class="editor-block-header"><span class="drag-handle">☰</span><span class="editor-block-title">Block Title</span><div class="editor-block-controls"><button class="toggle-btn">▼</button><button class="delete-block-btn" title="Delete Block">×</button></div></div><div class="editor-block-content"></div></div></template> <div id="add-block-modal" class="modal-overlay"><div class="modal-content"><span class="modal-close" id="modal-close-btn">×</span><h3>Choose a Block to Add</h3><div id="add-block-options"><button data-type="heading">Heading</button><button data-type="paragraph">Paragraph</button><button data-type="image">Image</button><hr><button data-type="hero">Hero Block</button><button data-type="schedule">Schedule</button><button data-type="location">Location</button><button data-type="countdown">Countdown</button><button data-type="rsvp">RSVP Button</button><hr><button data-type="form-header">Form: Header</button><button data-type="input-question">Form: Text Input</button><button data-type="textarea-question">Form: Text Area</button><button data-type="radio-question">Form: Radio Choice</button><button data-type="form-footer">Form: Footer</button></div></div></div>
     <script>
+    const LOCK_STYLE_CHOICE = false;
     const iframe = document.getElementById("preview-frame");
-    let pageBlocks = []; let pageSettings = {}; let currentTemplate = '';
+    let pageBlocks = []; let pageSettings = {}; let currentTemplate = ''; let previewResizeObserver;
     
-    const defaultTextStyle = { fontFamily: 'Montserrat', fontSize: '1rem', color: '#333333', fontWeight: '400' };
-    const defaultTitleStyle = { fontFamily: 'Playfair Display', fontSize: '2.2rem', color: '#111111', fontWeight: '700' };
-
-    let mainPageData = { template: 'wedding-classic.html', settings: { maxWidth: '800px', style: 'classic', backgroundImage: '' }, blocks: [ { type: 'hero', id: `block-${Date.now()}-1`, content: { subtitle: { text: 'WE ARE GETTING MARRIED', enabled: true, style: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#FFFFFF', fontWeight: '400' } }, names: { text: 'John & Jane', enabled: true, style: { fontFamily: 'Great Vibes', fontSize: '4rem', color: '#FFFFFF', fontWeight: '400' } }, date: { text: 'September 15, 2025', enabled: true, style: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#FFFFFF', fontWeight: '400' } }, imageUrl: 'https://cdn.pixabay.com/photo/2018/03/01/01/07/blossom-3189810_1280.jpg', backgroundPosition: 'center 30%', aspectRatio: '9/16', innerBlocks: [] }}, { type: 'text-block', id: `block-${Date.now()}-3`, content: { title: 'A few words', text: 'We are excited to share this special day with our closest family and friends.', titleStyle: { ...defaultTitleStyle, fontSize: '2.5rem' }, textStyle: { ...defaultTextStyle, fontSize: '1.1rem', textAlign: 'center' } }}, { type: 'countdown', id: `block-${Date.now()}-2`, content: { title: 'Until Our Big Day', targetDate: '2025-09-15T16:00', titleStyle: { ...defaultTitleStyle } }}, { type: 'schedule', id: `block-${Date.now()}-4`, content: { title: "The Day's Schedule", items: [], titleStyle: { ...defaultTitleStyle } }}, { type: 'location', id: `block-${Date.now()}-5`, content: { title: 'Venue', address: 'The Grand Hall, 123 Celebration Ave, New York', imageUrl: 'https://images.unsplash.com/photo-1511795408833-2a1e94992e7a?q=80&w=2070&auto=format&fit=crop', mapLink: 'https://maps.google.com', titleStyle: { ...defaultTitleStyle } }}, { type: 'rsvp', id: `block-${Date.now()}-6`, content: { title: 'Confirm Your Attendance', subtitle: 'Please reply by September 1st.', titleStyle: { ...defaultTitleStyle }, buttonStyle: { fontFamily: 'Montserrat', fontSize: '1.1rem', color: '#FFFFFF', fontWeight: '700', backgroundColor: '#c5a98b' } }} ] };
-    let rsvpFormData = { template: 'rsvp-form.html', settings: { maxWidth: '800px', style: 'classic', backgroundImage: '' }, blocks: [ ] };
+    let mainPageData = { template: 'wedding-classic.html', settings: { maxWidth: '800px', style: 'classic', backgroundImage: '' }, blocks: [ { type: 'hero', id: `block-${Date.now()}-1`, content: { subtitle: 'WE ARE GETTING MARRIED', names: 'John & Jane', date: 'September 15, 2025', imageUrl: 'https://cdn.pixabay.com/photo/2018/03/01/01/07/blossom-3189810_1280.jpg', backgroundPosition: 'center 30%', aspectRatio: '16/9', innerBlocks: [] }}, { type: 'countdown', id: `block-${Date.now()}-2`, content: { title: 'Until Our Big Day', targetDate: '2025-09-15T16:00' }}, { type: 'paragraph', id: `block-${Date.now()}-3`, content: { text: 'We are excited to share this special day with our closest family and friends.\n\nYour presence is the greatest gift to us as we begin this beautiful new chapter of our lives.' }}, { type: 'schedule', id: `block-${Date.now()}-4`, content: { title: 'The Day\'s Schedule', items: [ { id: `s-1`, time: '15:00', title: 'Guest Arrival', desc: 'Welcome drinks and light music.'}, { id: `s-2`, time: '16:00', title: 'Ceremony', desc: 'The main event!'}, { id: `s-3`, time: '18:00', title: 'Dinner & Party', desc: 'Let\'s celebrate together.'} ]}}, { type: 'location', id: `block-${Date.now()}-5`, content: { title: 'Venue', address: 'The Grand Hall, 123 Celebration Ave, New York', imageUrl: 'https://images.unsplash.com/photo-1511795408833-2a1e94992e7a?q=80&w=2070&auto=format&fit=crop', mapLink: 'https://maps.google.com' }}, { type: 'rsvp', id: `block-${Date.now()}-6`, content: { title: 'Confirm Your Attendance', subtitle: 'Please reply by September 1st.\nClick the button to fill out the RSVP form.', acceptLink: '#', declineLink: '#' }} ] };
+    let rsvpFormData = { template: 'rsvp-form.html', settings: { maxWidth: '800px', style: 'classic', backgroundImage: '' }, blocks: [ { type: 'form-header', id: `block-${Date.now()}-f1`, content: { title: 'Confirm Your Attendance', subtitle: 'We can\'t wait to celebrate with you!', imageUrl: 'https://images.unsplash.com/photo-1595398638959-529255a58a36?q=80&w=2070&auto=format&fit=crop', aspectRatio: '4/3', innerBlocks: [] }}, { type: 'input-question', id: `block-${Date.now()}-f2`, content: { id: 'name', title: '♥ Your Full Name', required: true }}, { type: 'radio-question', id: `block-${Date.now()}-f3`, content: { id: 'attendance', title: '♥ Will you be able to join us?', required: true, options: [{ id: `opt-1`, text: 'Yes, I\'ll be there!' }, { id: `opt-2`, text: 'Sadly, I can\'t make it.' }] }}, { type: 'radio-question', id: `block-${Date.now()}-f4`, content: { id: 'guest', title: '♥ Are you bringing a plus-one?', required: true, options: [{ id: `opt-3`, text: 'Yes, I\'m bringing a guest' }, { id: `opt-4`, text: 'No, I\'m coming solo' }] }}, { type: 'input-question', id: `block-${Date.now()}-f5`, content: { id: 'guest_name', title: 'If yes, what is your guest\'s name?', required: false }}, { type: 'textarea-question', id: `block-${Date.now()}-f6`, content: { id: 'song', title: '♫ What song will get you on the dance floor?', required: false }}, { type: 'form-footer', id: `block-${Date.now()}-f7`, content: { text: 'Thank you for your response! ♥' }} ] };
     
-    const fontOptionsHTML = `
-        <optgroup label="Script/Handwritten"> <option value="Great Vibes">Great Vibes</option> <option value="Dancing Script">Dancing Script</option> <option value="Allura">Allura</option> <option value="Sacramento">Sacramento</option> <option value="Alex Brush">Alex Brush</option> <option value="Satisfy">Satisfy</option> <option value="Kaushan Script">Kaushan Script</option> <option value="Pacifico">Pacifico</option> <option value="Caveat">Caveat</option> <option value="Cookie">Cookie</option> </optgroup>
-        <optgroup label="Elegant Serif"> <option value="Playfair Display">Playfair Display</option> <option value="Crimson Text">Crimson Text</option> <option value="Cormorant Garamond">Cormorant Garamond</option> <option value="EB Garamond">EB Garamond</option> <option value="Libre Baskerville">Libre Baskerville</option> <option value="Lora">Lora</option> <option value="Merriweather">Merriweather</option> <option value="Vollkorn">Vollkorn</option> </optgroup>
-        <optgroup label="Decorative"> <option value="Cinzel">Cinzel</option> <option value="Abril Fatface">Abril Fatface</option> <option value="Amatic SC">Amatic SC</option> <option value="Fredoka One">Fredoka One</option> <option value="Lobster">Lobster</option> </optgroup>
-        <optgroup label="Modern Sans-Serif"> <option value="Montserrat">Montserrat</option> <option value="Raleway">Raleway</option> <option value="Lato">Lato</option> <option value="Open Sans">Open Sans</option> <option value="Poppins">Poppins</option> </optgroup>
-    `;
-
-    function createStyleControlsHTML(prefix, styleObject, options = { color: true, size: true, weight: true, family: true, textAlign: false }) {
-        if (!styleObject) return '';
-        return `<div class="style-controls">
-            ${options.family ? `<div class="control-group"><label>Font Family</label><select data-key="${prefix}.fontFamily">${fontOptionsHTML.replace(`value="${styleObject.fontFamily}"`, `value="${styleObject.fontFamily}" selected`)}</select></div>` : ''}
-            <div class="style-controls-grid">
-                ${options.size ? `<div class="control-group"><label>Font Size</label><input type="text" data-key="${prefix}.fontSize" value="${styleObject.fontSize || ''}" placeholder="e.g. 16px or 1.2rem"></div>` : ''}
-                ${options.color ? `<div class="control-group"><label>Color</label><input type="color" data-key="${prefix}.color" value="${styleObject.color || '#000000'}"></div>` : ''}
-            </div>
-            <div class="style-controls-grid" style="margin-top: 10px;">
-                ${options.weight ? `<div class="control-group"><label>Font Weight</label><select data-key="${prefix}.fontWeight"><option value="400" ${styleObject.fontWeight == '400' ? 'selected' : ''}>Normal</option><option value="700" ${styleObject.fontWeight == '700' ? 'selected' : ''}>Bold</option></select></div>` : ''}
-                ${options.textAlign ? `<div class="control-group"><label>Text Align</label><select data-key="${prefix}.textAlign"><option value="left" ${styleObject.textAlign == 'left' ? 'selected' : ''}>Left</option><option value="center" ${styleObject.textAlign == 'center' ? 'selected' : ''}>Center</option><option value="right" ${styleObject.textAlign == 'right' ? 'selected' : ''}>Right</option></select></div>` : ''}
-            </div>
-        </div>`;
-    }
+    function getNewBlockData(type) { const newBlock = { type: type, id: `block-${Date.now()}`, content: {} }; switch(type) { case 'hero': newBlock.content = { subtitle: 'New Subtitle', names: 'New Names', date: 'New Date', imageUrl: '', backgroundPosition: 'center center', aspectRatio: '16/9', innerBlocks: [] }; break; case 'form-header': newBlock.content = { title: 'RSVP', subtitle: 'Please fill out the form below', imageUrl: '', aspectRatio: '16/9', innerBlocks: [] }; break; case 'countdown': newBlock.content = { title: 'New Countdown', targetDate: '' }; break; case 'schedule': newBlock.content = { title: 'New Schedule', items: [] }; break; case 'location': newBlock.content = { title: 'New Location', address: '', imageUrl: '', mapLink: '#' }; break; case 'rsvp': newBlock.content = { title: 'New RSVP Block', subtitle: 'New subtitle text', acceptLink: '#', declineLink: '#' }; break; case 'heading': newBlock.content = { text: 'New Heading' }; break; case 'paragraph': newBlock.content = { text: 'This is a new paragraph.' }; break; case 'image': newBlock.content = { imageUrl: 'https://via.placeholder.com/800x400', caption: 'Image caption' }; break; case 'input-question': newBlock.content = { id: `input-${Date.now()}`, title: 'Your Name', required: true }; break; case 'textarea-question': newBlock.content = { id: `textarea-${Date.now()}`, title: 'Any comments?', required: false }; break; case 'radio-question': newBlock.content = { id: `radio-${Date.now()}`, title: 'Will you attend?', required: true, options: [{ id: `opt-${Date.now()}`, text: 'New Option' }] }; break; case 'form-footer': newBlock.content = { text: 'Thanks for your response!' }; break; } return newBlock; }
     
     function createInnerBlocksEditor(block) {
         let innerBlocksHTML = (block.content.innerBlocks || []).map((innerBlock, index) => {
-            const textContentField = innerBlock.type === 'heading'
-                ? `<input type="text" data-key="innerBlocks.${index}.text" value="${innerBlock.text || ''}">`
-                : `<textarea data-key="innerBlocks.${index}.text">${innerBlock.text || ''}</textarea>`;
-            return `<div class="inner-block-editor" data-index="${index}">
-                <button class="delete-inner-block-btn" title="Delete this element">×</button>
-                <label style="text-transform: capitalize;">${innerBlock.type} Text</label>
-                ${textContentField}
-                ${createStyleControlsHTML(`innerBlocks.${index}.style`, innerBlock.style, { textAlign: true, color: true, size: true, weight: true, family: true })}
-            </div>`;
+            let innerFields = '';
+            if (innerBlock.type === 'heading') {
+                innerFields = `<label>Heading</label><input type="text" class="inner-block-input" data-index="${index}" data-key="text" value="${innerBlock.content.text}">`;
+            } else if (innerBlock.type === 'paragraph') {
+                innerFields = `<label>Paragraph</label><textarea class="inner-block-input" data-index="${index}" data-key="text">${innerBlock.content.text}</textarea>`;
+            }
+            return `<div class="inner-block-editor" data-index="${index}"><button class="delete-inner-block-btn" title="Delete this element">×</button>${innerFields}</div>`;
         }).join('');
-        return `<div class="inner-blocks-container">
-            <label style="font-weight: bold; color: #333;">Additional Elements</label>
-            <div class="inner-blocks-list">${innerBlocksHTML}</div>
-            <div class="add-inner-block-controls">
-                <button class="add-inner-block-btn" data-inner-type="heading">+ Add Heading</button>
-                <button class="add-inner-block-btn" data-inner-type="paragraph">+ Add Paragraph</button>
-            </div>
-        </div>`;
+        return `<div class="inner-blocks-container"><label style="font-weight: bold; color: #333;">Inner Blocks</label><div class="inner-blocks-list">${innerBlocksHTML}</div><div class="add-inner-block-controls"><button class="add-inner-block-btn" data-inner-type="heading">+ Add Heading</button><button class="add-inner-block-btn" data-inner-type="paragraph">+ Add Paragraph</button></div></div>`;
     }
 
-    function getNewBlockData(type) {
-        const newBlock = { type: type, id: `block-${Date.now()}`, content: {} };
-        switch(type) {
-            case 'hero': newBlock.content = { subtitle: { text: 'WE ARE GETTING MARRIED', enabled: true, style: { ...defaultTextStyle, color: '#FFFFFF' } }, names: { text: 'John & Jane', enabled: true, style: { ...defaultTitleStyle, fontFamily: 'Great Vibes', fontSize: '4rem', color: '#FFFFFF'} }, date: { text: 'September 15, 2025', enabled: true, style: { ...defaultTextStyle, color: '#FFFFFF' } }, imageUrl: 'https://images.unsplash.com/photo-1522158637959-30385a09e0da?q=80&w=2070&auto=format&fit=crop', backgroundPosition: 'center center', aspectRatio: '16/9', innerBlocks: [] }; break;
-            case 'text-block': newBlock.content = { title: 'New Title', text: 'New paragraph text.', titleStyle: { ...defaultTitleStyle }, textStyle: { ...defaultTextStyle } }; break;
-            case 'countdown': newBlock.content = { title: 'New Countdown', targetDate: '', titleStyle: { ...defaultTitleStyle } }; break;
-            case 'schedule': newBlock.content = { title: 'New Schedule', items: [], titleStyle: { ...defaultTitleStyle } }; break;
-            case 'location': newBlock.content = { title: 'New Location', address: '', imageUrl: '', mapLink: '#', titleStyle: { ...defaultTitleStyle } }; break;
-            case 'rsvp': newBlock.content = { title: 'New RSVP Block', subtitle: 'New subtitle text', titleStyle: { ...defaultTitleStyle }, buttonStyle: { fontFamily: 'Montserrat', fontSize: '1.1rem', color: '#FFFFFF', fontWeight: '700', backgroundColor: '#c5a98b' } }; break;
-            case 'image': newBlock.content = { imageUrl: 'https://via.placeholder.com/800x400', caption: 'Image caption' }; break;
-            case 'form-header': newBlock.content = { title: 'RSVP', subtitle: 'Please fill out the form below', imageUrl: '', aspectRatio: '16/9' }; break;
-            case 'input-question': newBlock.content = { id: `input-${Date.now()}`, title: 'Your Name', required: true }; break;
-            case 'textarea-question': newBlock.content = { id: `textarea-${Date.now()}`, title: 'Any comments?', required: false }; break;
-            case 'radio-question': newBlock.content = { id: `radio-${Date.now()}`, title: 'Will you attend?', required: true, options: [{ id: `opt-${Date.now()}`, text: 'New Option' }] }; break;
-            case 'form-footer': newBlock.content = { text: 'Thanks for your response!' }; break;
-        }
-        return newBlock;
-    }
-
+    // ИЗМЕНЕНИЕ: Замена текстового поля на выпадающий список <select>
     function createEditorFieldsForBlock(block) {
         let fieldsHTML = '';
-        const c = block.content;
-        const bgPosField = `<div class="control-group"><label>Background Focus Point</label><input type="text" data-key="backgroundPosition" value="${c.backgroundPosition || 'center center'}" placeholder="e.g., center 30%"></div>`;
-        const aspectRatioField = `<div class="control-group"><label>Block Shape (Height)</label><select data-key="aspectRatio"> <option value="21/9" ${c.aspectRatio === '21/9' ? 'selected' : ''}>Cinematic</option> <option value="16/9" ${c.aspectRatio === '16/9' ? 'selected' : ''}>Widescreen</option> <option value="8/5" ${c.aspectRatio === '8/5' ? 'selected' : ''}>Landscape (Wide)</option> <option value="3/2"  ${c.aspectRatio === '3/2' ? 'selected' : ''}>Landscape (Classic)</option> <option value="4/3"  ${c.aspectRatio === '4/3' ? 'selected' : ''}>Standard (4:3)</option> <option value="1/1"  ${c.aspectRatio === '1/1' ? 'selected' : ''}>Square</option> <option value="9/12" ${c.aspectRatio === '9/12' ? 'selected' : ''}>Portrait (Standard)</option> <option value="9/16" ${c.aspectRatio === '9/16' ? 'selected' : ''}>Portrait (Tall)</option> </select></div>`;
-        const titleStyleField = (styleObj) => `<label>Title Style</label>${createStyleControlsHTML('titleStyle', styleObj, { textAlign: true, color: true, size: true, weight: true, family: true })}`;
-        const sectionTitleField = (title) => `<div class="control-group"><label>Section Title</label><input type="text" data-key="title" value="${title}"></div>`;
+        const bgPosField = `<div class="control-group"><label>Background Focus Point</label><input type="text" data-key="backgroundPosition" value="${block.content.backgroundPosition || 'center center'}" placeholder="e.g., center 30%"></div>`;
         
-        const createOptionalElementEditor = (key, label) => {
-            const element = c[key];
-            if (!element) return '';
-            return `<div class="control-group">
-                <div class="optional-element-header">
-                    <label>${label}</label>
-                    <label><input type="checkbox" data-key="${key}.enabled" ${element.enabled ? 'checked' : ''}> Show</label>
-                </div>
-                <input type="text" data-key="${key}.text" value="${element.text}">
-                ${createStyleControlsHTML(`${key}.style`, element.style)}
+        const aspectRatioField = `
+            <div class="control-group">
+                <label for="aspect-ratio-select-${block.id}">Block Shape (Height)</label>
+                <select id="aspect-ratio-select-${block.id}" data-key="aspectRatio">
+                    <option value="21/9" ${block.content.aspectRatio === '21/9' ? 'selected' : ''}>Cinematic (Very Wide)</option>
+                    <option value="16/9" ${block.content.aspectRatio === '16/9' ? 'selected' : ''}>Widescreen (Standard)</option>
+                    <option value="3/2"  ${block.content.aspectRatio === '3/2' ? 'selected' : ''}>Landscape (Classic Photo)</option>
+                    <option value="4/3"  ${block.content.aspectRatio === '4/3' ? 'selected' : ''}>Standard (Monitor)</option>
+                    <option value="1/1"  ${block.content.aspectRatio === '1/1' ? 'selected' : ''}>Square</option>
+                    <option value="9/12" ${block.content.aspectRatio === '9/12' ? 'selected' : ''}>Portrait (Standard)</option>
+                    <option value="9/16" ${block.content.aspectRatio === '9/16' ? 'selected' : ''}>Portrait (Tall)</option>
+                </select>
             </div>`;
-        };
+        
+        const innerBlocksEditor = createInnerBlocksEditor(block);
 
         switch(block.type) {
             case 'hero':
-                fieldsHTML = `<div class="control-group"><label>Background Image URL</label><input type="url" data-key="imageUrl" value="${c.imageUrl}"></div>
-                    ${createOptionalElementEditor('names', 'Names')}
-                    <hr class="style-separator">
-                    ${createOptionalElementEditor('subtitle', 'Subtitle')}
-                    <hr class="style-separator">
-                    ${createOptionalElementEditor('date', 'Date')}
-                    <hr class="style-separator">
-                    ${aspectRatioField}${bgPosField}
-                    ${createInnerBlocksEditor(block)}`;
+                fieldsHTML = `<div class="control-group"><label>Subtitle</label><input type="text" data-key="subtitle" value="${block.content.subtitle}"></div><div class="control-group"><label>Names</label><input type="text" data-key="names" value="${block.content.names}"></div><div class="control-group"><label>Date (text)</label><input type="text" data-key="date" value="${block.content.date}"></div><div class="control-group"><label>Background Image URL</label><input type="url" data-key="imageUrl" value="${block.content.imageUrl}"></div>${aspectRatioField}${bgPosField}${innerBlocksEditor}`;
                 break;
-            case 'text-block':
-                fieldsHTML = `<div class="control-group"><label>Title (optional)</label><input type="text" data-key="title" value="${c.title || ''}"></div>${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Paragraph Text</label><textarea data-key="text">${c.text}</textarea></div>${createStyleControlsHTML('textStyle', c.textStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}`;
-                break;
-             case 'rsvp':
-                fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${c.subtitle}</textarea></div><hr class="style-separator"><label>Button Style</label><div class="style-controls"><div class="style-controls-grid"><div class="control-group"><label>Background Color</label><input type="color" data-key="buttonStyle.backgroundColor" value="${c.buttonStyle.backgroundColor || '#c5a98b'}"></div><div class="control-group"><label>Text Color</label><input type="color" data-key="buttonStyle.color" value="${c.buttonStyle.color || '#FFFFFF'}"></div></div><div style="margin-top: 10px;">${createStyleControlsHTML('buttonStyle', c.buttonStyle, {color: false, size: true, weight: true, family: true})}</div></div>`;
-                break;
-            case 'countdown': case 'schedule': case 'location':
-                fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}`;
-                if(block.type === 'countdown') fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Target Date & Time</label><input type="datetime-local" data-key="targetDate" value="${c.targetDate}"></div>`;
-                if(block.type === 'schedule') { let items = (c.items || []).map(item => `<div class="sub-item-editor" data-item-id="${item.id}"><input type="text" placeholder="Time" class="sub-item-input" data-item-key="time" value="${item.time}"><input type="text" placeholder="Title" class="sub-item-input" data-item-key="title" value="${item.title}"><button class="delete-sub-item-btn">×</button><textarea class="sub-item-input" data-item-key="desc" placeholder="Description">${item.desc}</textarea></div>`).join(''); fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Items</label>${items}</div><button class="add-sub-item-btn action-button" data-list-key="items" style="font-size: 12px; padding: 5px; margin-top: 10px;">+ Add Item</button>`; }
-                if(block.type === 'location') { fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Smart Location Search</label><input type="text" class="smart-location-search" placeholder="e.g., Per Se, New York"></div><div class="control-group"><label>Address</label><textarea data-key="address">${c.address || ''}</textarea></div><div class="control-group"><label>Photo URL</label><input type="url" data-key="imageUrl" value="${c.imageUrl || ''}"></div><div class="control-group"><label>Google Maps Link</label><input type="url" data-key="mapLink" value="${c.mapLink || ''}"></div>`; }
-                break;
-            default: fieldsHTML = 'No editor available for this block type.';
+            case 'form-header':
+                 fieldsHTML = `<div class="control-group"><label>Image URL (optional)</label><input type="url" data-key="imageUrl" value="${block.content.imageUrl || ''}"></div><div class="control-group"><label>Title</label><input type="text" data-key="title" value="${block.content.title}"></div><div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${block.content.subtitle}</textarea></div>${aspectRatioField}${innerBlocksEditor}`;
+                 break;
+            case 'image': fieldsHTML = `<div class="control-group"><label>Image URL</label><input type="url" data-key="imageUrl" value="${block.content.imageUrl}"></div><div class="control-group"><label>Caption</label><input type="text" data-key="caption" value="${block.content.caption}"></div>`; break;
+            case 'paragraph': fieldsHTML = `<div class="control-group"><label>Paragraph Text</label><textarea data-key="text">${block.content.text}</textarea></div>`; break;
+            case 'countdown': fieldsHTML = `<div class="control-group"><label>Section Title</label><input type="text" data-key="title" value="${block.content.title}"></div><div class="control-group"><label>Target Date & Time</label><input type="datetime-local" data-key="targetDate" value="${block.content.targetDate}"></div>`; break; case 'schedule': let scheduleItems = block.content.items.map(item => `<div class="sub-item-editor schedule-item-editor" data-item-id="${item.id}"><input type="text" placeholder="Time" class="sub-item-input" data-item-key="time" value="${item.time}"><input type="text" placeholder="Title" class="sub-item-input" data-item-key="title" value="${item.title}"><button class="delete-sub-item-btn">×</button><textarea class="sub-item-input" data-item-key="desc" placeholder="Description">${item.desc}</textarea></div>`).join(''); fieldsHTML = `<div class="control-group"><label>Section Title</label><input type="text" data-key="title" value="${block.content.title}"></div><div class="control-group"><label>Items</label>${scheduleItems}</div><button class="add-sub-item-btn action-button" data-list-key="items" style="font-size: 12px; padding: 5px; margin-top: 10px;">+ Add Item</button>`; break; case 'location': fieldsHTML = `<div class="control-group"><label>Smart Location Search</label><input type="text" class="smart-location-search" placeholder="e.g., Per Se, New York"></div><hr style="border:none; border-top: 1px solid #eee; margin: 20px 0;"><div class="control-group"><label>Section Title</label><input type="text" data-key="title" value="${block.content.title}"></div><div class="control-group"><label>Address</label><textarea data-key="address">${block.content.address}</textarea></div><div class="control-group"><label>Photo URL</label><input type="url" data-key="imageUrl" value="${block.content.imageUrl}"></div><div class="control-group"><label>Google Maps Link</label><input type="url" data-key="mapLink" value="${block.content.mapLink}"></div>`; break; case 'rsvp': fieldsHTML = `<div class="control-group"><label>Section Title</label><input type="text" data-key="title" value="${block.content.title}"></div><div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${block.content.subtitle}</textarea></div><div class="control-group"><label>"I'll Attend" Link (auto-generated)</label><input type="url" data-key="acceptLink" value="${block.content.acceptLink}" disabled></div><div class="control-group"><label>"Can't Attend" Link (optional)</label><input type="url" data-key="declineLink" value="${block.content.declineLink}"></div>`; break; case 'heading': fieldsHTML = `<div class="control-group"><label>Heading Text</label><input type="text" data-key="text" value="${block.content.text}"></div>`; break; case 'input-question': case 'textarea-question': fieldsHTML = `<div class="control-group"><label>Question Text</label><input type="text" data-key="title" value="${block.content.title}"></div><div class="control-group"><label><input type="checkbox" data-key="required" ${block.content.required ? 'checked' : ''}> Required Question</label></div>`; break; case 'radio-question': let radioOptions = block.content.options.map(opt => `<div class="sub-item-editor" data-item-id="${opt.id}"><input type="text" class="sub-item-input" data-item-key="text" value="${opt.text}" placeholder="Option text"><button class="delete-sub-item-btn">×</button></div>`).join(''); fieldsHTML = `<div class="control-group"><label>Question Text</label><input type="text" data-key="title" value="${block.content.title}"></div><div class="control-group"><label><input type="checkbox" data-key="required" ${block.content.required ? 'checked' : ''}> Required Question</label></div><div class="control-group"><label>Options</label>${radioOptions}</div><button class="add-sub-item-btn action-button" data-list-key="options" style="font-size: 12px; padding: 5px; margin-top: 10px;">+ Add Option</button>`; break; case 'form-footer': fieldsHTML = `<div class="control-group"><label>Footer Text</label><input type="text" data-key="text" value="${block.content.text}"></div>`; break; default: fieldsHTML = 'No editor available for this block type.';
         }
         return fieldsHTML;
     }
 
     function renderEditor() { const container = document.getElementById('editor-content'); const currentlyOpen = [...container.querySelectorAll('.editor-block-content.is-open')].map(el => el.closest('.editor-block').dataset.id); container.innerHTML = ''; pageBlocks.forEach(block => { const tpl = document.getElementById('editor-block-template').content.cloneNode(true); const editorBlock = tpl.querySelector('.editor-block'); editorBlock.dataset.id = block.id; const title = block.type.charAt(0).toUpperCase() + block.type.slice(1).replace(/-/g, ' '); editorBlock.querySelector('.editor-block-title').textContent = title; const contentDiv = editorBlock.querySelector('.editor-block-content'); contentDiv.innerHTML = createEditorFieldsForBlock(block); if (currentlyOpen.includes(block.id)) { contentDiv.classList.add('is-open'); editorBlock.querySelector('.toggle-btn').textContent = '▲'; } container.appendChild(tpl); }); initializeMapsForEditor(); }
-    
-    function initializeMapsForEditor() {
-        if (typeof google === 'undefined' || typeof google.maps === 'undefined' || typeof google.maps.places === 'undefined') { console.warn("Google Maps script not ready."); return; }
-        document.querySelectorAll('.smart-location-search').forEach(input => {
-            if (input.dataset.mapsInitialized) return;
-            input.dataset.mapsInitialized = 'true';
-            const autocomplete = new google.maps.places.Autocomplete(input, { fields: ["name", "formatted_address", "photos", "url"], types: ["establishment"] });
-            autocomplete.addListener('place_changed', () => {
-                const place = autocomplete.getPlace();
-                if (!place) return;
-                const blockDiv = input.closest('.editor-block');
-                const blockId = blockDiv.dataset.id;
-                const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
-                if (blockIndex === -1) return;
-                
-                const content = pageBlocks[blockIndex].content;
-                content.title = place.name || '';
-                content.address = place.formatted_address || '';
-                content.mapLink = place.url || '';
-                if (place.photos && place.photos.length > 0) {
-                    content.imageUrl = place.photos[0].getUrl({ 'maxWidth': 1600 });
-                }
-                
-                renderEditor();
-                renderPreview();
-            });
-        });
-    }
+    function initializeMapsForEditor() { if (typeof google === 'undefined' || typeof google.maps === 'undefined' || typeof google.maps.places === 'undefined') { console.warn("Google Maps script not loaded, autocomplete disabled."); return; } document.querySelectorAll('.smart-location-search').forEach(input => { if (input.dataset.mapsInitialized) return; input.dataset.mapsInitialized = 'true'; const autocomplete = new google.maps.places.Autocomplete(input, { fields: ["name", "formatted_address", "photos", "url"], types: ["establishment"] }); autocomplete.addListener('place_changed', () => { const place = autocomplete.getPlace(); if (!place) return; const blockDiv = input.closest('.editor-block'); const blockId = blockDiv.dataset.id; const blockIndex = pageBlocks.findIndex(b => b.id === blockId); if (blockIndex === -1) return; const block = pageBlocks[blockIndex]; block.content.title = place.name || block.content.title; block.content.address = place.formatted_address || block.content.address; block.content.mapLink = place.url || block.content.mapLink; if (place.photos && place.photos.length > 0) { block.content.imageUrl = place.photos[0].getUrl({ 'maxWidth': 1600 }); } renderEditor(); renderPreview(); }); }); }
     
     function setupEventListeners() {
         const editorContent = document.getElementById('editor-content');
-        const handleEditorChange = (e) => {
+        // ИЗМЕНЕНИЕ: Добавлен 'change' для отслеживания <select>
+        editorContent.addEventListener('input', handleEditorChange);
+        editorContent.addEventListener('change', handleEditorChange);
+
+        function handleEditorChange(e) {
             const input = e.target;
             const blockDiv = input.closest('.editor-block');
             if (!blockDiv) return;
@@ -178,27 +87,27 @@
             const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
             if (blockIndex === -1) return;
 
-            const key = input.dataset.key;
-            if (input.matches('.sub-item-input')) {
+            if (input.matches('.inner-block-input')) {
+                const innerBlockDiv = input.closest('.inner-block-editor');
+                const innerIndex = parseInt(innerBlockDiv.dataset.index, 10);
+                const innerKey = input.dataset.key;
+                if (pageBlocks[blockIndex].content.innerBlocks[innerIndex]) {
+                     pageBlocks[blockIndex].content.innerBlocks[innerIndex].content[innerKey] = input.value;
+                }
+            } else if (input.matches('[data-key]')) {
+                const key = input.dataset.key;
+                const value = input.type === 'checkbox' ? input.checked : input.value;
+                pageBlocks[blockIndex].content[key] = value;
+            } else if (input.matches('.sub-item-input')) {
                 const subItemDiv = input.closest('.sub-item-editor');
                 const subItemId = subItemDiv.dataset.itemId;
                 const subItemKey = input.dataset.itemKey;
                 const listKey = pageBlocks[blockIndex].content.items ? 'items' : 'options';
                 const subItemIndex = pageBlocks[blockIndex].content[listKey].findIndex(i => i.id === subItemId);
                 if (subItemIndex > -1) pageBlocks[blockIndex].content[listKey][subItemIndex][subItemKey] = input.value;
-            } else if (key) {
-                const value = input.type === 'checkbox' ? input.checked : input.value;
-                const keys = key.split('.');
-                let current = pageBlocks[blockIndex].content;
-                for (let i = 0; i < keys.length - 1; i++) {
-                    current = current[keys[i]] = current[keys[i]] || {};
-                }
-                current[keys[keys.length - 1]] = value;
             }
             renderPreview();
-        };
-        editorContent.addEventListener('input', handleEditorChange);
-        editorContent.addEventListener('change', handleEditorChange);
+        }
 
         editorContent.addEventListener('click', (e) => {
             const target = e.target;
@@ -207,12 +116,18 @@
             const blockId = blockDiv.dataset.id;
             const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
 
-            if (target.matches('.add-inner-block-btn')) {
+            if (target.closest('.delete-block-btn')) {
+                if (confirm('Are you sure you want to delete this block?')) {
+                    pageBlocks.splice(blockIndex, 1);
+                    renderEditor();
+                    renderPreview();
+                }
+            } else if (target.matches('.add-inner-block-btn')) {
                 const type = target.dataset.innerType;
-                const newInnerBlock = { id: `inner-${Date.now()}`, type, text: `New ${type}`, style: type === 'heading' ? {...defaultTitleStyle, color: '#FFFFFF'} : {...defaultTextStyle, color: '#FFFFFF'} };
                 if (!pageBlocks[blockIndex].content.innerBlocks) {
                     pageBlocks[blockIndex].content.innerBlocks = [];
                 }
+                const newInnerBlock = { type: type, content: { text: `New ${type}` } };
                 pageBlocks[blockIndex].content.innerBlocks.push(newInnerBlock);
                 renderEditor();
                 renderPreview();
@@ -221,32 +136,91 @@
                 pageBlocks[blockIndex].content.innerBlocks.splice(innerIndex, 1);
                 renderEditor();
                 renderPreview();
-            } else if (target.closest('.delete-block-btn')) { if (confirm('Are you sure?')) { pageBlocks.splice(blockIndex, 1); renderEditor(); renderPreview(); } }
-            else if (target.closest('.add-sub-item-btn')) { const listKey = target.dataset.listKey; pageBlocks[blockIndex].content[listKey].push({ id: `s-${Date.now()}`, time: 'New', title: 'New', desc: '' }); renderEditor(); renderPreview(); }
-            else if (target.closest('.delete-sub-item-btn')) { const subItemId = target.closest('.sub-item-editor').dataset.itemId; const listKey = pageBlocks[blockIndex].content.items ? 'items' : 'options'; pageBlocks[blockIndex].content[listKey] = pageBlocks[blockIndex].content[listKey].filter(i => i.id !== subItemId); renderEditor(); renderPreview(); }
-            else if (target.closest('.editor-block-header')) { const content = blockDiv.querySelector('.editor-block-content'); if (content) { content.classList.toggle('is-open'); blockDiv.querySelector('.toggle-btn').textContent = content.classList.contains('is-open') ? '▲' : '▼'; } }
+            } else if (target.closest('.add-sub-item-btn')) {
+                const listKey = target.dataset.listKey;
+                const newItem = listKey === 'items' ? { id: `s-${Date.now()}`, time: 'New Time', title: 'New Event', desc: '' } : { id: `opt-${Date.now()}`, text: 'New Option' };
+                pageBlocks[blockIndex].content[listKey].push(newItem);
+                renderEditor();
+                renderPreview();
+            } else if (target.closest('.delete-sub-item-btn')) {
+                const subItemDiv = target.closest('.sub-item-editor');
+                const subItemId = subItemDiv.dataset.itemId;
+                const listKey = pageBlocks[blockIndex].content.items ? 'items' : 'options';
+                pageBlocks[blockIndex].content[listKey] = pageBlocks[blockIndex].content[listKey].filter(i => i.id !== subItemId);
+                renderEditor();
+                renderPreview();
+            } else if (target.closest('.editor-block-header')) {
+                const content = blockDiv.querySelector('.editor-block-content');
+                if (content) {
+                    content.classList.toggle('is-open');
+                    blockDiv.querySelector('.toggle-btn').textContent = content.classList.contains('is-open') ? '▲' : '▼';
+                }
+            }
         });
     }
-    const addBlockModal = document.getElementById('add-block-modal'); document.getElementById('add-block-btn').addEventListener('click', () => addBlockModal.classList.add('is-visible')); document.getElementById('modal-close-btn').addEventListener('click', () => addBlockModal.classList.remove('is-visible')); addBlockModal.addEventListener('click', (e) => { if (e.target === addBlockModal) addBlockModal.classList.remove('is-visible'); }); document.getElementById('add-block-options').addEventListener('click', (e) => { if (e.target.tagName === 'BUTTON' && e.target.dataset.type) { const newBlock = getNewBlockData(e.target.dataset.type); pageBlocks.push(newBlock); renderEditor(); renderPreview(); addBlockModal.classList.remove('is-visible'); } });
-    let resizeObserver; function setupResizeObserver() { if (resizeObserver) resizeObserver.disconnect(); const previewBody = iframe.contentWindow.document.body; if (!previewBody) return; resizeObserver = new ResizeObserver(() => { iframe.style.height = previewBody.scrollHeight + 'px'; }); resizeObserver.observe(previewBody); iframe.style.height = previewBody.scrollHeight + 'px'; }
+
+    const addBlockModal = document.getElementById('add-block-modal'); document.getElementById('add-block-btn').addEventListener('click', () => addBlockModal.classList.add('is-visible')); document.getElementById('modal-close-btn').addEventListener('click', () => addBlockModal.classList.remove('is-visible')); addBlockModal.addEventListener('click', (e) => { if (e.target === addBlockModal) { addBlockModal.classList.remove('is-visible'); } }); document.getElementById('add-block-options').addEventListener('click', (e) => { if (e.target.tagName === 'BUTTON' && e.target.dataset.type) { pageBlocks.push(getNewBlockData(e.target.dataset.type)); renderEditor(); renderPreview(); addBlockModal.classList.remove('is-visible'); } });
+    
+    function setupResizeObserver() { if (previewResizeObserver) { previewResizeObserver.disconnect(); } const previewBody = iframe.contentWindow.document.body; if (!previewBody) return; previewResizeObserver = new ResizeObserver(() => { iframe.style.height = previewBody.scrollHeight + 'px'; }); previewResizeObserver.observe(previewBody); iframe.style.height = previewBody.scrollHeight + 'px'; }
     function renderPreview() { if (iframe.contentWindow && typeof iframe.contentWindow.renderPage === 'function') { iframe.contentWindow.renderPage(pageBlocks, pageSettings); } }
+    
     function initSortable() { const c = document.getElementById('editor-content'); Sortable.create(c, { handle: '.drag-handle', animation: 150, onEnd: (evt) => { const mi = pageBlocks.splice(evt.oldIndex, 1)[0]; pageBlocks.splice(evt.newIndex, 0, mi); renderPreview(); }}); }
-    document.getElementById('share-button').addEventListener('click', async function() { const statusText = document.getElementById('status-text'); this.disabled = true; statusText.innerText = 'Saving...'; saveCurrentPageData(); const dataToSave = { main: mainPageData, rsvp: rsvpFormData }; try { const response = await fetch('/.netlify/functions/create-bundle', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataToSave) }); const result = await response.json(); if (!response.ok) throw new Error(result.error || `Server Error (${response.status})`); const mainLink = result.link; await navigator.clipboard.writeText(mainLink); statusText.innerText = 'Invitation link copied!'; alert(`Invitation Link (copied to clipboard):\n${mainLink}`); } catch (err) { statusText.innerText = `Error: ${err.message}`; } finally { this.disabled = false; setTimeout(() => { statusText.innerText = ''; }, 5000); } });
-    const editMainBtn = document.getElementById('edit-main-btn'), editRsvpBtn = document.getElementById('edit-rsvp-btn'), globalWidthInput = document.getElementById('global-width-input'), globalStyleSelect = document.getElementById('global-style-select'), globalBgImageGroup = document.getElementById('global-bg-image-group'), globalBgImageInput = document.getElementById('global-bg-image-input');
+    document.getElementById('share-button').addEventListener('click', async function() { const statusText = document.getElementById('status-text'); this.disabled = true; statusText.innerText = 'Saving...'; saveCurrentPageData(); const dataToSave = { main: mainPageData, rsvp: rsvpFormData }; try { const response = await fetch('/.netlify/functions/create-bundle', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataToSave) }); const result = await response.json(); if (!response.ok) { throw new Error(result.error || `Server Error (${response.status})`); } const mainLink = result.link; await navigator.clipboard.writeText(mainLink); statusText.innerText = 'Invitation link copied!'; alert(`Invitation Link (copied to clipboard):\n${mainLink}\n\nUse this link to share the invitation. The RSVP button inside will automatically link to the form.`); } catch (err) { statusText.innerText = `Error: ${err.message}`; console.error(err); } finally { this.disabled = false; setTimeout(() => { if (statusText.innerText !== '') statusText.innerText = ''; }, 5000); } });
+    const editMainBtn = document.getElementById('edit-main-btn'); const editRsvpBtn = document.getElementById('edit-rsvp-btn'); const globalWidthInput = document.getElementById('global-width-input'); const globalStyleSelect = document.getElementById('global-style-select'); const globalBgImageGroup = document.getElementById('global-bg-image-group'); const globalBgImageInput = document.getElementById('global-bg-image-input');
     function toggleBgImageField() { globalBgImageGroup.style.display = (pageSettings.style === 'modern') ? 'block' : 'none'; }
     globalStyleSelect.addEventListener('change', () => { pageSettings.style = globalStyleSelect.value; toggleBgImageField(); renderPreview(); });
     globalBgImageInput.addEventListener('input', () => { pageSettings.backgroundImage = globalBgImageInput.value; renderPreview(); });
     globalWidthInput.addEventListener('input', () => { pageSettings.maxWidth = globalWidthInput.value; renderPreview(); });
-    function saveCurrentPageData() { const data = { settings: JSON.parse(JSON.stringify(pageSettings)), blocks: JSON.parse(JSON.stringify(pageBlocks)) }; if (currentTemplate === mainPageData.template) { mainPageData = {...mainPageData, ...data}; } else { rsvpFormData = {...rsvpFormData, ...data}; } }
-    function switchEditorMode(target) { currentTemplate = target.template; pageSettings = JSON.parse(JSON.stringify(target.settings)); pageBlocks = JSON.parse(JSON.stringify(target.blocks)); globalWidthInput.value = pageSettings.maxWidth; globalStyleSelect.value = pageSettings.style; globalBgImageInput.value = pageSettings.backgroundImage; toggleBgImageField(); iframe.src = `templates/${currentTemplate}?v=${Date.now()}`; editMainBtn.classList.toggle('active', currentTemplate === mainPageData.template); editRsvpBtn.classList.toggle('active', currentTemplate === rsvpFormData.template); }
+    function saveCurrentPageData() { const dataToSave = { settings: JSON.parse(JSON.stringify(pageSettings)), blocks: JSON.parse(JSON.stringify(pageBlocks)) }; if (currentTemplate === mainPageData.template) { mainPageData.settings = dataToSave.settings; mainPageData.blocks = dataToSave.blocks; } else if (currentTemplate === rsvpFormData.template) { rsvpFormData.settings = dataToSave.settings; rsvpFormData.blocks = dataToSave.blocks; } }
+    function switchEditorMode(targetTemplateData) { currentTemplate = targetTemplateData.template; pageSettings = JSON.parse(JSON.stringify(targetTemplateData.settings)); pageBlocks = JSON.parse(JSON.stringify(targetTemplateData.blocks)); globalWidthInput.value = pageSettings.maxWidth; globalStyleSelect.value = pageSettings.style; globalBgImageInput.value = pageSettings.backgroundImage; toggleBgImageField(); iframe.src = `templates/${currentTemplate}?v=${Date.now()}`; editMainBtn.classList.toggle('active', currentTemplate === mainPageData.template); editRsvpBtn.classList.toggle('active', currentTemplate === rsvpFormData.template); }
     editMainBtn.addEventListener('click', () => { if (currentTemplate !== mainPageData.template) { saveCurrentPageData(); switchEditorMode(mainPageData); } });
     editRsvpBtn.addEventListener('click', () => { if (currentTemplate !== rsvpFormData.template) { saveCurrentPageData(); switchEditorMode(rsvpFormData); } });
+    
     function initEditor() {
-        const params = new URLSearchParams(window.location.search), id = params.get('id'), isCustomerMode = !!id;
-        const initialize = () => { if (isCustomerMode) document.querySelector('.global-settings')?.remove(); initSortable(); setupEventListeners(); iframe.onload = () => { renderEditor(); renderPreview(); setupResizeObserver(); }; switchEditorMode(mainPageData); };
-        if (isCustomerMode) { const status = document.getElementById('status-text'); status.innerText = 'Loading...'; fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, { headers: { 'X-Access-Key': '__JSONBIN_ACCESS_KEY__' } }).then(r => r.ok ? r.json() : Promise.reject(new Error('Could not load template.'))).then(d => { mainPageData = d.record.main; rsvpFormData = d.record.rsvp; status.innerText = ''; initialize(); }).catch(e => document.body.innerHTML = `<h1>Error</h1><p>${e.message}</p>`); } else { initialize(); }
+        const params = new URLSearchParams(window.location.search);
+        const binIdToLoad = params.get('id');
+        let isCustomerMode = !!binIdToLoad;
+
+        const initialize = () => {
+            if (isCustomerMode || LOCK_STYLE_CHOICE) {
+                const globalSettings = document.querySelector('.global-settings');
+                if(globalSettings) globalSettings.style.display = 'none';
+            }
+            initSortable();
+            setupEventListeners();
+            iframe.onload = () => {
+                renderEditor();
+                renderPreview();
+                setupResizeObserver();
+            };
+            switchEditorMode(mainPageData);
+            if (typeof google !== 'undefined' && google.maps) {
+                initializeMapsForEditor();
+            }
+        };
+
+        if (isCustomerMode) {
+            const statusText = document.getElementById('status-text');
+            statusText.innerText = 'Loading your template...';
+            fetch(`https://api.jsonbin.io/v3/b/${binIdToLoad}/latest`, { headers: { 'X-Access-Key': '__JSONBIN_ACCESS_KEY__' } })
+                .then(response => { if (!response.ok) throw new Error('Could not load your purchased template.'); return response.json(); })
+                .then(data => {
+                    mainPageData = data.record.main;
+                    rsvpFormData = data.record.rsvp;
+                    statusText.innerText = '';
+                    initialize();
+                })
+                .catch(err => { document.body.innerHTML = `<h1>Error Loading Template</h1><p>${err.message}</p>`; });
+        } else {
+            initialize();
+        }
     }
-    function mapsReady() { initializeMapsForEditor(); }
+
+    function mapsReady() {
+        console.log("Google Maps script has loaded.");
+        initializeMapsForEditor();
+    }
+
     initEditor();
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=__GOOGLE_MAPS_API_KEY__&libraries=places&callback=mapsReady"></script>
