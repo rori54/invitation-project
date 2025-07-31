@@ -16,9 +16,7 @@
         h1,h2,h3{font-family:'Playfair Display',serif;text-align:center}
         h2{font-size:2.2rem;margin-top: 0; margin-bottom:30px}
         
-        /* Файл: templates/wedding-classic.html */
-
-        /* ЗАМЕНИТЕ ЭТОТ БЛОК ЦЕЛИКОМ */
+        /* ===== ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ ДЛЯ HERO BLOCK ===== */
         .hero-block {
             display: flex;
             flex-direction: column;
@@ -27,30 +25,42 @@
             color: white;
             text-align: center;
             position: relative;
-            /* Возвращаем COVER, чтобы фон всегда заполнял пространство */
-            background-size: cover;
-            background-position: center;
+            /* УБИРАЕМ фон отсюда, он больше не нужен */
             overflow: hidden;
             padding: 40px 20px;
             box-sizing: border-box;
             width: 100%;
         }
-
-        /* ДОБАВЬТЕ ЭТОТ НОВЫЙ БЛОК */
-        .hero-block img {
+        /* Новый стиль для картинки внутри */
+        .hero-block .hero-image {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            /* Картинка будет вписана, а не обрезана */
-            object-fit: contain;
-            /* Убираем эффект затемнения с основной картинки, оставляя его на фоне */
-            z-index: -1; 
+            /* Картинка всегда будет вписана целиком */
+            object-fit: contain; 
+            /* Ставим ее на самый нижний слой */
+            z-index: 0; 
         }
+        /* Затемняющий слой теперь лежит поверх картинки */
+        .hero-block::before{
+            content:'';
+            position:absolute;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background:rgba(0,0,0,.4); 
+            z-index: 1; /* z-index: 1 (выше картинки) */
+        }
+        /* Текст лежит поверх затемняющего слоя */
+        .hero-content{
+            position:relative;
+            z-index: 2; /* z-index: 2 (самый верхний) */
+        }
+        /* ===== КОНЕЦ ФИНАЛЬНОГО ИСПРАВЛЕНИЯ ===== */
 
-        .hero-block::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4); z-index: 1;}
-        .hero-content{position:relative;z-index:2}
         .hero-content h1{font-size:4rem;margin:10px 0; line-height: 1.2;}
         .hero-content p{font-size:1.2rem;letter-spacing:2px; margin: 0;}
         .style-modern .content-section {background: rgba(255, 255, 255, 0.85); box-shadow: none; color: #333;}
@@ -80,51 +90,14 @@
         @media (max-width: 768px) { .content-section { margin-left: 15px; margin-right: 15px; } }
         @media (max-width: 600px) { .hero-content h1 { font-size: 2.8rem; } h2 { font-size: 1.8rem; } .content-section { padding: 30px 20px; margin: 20px 10px; } .schedule-item { flex-direction: column; align-items: flex-start; gap: 10px; } .time-block { padding: 15px; min-width: 60px; } .time-block .number { font-size: 2rem; } #countdown { gap: 10px; } }
 
-        /* ... (ВСЕ ОСТАЛЬНЫЕ СТИЛИ ДЛЯ КОНВЕРТА И АДАПТИВНОСТИ ОСТАЮТСЯ КАК ЕСТЬ) ... */
-        #envelope-wrapper {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #1a1a2e;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: opacity 1.5s ease-in-out;
-        }
-        body.intro-active main {
-            opacity: 0;
-        }
-        #envelope-3d {
-            width: 80%;
-            max-width: 500px;
-            height: 80%;
-            max-height: 500px;
-            transition: transform 0.5s, opacity 0.5s;
-            opacity: 0; 
-        }
-        #envelope-3d.loaded {
-            opacity: 1;
-            animation: floatAnimation 4s ease-in-out infinite;
-        }
-        #envelope-wrapper.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        @keyframes floatAnimation {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-            100% { transform: translateY(0); }
-        }
-        @media (min-width: 768px) {
-            #envelope-3d {
-                max-width: 700px;
-                max-height: 700px;
-            }
-        }
+        /* ... (ВСЕ СТИЛИ ДЛЯ КОНВЕРТА ОСТАЮТСЯ БЕЗ ИЗМЕНЕНИЙ) ... */
+        #envelope-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; z-index: 1000; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 1.5s ease-in-out; }
+        body.intro-active main { opacity: 0; }
+        #envelope-3d { width: 80%; max-width: 500px; height: 80%; max-height: 500px; transition: transform 0.5s, opacity 0.5s; opacity: 0; }
+        #envelope-3d.loaded { opacity: 1; animation: floatAnimation 4s ease-in-out infinite; }
+        #envelope-wrapper.hidden { opacity: 0; pointer-events: none; }
+        @keyframes floatAnimation { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0); } }
+        @media (min-width: 768px) { #envelope-3d { max-width: 700px; max-height: 700px; } }
     </style>
     
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -132,39 +105,20 @@
 </head>
 <body>
     <div id="envelope-wrapper">
-        <model-viewer id="envelope-3d"
-            src="/templates/envelope.glb"
-            alt="An interactive 3D envelope"
-            camera-controls
-            disable-zoom
-            interaction-prompt="none"
-            camera-orbit="0deg 75deg 105%"
-            style="width: 100%; height: 100%; background: none;">
-        </model-viewer>
+        <model-viewer id="envelope-3d" src="/templates/envelope.glb" alt="An interactive 3D envelope" camera-controls disable-zoom interaction-prompt="none" camera-orbit="0deg 75deg 105%" style="width: 100%; height: 100%; background: none;"></model-viewer>
     </div>
     <main id="page-content"></main>
     
     <script>
-    // ... (ВЕСЬ ВАШ JAVASCRIPT КОД ОСТАЕТСЯ БЕЗ ИЗМЕНЕНИЙ) ...
     let countdownInterval;
-    function setupIntroAnimation() {
+    function setupIntroAnimation() { /* ... (эта функция остается без изменений) ... */
         const envelopeWrapper = document.getElementById('envelope-wrapper');
         const modelViewer = document.getElementById('envelope-3d');
         if (!envelopeWrapper || !modelViewer || typeof confetti !== 'function') return;
         document.body.classList.add('intro-active');
-        modelViewer.addEventListener('load', () => {
-            modelViewer.classList.add('loaded');
-        });
+        modelViewer.addEventListener('load', () => { modelViewer.classList.add('loaded'); });
         const fireConfetti = () => {
-            const defaults = {
-                spread: 360,
-                ticks: 150,
-                gravity: 0,
-                decay: 0.95,
-                startVelocity: 35,
-                shapes: ['star'],
-                colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8']
-            };
+            const defaults = { spread: 360, ticks: 150, gravity: 0, decay: 0.95, startVelocity: 35, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] };
             confetti({ ...defaults, particleCount: 60, scalar: 1.2, shapes: ['star'] });
             confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] });
         };
@@ -178,26 +132,22 @@
             }, 500);
         }, { once: true });
     }
-    const getBlockStyles = (c, settings, type) => {
+    const getBlockStyles = (c, settings, type) => { /* ... (эта функция остается без изменений) ... */
         const styles = [];
         if (type !== 'hero' || settings.style === 'modern') { styles.push(`max-width: ${settings.maxWidth || '800px'}`); }
         if (c.height) { const heightProp = (type === 'hero' && settings.style === 'classic') ? 'height' : 'min-height'; styles.push(`${heightProp}: ${c.height}`); }
         return styles.join('; ');
     };
-    // Файл: templates/wedding-classic.html
-
+    
+    // ===== ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ В JAVASCRIPT =====
     const createHeroHTML = (c, s) => {
-        // Стиль для внешнего блока-контейнера (он будет фоном)
-        const headerStyles = [
-            `background-image: url('${c.imageUrl}')`,
-            getBlockStyles(c, s, 'hero')
-        ].filter(Boolean).join('; ');
+        // Стиль теперь применяется только для высоты блока
+        const headerStyles = getBlockStyles(c, s, 'hero');
 
-        // Теперь мы возвращаем HTML, который содержит и фоновый блок, и отдельный тег <img> внутри
         return `
             <header class="hero-block" style="${headerStyles}">
-                <!-- Эта картинка всегда будет видна целиком благодаря CSS -->
-                <img src="${c.imageUrl}" alt="Main photo">
+                <!-- Эта картинка всегда будет видна целиком -->
+                <img class="hero-image" src="${c.imageUrl}" alt="Main photo">
                 
                 <div class="hero-content">
                     <p>${c.subtitle}</p>
@@ -206,7 +156,8 @@
                 </div>
             </header>`;
     };
-    const processText = (text) => (text || '').replace(/\n/g, '<br>');
+
+    const processText = (text) => (text || '').replace(/\n/g, '<br>'); // ... (все остальные функции остаются без изменений)
     const createCountdownHTML = (c, s) => `<section class="content-section" style="${getBlockStyles(c, s, 'countdown')}"><h2 id="countdown-title">${c.title}</h2><div id="countdown"><div class="time-block"><div id="days" class="number">00</div><div>Days</div></div><div class="time-block"><div id="hours" class="number">00</div><div>Hours</div></div><div class="time-block"><div id="minutes" class="number">00</div><div>Minutes</div></div><div class="time-block"><div id="seconds" class="number">00</div><div>Seconds</div></div></div></section>`;
     const createScheduleHTML = (c, s) => `<section class="content-section" style="${getBlockStyles(c, s, 'schedule')}"><h2>${c.title}</h2><ul class="schedule-list">${c.items.map(i => `<li class="schedule-item"><div class="schedule-time">${i.time}</div><div class="schedule-event"><h3>${i.title}</h3><p>${processText(i.desc)}</p></div></li>`).join('')}</ul></section>`;
     const createLocationHTML = (c, s) => `<section class="content-section location-block" style="${getBlockStyles(c, s, 'location')}"><h2>${c.title}</h2><p>${processText(c.address)}</p><img src="${c.imageUrl}" alt="Venue"><a href="${c.mapLink}" class="rsvp-button" target="_blank" style="margin-top: 30px;">View on Map</a></section>`;
