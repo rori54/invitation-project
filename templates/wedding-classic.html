@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wedding Invitation</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,7 +10,7 @@
     <style>
         :root{--accent-color:#c5a98b;--background-color:#f8f7f5}
         body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.7;background-color:var(--background-color);color:#333;opacity:0;transition:opacity .5s ease-in-out; background-size: cover; background-position: center; background-attachment: fixed;}
-        /* ... (ВСЕ ВАШИ СТАНДАРТНЫЕ СТИЛИ БЕЗ ИЗМЕНЕНИЙ) ... */
+        /* ... (ВСЕ ВАШИ СТАНДАРТНЫЕ СТИЛИ ОСТАЮТСЯ БЕЗ ИЗМЕНЕНИЙ) ... */
         .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; position: relative; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); box-sizing: border-box;}
         #page-content > .content-section:first-child { margin-top: 0; border-radius: 0; }
         #page-content > .hero-block + .content-section { margin-top: 30px; border-radius: 8px; }
@@ -79,21 +79,22 @@
         }
     </style>
     
-    <!-- ===== БИБЛИОТЕКИ ДЛЯ 3D И ЭФФЕКТА ЧАСТИЦ ===== -->
+    <!-- ===== БИБЛИОТЕКИ ДЛЯ 3D И ЭФФЕКТА ЧАСТИЦ (ВАЖНО, ЧТОБЫ ОНИ БЫЛИ ЗДЕСЬ) ===== -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
 </head>
 <body>
-    <!-- ===== НАЧАЛО КОДА 3D-МОДЕЛИ ===== -->
+    <!-- ===== ИСПРАВЛЕННЫЙ КОД 3D-МОДЕЛИ ===== -->
     <div id="envelope-wrapper">
         <model-viewer id="envelope-3d"
-            src="/templates/envelope.glb" <!-- УБЕДИТЕСЬ, ЧТО ФАЙЛ НАЗЫВАЕТСЯ ТАК -->
+            src="/templates/envelope.glb"
             alt="An interactive 3D envelope"
             auto-rotate
             camera-controls
             disable-zoom
             interaction-prompt="none"
+            camera-orbit="0deg 75deg 105%" <!-- ВОТ ИСПРАВЛЕНИЕ ПОЛОЖЕНИЯ -->
             style="width: 100%; height: 100%; background: none;">
         </model-viewer>
     </div>
@@ -104,7 +105,7 @@
     <script>
     let countdownInterval;
 
-    // ===== ЛОГИКА ДЛЯ 3D-ЗАСТАВКИ И "ЗОЛОТОЙ ПЫЛИ" =====
+    // ... (весь остальной JavaScript код остается ТОЧНО ТАКИМ ЖЕ, как в моем предыдущем ответе) ...
     function setupIntroAnimation() {
         const envelopeWrapper = document.getElementById('envelope-wrapper');
         const modelViewer = document.getElementById('envelope-3d');
@@ -113,7 +114,6 @@
 
         document.body.classList.add('intro-active');
         
-        // Функция для "взрыва" золотой пыли
         const fireConfetti = () => {
             const defaults = {
                 spread: 360,
@@ -130,23 +130,16 @@
         };
 
         envelopeWrapper.addEventListener('click', () => {
-            // 1. Запускаем "взрыв" частиц
             fireConfetti();
-
-            // 2. Плавно прячем 3D-модель
             modelViewer.style.transform = 'scale(0)';
             modelViewer.style.opacity = '0';
-
-            // 3. Ждем немного и начинаем прятать фон
             setTimeout(() => {
                 document.body.classList.remove('intro-active');
                 envelopeWrapper.classList.add('hidden');
-            }, 500); // 0.5 секунды
-            
+            }, 500);
         }, { once: true });
     }
 
-    // ===== ИСПРАВЛЕННЫЕ ФУНКЦИИ ДЛЯ КОРРЕКТНОГО ОТОБРАЖЕНИЯ ВЫСОТЫ =====
     const getBlockStyles = (c, settings, type) => {
         const styles = [];
         if (type !== 'hero' || settings.style === 'modern') {
@@ -165,7 +158,6 @@
         return `<header class="hero-block" style="${styleAttribute}"><div class="hero-content"><p>${c.subtitle}</p><h1>${c.names}</h1><p>${c.date}</p></div></header>`;
     };
     
-    // ===== ОСТАЛЬНЫЕ ФУНКЦИИ ГЕНЕРАЦИИ HTML (без изменений) =====
     const processText = (text) => (text || '').replace(/\n/g, '<br>');
     const createCountdownHTML = (c, s) => `<section class="content-section" style="${getBlockStyles(c, s, 'countdown')}"><h2 id="countdown-title">${c.title}</h2><div id="countdown"><div class="time-block"><div id="days" class="number">00</div><div>Days</div></div><div class="time-block"><div id="hours" class="number">00</div><div>Hours</div></div><div class="time-block"><div id="minutes" class="number">00</div><div>Minutes</div></div><div class="time-block"><div id="seconds" class="number">00</div><div>Seconds</div></div></div></section>`;
     const createScheduleHTML = (c, s) => `<section class="content-section" style="${getBlockStyles(c, s, 'schedule')}"><h2>${c.title}</h2><ul class="schedule-list">${c.items.map(i => `<li class="schedule-item"><div class="schedule-time">${i.time}</div><div class="schedule-event"><h3>${i.title}</h3><p>${processText(i.desc)}</p></div></li>`).join('')}</ul></section>`;
@@ -175,7 +167,6 @@
     const createImageHTML = (c, s) => `<section class="content-section image-block" style="${getBlockStyles(c,s,'image')}"><figure><img src="${c.imageUrl}" alt="${c.caption}"><figcaption>${c.caption}</figcaption></figure></section>`;
     const createParagraphHTML = (c, s) => `<section class="content-section paragraph-block" style="${getBlockStyles(c, s, 'paragraph')}"><p>${processText(c.text)}</p></section>`;
     
-    // ===== ОСНОВНАЯ ЛОГИКА СТРАНИЦЫ =====
     function renderPage(blocks, settings, rsvpLink = '#') {
         if (!blocks || !settings) return;
         document.body.className = '';
@@ -236,14 +227,13 @@
         }
     }
     
-    // ===== ИСПРАВЛЕННАЯ ЛОГИКА ДЛЯ РЕДАКТОРА И ФИНАЛЬНОЙ СТРАНИЦЫ =====
-    if (window.self !== window.top) { // Если в iframe (превью в редакторе)
+    if (window.self !== window.top) {
         document.body.style.opacity = 1;
         const envelopeWrapper = document.getElementById('envelope-wrapper');
         if (envelopeWrapper) {
             envelopeWrapper.style.display = 'none';
         }
-    } else { // Если открыто как самостоятельная страница
+    } else {
         window.addEventListener('load', loadInvitationData);
     }
     </script>
