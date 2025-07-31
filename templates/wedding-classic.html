@@ -16,20 +16,11 @@
         h1,h2,h3{font-family:'Playfair Display',serif;text-align:center}
         h2{font-size:2.2rem;margin-top: 0; margin-bottom:30px}
         
-        /* ИЗМЕНЕНИЕ: Убрали background-size из основного класса */
+        /* ИЗМЕНЕНИЕ: Задаем aspect-ratio по умолчанию. Он будет переопределяться инлайновым стилем. */
         .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; overflow: hidden; width: 100%; aspect-ratio: 16 / 9; }
         @media (max-width: 600px) { .hero-block { aspect-ratio: 9 / 12; } }
         
-        /* НОВОЕ ПРАВИЛО: Стили для тега <img>, который будет фоном */
-        .hero-background-image {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Аналог background-size: cover */
-            z-index: 0; /* Размещаем под контентом и оверлеем */
-        }
+        .hero-background-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
 
         .hero-block::before{ content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); z-index: 1; }
         .hero-content{ position:relative; z-index: 2; width: 90%; max-width: 1000px; }
@@ -40,7 +31,7 @@
         .hero-inner-blocks .inner-paragraph { font-family: 'Montserrat', sans-serif; font-size: 1rem; margin: 0 auto 15px; max-width: 600px; white-space: pre-wrap; line-height: 1.6; letter-spacing: 0.5px; }
         .style-modern .content-section {background: rgba(255, 255, 255, 0.85); box-shadow: none; color: #333;}
         .style-modern #page-content > .content-section:first-child { border-radius: 8px; }
-        .style-modern .hero-block { background-image: none !important; margin: 0 auto; }
+        .style-modern .hero-block { margin: 0 auto; }
         .style-modern .hero-block::before { background: rgba(0,0,0,0.2); }
         .style-modern .hero-content h1, .style-modern .hero-content p, .style-modern .hero-inner-blocks * { text-shadow: 1px 1px 4px rgba(0,0,0,0.6); }
         .style-modern #countdown .time-block { background: rgba(255, 255, 255, 0.5); }
@@ -81,7 +72,7 @@
     <script>
     let countdownInterval;
     
-    // ИЗМЕНЕНИЕ: Полностью переработана функция для использования <img> вместо background-image
+    // ИЗМЕНЕНИЕ: Упрощенная и надежная логика на основе aspect-ratio
     const createHeroHTML = (c, s) => {
         let innerBlocksHTML = '';
         if (c.innerBlocks && c.innerBlocks.length > 0) {
@@ -92,25 +83,18 @@
             }).join('')}</div>`;
         }
         
-        // Создаем HTML-код для фонового изображения
         const imageHTML = c.imageUrl 
             ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'};" alt="Wedding background">`
             : '';
 
-        // Создаем стили для самого контейнера .hero-block
         const headerStyles = [];
-        if (c.height && c.height.trim() !== '') {
-            if (c.height.includes('vh')) {
-                const vhValue = parseFloat(c.height) || 0;
-                headerStyles.push(`height: calc(var(--vh, 1vh) * ${vhValue})`);
-            } else {
-                headerStyles.push(`height: ${c.height}`);
-            }
-            headerStyles.push(`aspect-ratio: auto`);
+        // Если для блока задано соотношение сторон, применяем его.
+        // Это переопределит CSS по умолчанию и гарантирует одинаковое отображение.
+        if (c.aspectRatio && c.aspectRatio.trim() !== '') {
+            headerStyles.push(`aspect-ratio: ${c.aspectRatio}`);
         }
         const styleAttribute = headerStyles.join('; ');
 
-        // Собираем финальный HTML блока
         return `<header class="hero-block" style="${styleAttribute}">
                     ${imageHTML}
                     <div class="hero-content">
