@@ -17,8 +17,7 @@
     const iframe = document.getElementById("preview-frame");
     let pageBlocks = []; let pageSettings = {}; let currentTemplate = ''; let previewResizeObserver;
     
-    // ИЗМЕНЕНИЕ: Заменили 'height' на 'aspectRatio' для предсказуемости
-    let mainPageData = { template: 'wedding-classic.html', settings: { maxWidth: '800px', style: 'classic', backgroundImage: '' }, blocks: [ { type: 'hero', id: `block-${Date.now()}-1`, content: { subtitle: 'WE ARE GETTING MARRIED', names: 'John & Jane', date: 'September 15, 2025', imageUrl: 'https://cdn.pixabay.com/photo/2018/03/01/01/07/blossom-3189810_1280.jpg', backgroundPosition: 'center 30%', aspectRatio: '9/12', innerBlocks: [] }}, { type: 'countdown', id: `block-${Date.now()}-2`, content: { title: 'Until Our Big Day', targetDate: '2025-09-15T16:00' }}, { type: 'paragraph', id: `block-${Date.now()}-3`, content: { text: 'We are excited to share this special day with our closest family and friends.\n\nYour presence is the greatest gift to us as we begin this beautiful new chapter of our lives.' }}, { type: 'schedule', id: `block-${Date.now()}-4`, content: { title: 'The Day\'s Schedule', items: [ { id: `s-1`, time: '15:00', title: 'Guest Arrival', desc: 'Welcome drinks and light music.'}, { id: `s-2`, time: '16:00', title: 'Ceremony', desc: 'The main event!'}, { id: `s-3`, time: '18:00', title: 'Dinner & Party', desc: 'Let\'s celebrate together.'} ]}}, { type: 'location', id: `block-${Date.now()}-5`, content: { title: 'Venue', address: 'The Grand Hall, 123 Celebration Ave, New York', imageUrl: 'https://images.unsplash.com/photo-1511795408833-2a1e94992e7a?q=80&w=2070&auto=format&fit=crop', mapLink: 'https://maps.google.com' }}, { type: 'rsvp', id: `block-${Date.now()}-6`, content: { title: 'Confirm Your Attendance', subtitle: 'Please reply by September 1st.\nClick the button to fill out the RSVP form.', acceptLink: '#', declineLink: '#' }} ] };
+    let mainPageData = { template: 'wedding-classic.html', settings: { maxWidth: '800px', style: 'classic', backgroundImage: '' }, blocks: [ { type: 'hero', id: `block-${Date.now()}-1`, content: { subtitle: 'WE ARE GETTING MARRIED', names: 'John & Jane', date: 'September 15, 2025', imageUrl: 'https://cdn.pixabay.com/photo/2018/03/01/01/07/blossom-3189810_1280.jpg', backgroundPosition: 'center 30%', aspectRatio: '16/9', innerBlocks: [] }}, { type: 'countdown', id: `block-${Date.now()}-2`, content: { title: 'Until Our Big Day', targetDate: '2025-09-15T16:00' }}, { type: 'paragraph', id: `block-${Date.now()}-3`, content: { text: 'We are excited to share this special day with our closest family and friends.\n\nYour presence is the greatest gift to us as we begin this beautiful new chapter of our lives.' }}, { type: 'schedule', id: `block-${Date.now()}-4`, content: { title: 'The Day\'s Schedule', items: [ { id: `s-1`, time: '15:00', title: 'Guest Arrival', desc: 'Welcome drinks and light music.'}, { id: `s-2`, time: '16:00', title: 'Ceremony', desc: 'The main event!'}, { id: `s-3`, time: '18:00', title: 'Dinner & Party', desc: 'Let\'s celebrate together.'} ]}}, { type: 'location', id: `block-${Date.now()}-5`, content: { title: 'Venue', address: 'The Grand Hall, 123 Celebration Ave, New York', imageUrl: 'https://images.unsplash.com/photo-1511795408833-2a1e94992e7a?q=80&w=2070&auto=format&fit=crop', mapLink: 'https://maps.google.com' }}, { type: 'rsvp', id: `block-${Date.now()}-6`, content: { title: 'Confirm Your Attendance', subtitle: 'Please reply by September 1st.\nClick the button to fill out the RSVP form.', acceptLink: '#', declineLink: '#' }} ] };
     let rsvpFormData = { template: 'rsvp-form.html', settings: { maxWidth: '800px', style: 'classic', backgroundImage: '' }, blocks: [ { type: 'form-header', id: `block-${Date.now()}-f1`, content: { title: 'Confirm Your Attendance', subtitle: 'We can\'t wait to celebrate with you!', imageUrl: 'https://images.unsplash.com/photo-1595398638959-529255a58a36?q=80&w=2070&auto=format&fit=crop', aspectRatio: '4/3', innerBlocks: [] }}, { type: 'input-question', id: `block-${Date.now()}-f2`, content: { id: 'name', title: '♥ Your Full Name', required: true }}, { type: 'radio-question', id: `block-${Date.now()}-f3`, content: { id: 'attendance', title: '♥ Will you be able to join us?', required: true, options: [{ id: `opt-1`, text: 'Yes, I\'ll be there!' }, { id: `opt-2`, text: 'Sadly, I can\'t make it.' }] }}, { type: 'radio-question', id: `block-${Date.now()}-f4`, content: { id: 'guest', title: '♥ Are you bringing a plus-one?', required: true, options: [{ id: `opt-3`, text: 'Yes, I\'m bringing a guest' }, { id: `opt-4`, text: 'No, I\'m coming solo' }] }}, { type: 'input-question', id: `block-${Date.now()}-f5`, content: { id: 'guest_name', title: 'If yes, what is your guest\'s name?', required: false }}, { type: 'textarea-question', id: `block-${Date.now()}-f6`, content: { id: 'song', title: '♫ What song will get you on the dance floor?', required: false }}, { type: 'form-footer', id: `block-${Date.now()}-f7`, content: { text: 'Thank you for your response! ♥' }} ] };
     
     function getNewBlockData(type) { const newBlock = { type: type, id: `block-${Date.now()}`, content: {} }; switch(type) { case 'hero': newBlock.content = { subtitle: 'New Subtitle', names: 'New Names', date: 'New Date', imageUrl: '', backgroundPosition: 'center center', aspectRatio: '16/9', innerBlocks: [] }; break; case 'form-header': newBlock.content = { title: 'RSVP', subtitle: 'Please fill out the form below', imageUrl: '', aspectRatio: '16/9', innerBlocks: [] }; break; case 'countdown': newBlock.content = { title: 'New Countdown', targetDate: '' }; break; case 'schedule': newBlock.content = { title: 'New Schedule', items: [] }; break; case 'location': newBlock.content = { title: 'New Location', address: '', imageUrl: '', mapLink: '#' }; break; case 'rsvp': newBlock.content = { title: 'New RSVP Block', subtitle: 'New subtitle text', acceptLink: '#', declineLink: '#' }; break; case 'heading': newBlock.content = { text: 'New Heading' }; break; case 'paragraph': newBlock.content = { text: 'This is a new paragraph.' }; break; case 'image': newBlock.content = { imageUrl: 'https://via.placeholder.com/800x400', caption: 'Image caption' }; break; case 'input-question': newBlock.content = { id: `input-${Date.now()}`, title: 'Your Name', required: true }; break; case 'textarea-question': newBlock.content = { id: `textarea-${Date.now()}`, title: 'Any comments?', required: false }; break; case 'radio-question': newBlock.content = { id: `radio-${Date.now()}`, title: 'Will you attend?', required: true, options: [{ id: `opt-${Date.now()}`, text: 'New Option' }] }; break; case 'form-footer': newBlock.content = { text: 'Thanks for your response!' }; break; } return newBlock; }
@@ -36,11 +35,25 @@
         return `<div class="inner-blocks-container"><label style="font-weight: bold; color: #333;">Inner Blocks</label><div class="inner-blocks-list">${innerBlocksHTML}</div><div class="add-inner-block-controls"><button class="add-inner-block-btn" data-inner-type="heading">+ Add Heading</button><button class="add-inner-block-btn" data-inner-type="paragraph">+ Add Paragraph</button></div></div>`;
     }
 
+    // ИЗМЕНЕНИЕ: Замена текстового поля на выпадающий список <select>
     function createEditorFieldsForBlock(block) {
         let fieldsHTML = '';
         const bgPosField = `<div class="control-group"><label>Background Focus Point</label><input type="text" data-key="backgroundPosition" value="${block.content.backgroundPosition || 'center center'}" placeholder="e.g., center 30%"></div>`;
-        // ИЗМЕНЕНИЕ: Заменили поле Height на Aspect Ratio для предсказуемости
-        const aspectRatioField = `<div class="control-group"><label>Block Aspect Ratio</label><input type="text" data-key="aspectRatio" value="${block.content.aspectRatio || ''}" placeholder="e.g., 16/9, 1/1, 9/16 (empty for default)"></div>`;
+        
+        const aspectRatioField = `
+            <div class="control-group">
+                <label for="aspect-ratio-select-${block.id}">Block Shape (Height)</label>
+                <select id="aspect-ratio-select-${block.id}" data-key="aspectRatio">
+                    <option value="21/9" ${block.content.aspectRatio === '21/9' ? 'selected' : ''}>Cinematic (Very Wide)</option>
+                    <option value="16/9" ${block.content.aspectRatio === '16/9' ? 'selected' : ''}>Widescreen (Standard)</option>
+                    <option value="3/2"  ${block.content.aspectRatio === '3/2' ? 'selected' : ''}>Landscape (Classic Photo)</option>
+                    <option value="4/3"  ${block.content.aspectRatio === '4/3' ? 'selected' : ''}>Standard (Monitor)</option>
+                    <option value="1/1"  ${block.content.aspectRatio === '1/1' ? 'selected' : ''}>Square</option>
+                    <option value="9/12" ${block.content.aspectRatio === '9/12' ? 'selected' : ''}>Portrait (Standard)</option>
+                    <option value="9/16" ${block.content.aspectRatio === '9/16' ? 'selected' : ''}>Portrait (Tall)</option>
+                </select>
+            </div>`;
+        
         const innerBlocksEditor = createInnerBlocksEditor(block);
 
         switch(block.type) {
@@ -62,7 +75,11 @@
     
     function setupEventListeners() {
         const editorContent = document.getElementById('editor-content');
-        editorContent.addEventListener('input', (e) => {
+        // ИЗМЕНЕНИЕ: Добавлен 'change' для отслеживания <select>
+        editorContent.addEventListener('input', handleEditorChange);
+        editorContent.addEventListener('change', handleEditorChange);
+
+        function handleEditorChange(e) {
             const input = e.target;
             const blockDiv = input.closest('.editor-block');
             if (!blockDiv) return;
@@ -90,7 +107,7 @@
                 if (subItemIndex > -1) pageBlocks[blockIndex].content[listKey][subItemIndex][subItemKey] = input.value;
             }
             renderPreview();
-        });
+        }
 
         editorContent.addEventListener('click', (e) => {
             const target = e.target;
