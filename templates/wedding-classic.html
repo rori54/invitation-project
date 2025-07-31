@@ -10,6 +10,7 @@
     <style>
         :root{--accent-color:#c5a98b;--background-color:#f8f7f5}
         body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.7;background-color:var(--background-color);color:#333;opacity:0;transition:opacity .5s ease-in-out; background-size: cover; background-position: center; background-attachment: fixed;}
+        main { transition: opacity 1s ease-in-out; } body.intro-active main { opacity: 0; }
         .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; position: relative; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); box-sizing: border-box;}
         #page-content > .content-section:first-child { margin-top: 0; border-radius: 0; }
         #page-content > .hero-block + .content-section { margin-top: 30px; border-radius: 8px; }
@@ -41,7 +42,7 @@
         .schedule-event p{margin:5px 0 0; white-space: pre-wrap;}
         
         .location-block p { margin-bottom: 20px; white-space: pre-wrap; }
-        .location-block img { width: 100%; height: auto; max-height: 400px; object-fit: cover; border-radius: 8px; }
+        .location-block img { width: 100%; height: auto; max-height: 400px; object-fit: cover; border-radius: 8px; margin-bottom: 20px;}
         
         .rsvp-button{display:inline-block; padding:15px 30px;text-decoration:none;border-radius:50px;transition:transform .2s ease; margin: 10px;}
         .rsvp-button:hover{transform:scale(1.05)}
@@ -53,10 +54,18 @@
 
         @media (max-width: 768px) { .content-section { margin-left: 15px; margin-right: 15px; } }
         @media (max-width: 600px) { .content-section { padding: 30px 20px; margin: 20px 10px; } .schedule-item { flex-direction: column; align-items: flex-start; gap: 10px; } .time-block { padding: 15px; min-width: 60px; } .time-block .number { font-size: 2rem; } #countdown { gap: 10px; } }
+    
+        #envelope-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; z-index: 1000; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 1.5s ease-in-out; } #envelope-3d { width: 80%; max-width: 500px; height: 80%; max-height: 500px; transition: transform 0.5s, opacity 0.5s; opacity: 0; } #envelope-3d.loaded { opacity: 1; animation: floatAnimation 4s ease-in-out infinite; } #envelope-wrapper.hidden { opacity: 0; pointer-events: none; } @keyframes floatAnimation { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { translateY(0); } } @media (min-width: 768px) { #envelope-3d { max-width: 700px; max-height: 700px; } }
     </style>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 <body>
+    <div id="envelope-wrapper">
+        <model-viewer id="envelope-3d" src="/templates/envelope.glb" alt="An interactive 3D envelope" camera-controls disable-zoom interaction-prompt="none" camera-orbit="0deg 75deg 105%" style="width: 100%; height: 100%; background: none;"></model-viewer>
+    </div>
     <main id="page-content"></main>
+
     <script>
     let countdownInterval;
 
@@ -110,7 +119,7 @@
 
     const createCountdownHTML = (c, s) => createSectionWithTitleHTML('countdown', c, s, `<div id="countdown"><div class="time-block"><div id="days" class="number">00</div><div>Days</div></div><div class="time-block"><div id="hours" class="number">00</div><div>Hours</div></div><div class="time-block"><div id="minutes" class="number">00</div><div>Minutes</div></div><div class="time-block"><div id="seconds" class="number">00</div><div>Seconds</div></div></div>`);
     const createScheduleHTML = (c, s) => createSectionWithTitleHTML('schedule', c, s, `<ul class="schedule-list">${c.items.map(i => `<li class="schedule-item"><div class="schedule-time">${i.time}</div><div class="schedule-event"><h3>${i.title}</h3><p>${processText(i.desc)}</p></div></li>`).join('')}</ul>`);
-    const createLocationHTML = (c, s) => createSectionWithTitleHTML('location', c, s, `<p>${processText(c.address)}</p><img src="${c.imageUrl}" alt="Venue"><a href="${c.mapLink}" class="rsvp-button" target="_blank" style="margin-top: 30px;">View on Map</a>`);
+    const createLocationHTML = (c, s) => createSectionWithTitleHTML('location', c, s, `<p>${processText(c.address)}</p><img src="${c.imageUrl}" alt="Venue"><a href="${c.mapLink}" class="rsvp-button" target="_blank">View on Map</a>`);
     
     const createRsvpHTML = (c, s, rsvpLink) => {
         const buttonStyle = getStyleString(c.buttonStyle);
@@ -148,8 +157,10 @@
 
     function startCountdown(targetDate) { if (!targetDate) return; if (countdownInterval) clearInterval(countdownInterval); const targetTime = new Date(targetDate).getTime(); countdownInterval = setInterval(() => { const now = new Date().getTime(), distance = targetTime - now; if (distance < 0) { clearInterval(countdownInterval); const e = document.getElementById("countdown"); if (e) e.innerHTML = "<h2>The event has already happened!</h2>"; return; } const D = document.getElementById("days"), H = document.getElementById("hours"), M = document.getElementById("minutes"), S = document.getElementById("seconds"); if(D) D.innerText = Math.floor(distance / 864e5).toString().padStart(2, '0'); if(H) H.innerText = Math.floor(distance % 864e5 / 36e5).toString().padStart(2, '0'); if(M) M.innerText = Math.floor(distance % 36e5 / 6e4).toString().padStart(2, '0'); if(S) S.innerText = Math.floor(distance % 6e4 / 1e3).toString().padStart(2, '0'); }, 1000); }
     
+    function setupIntroAnimation() { const envelopeWrapper = document.getElementById('envelope-wrapper'); const modelViewer = document.getElementById('envelope-3d'); const mainContent = document.querySelector('main'); if (!envelopeWrapper || !modelViewer || typeof confetti !== 'function') { mainContent.style.opacity = 1; return; } document.body.classList.add('intro-active'); modelViewer.addEventListener('load', () => modelViewer.classList.add('loaded')); const fireConfetti = () => { const defaults = { spread: 360, ticks: 150, gravity: 0, decay: 0.95, startVelocity: 35, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] }; confetti({ ...defaults, particleCount: 60, scalar: 1.2, shapes: ['star'] }); confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] }); }; envelopeWrapper.addEventListener('click', () => { fireConfetti(); modelViewer.style.transform = 'scale(0)'; modelViewer.style.opacity = '0'; setTimeout(() => { document.body.classList.remove('intro-active'); envelopeWrapper.classList.add('hidden'); mainContent.style.opacity = 1; }, 500); }, { once: true }); }
+
     async function loadInvitationData() {
-        document.body.style.opacity = 1; // Show body content
+        document.body.style.opacity = 1;
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id'), pageType = params.get('page') || 'main';
         if (id && pageType) {
@@ -168,12 +179,13 @@
         }
     }
 
-    // Don't run intro animation if inside an iframe (the editor)
-    if (window.self === window.top) {
-        // Here you can add back the envelope intro animation if you want it on the final page
-        loadInvitationData(); 
-    } else {
+    if (window.self === window.top) { // Final page logic
+        loadInvitationData();
+        setupIntroAnimation();
+    } else { // Editor iframe logic
         document.body.style.opacity = 1;
+        const envelope = document.getElementById('envelope-wrapper');
+        if (envelope) envelope.style.display = 'none';
     }
     </script>
 </body>
