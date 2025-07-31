@@ -16,8 +16,20 @@
         h1,h2,h3{font-family:'Playfair Display',serif;text-align:center}
         h2{font-size:2.2rem;margin-top: 0; margin-bottom:30px}
         
-        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; background-size: cover; overflow: hidden; width: 100%; aspect-ratio: 16 / 9; }
+        /* ИЗМЕНЕНИЕ: Убрали background-size из основного класса */
+        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; overflow: hidden; width: 100%; aspect-ratio: 16 / 9; }
         @media (max-width: 600px) { .hero-block { aspect-ratio: 9 / 12; } }
+        
+        /* НОВОЕ ПРАВИЛО: Стили для тега <img>, который будет фоном */
+        .hero-background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Аналог background-size: cover */
+            z-index: 0; /* Размещаем под контентом и оверлеем */
+        }
 
         .hero-block::before{ content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); z-index: 1; }
         .hero-content{ position:relative; z-index: 2; width: 90%; max-width: 1000px; }
@@ -69,7 +81,7 @@
     <script>
     let countdownInterval;
     
-    // ИСПРАВЛЕНИЕ: Функция теперь корректно обрабатывает vh и другие единицы
+    // ИЗМЕНЕНИЕ: Полностью переработана функция для использования <img> вместо background-image
     const createHeroHTML = (c, s) => {
         let innerBlocksHTML = '';
         if (c.innerBlocks && c.innerBlocks.length > 0) {
@@ -80,27 +92,34 @@
             }).join('')}</div>`;
         }
         
-        const styles = [
-            `background-image: url('${c.imageUrl}')`,
-            `background-position: ${c.backgroundPosition || 'center center'}`,
-        ];
+        // Создаем HTML-код для фонового изображения
+        const imageHTML = c.imageUrl 
+            ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'};" alt="Wedding background">`
+            : '';
 
+        // Создаем стили для самого контейнера .hero-block
+        const headerStyles = [];
         if (c.height && c.height.trim() !== '') {
-            // Если используются 'vh', применяем переменную --vh
             if (c.height.includes('vh')) {
                 const vhValue = parseFloat(c.height) || 0;
-                // Используем calc с переданной переменной, с фоллбэком на 1vh
-                styles.push(`height: calc(var(--vh, 1vh) * ${vhValue})`);
+                headerStyles.push(`height: calc(var(--vh, 1vh) * ${vhValue})`);
             } else {
-                // Для других единиц (px, %, em) используем значение как есть
-                styles.push(`height: ${c.height}`);
+                headerStyles.push(`height: ${c.height}`);
             }
-            // Отключаем aspect-ratio, чтобы высота имела приоритет
-            styles.push(`aspect-ratio: auto`);
+            headerStyles.push(`aspect-ratio: auto`);
         }
+        const styleAttribute = headerStyles.join('; ');
 
-        const styleAttribute = styles.filter(Boolean).join('; ');
-        return `<header class="hero-block" style="${styleAttribute}"><div class="hero-content"><p>${c.subtitle}</p><h1>${c.names}</h1><p>${c.date}</p>${innerBlocksHTML}</div></header>`;
+        // Собираем финальный HTML блока
+        return `<header class="hero-block" style="${styleAttribute}">
+                    ${imageHTML}
+                    <div class="hero-content">
+                        <p>${c.subtitle}</p>
+                        <h1>${c.names}</h1>
+                        <p>${c.date}</p>
+                        ${innerBlocksHTML}
+                    </div>
+                </header>`;
     };
 
     const processText = (text) => (text || '').replace(/\n/g, '<br>');
