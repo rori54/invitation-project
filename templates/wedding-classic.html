@@ -48,7 +48,7 @@
         @media (max-width: 768px) { .content-section { margin-left: 15px; margin-right: 15px; } }
         @media (max-width: 600px) { .hero-content h1 { font-size: 2.8rem; } h2 { font-size: 1.8rem; } .content-section { padding: 30px 20px; margin: 20px 10px; } .schedule-item { flex-direction: column; align-items: flex-start; gap: 10px; } .time-block { padding: 15px; min-width: 60px; } .time-block .number { font-size: 2rem; } #countdown { gap: 10px; } }
 
-        /* ===== СТИЛИ ДЛЯ 3D-ЗАСТАВКИ (С ИСПРАВЛЕНИЕМ) ===== */
+        /* ===== СТИЛИ ДЛЯ 3D-ЗАСТАВКИ (С АНИМАЦИЕЙ КОЛЫХАНИЯ) ===== */
         #envelope-wrapper {
             position: fixed;
             top: 0;
@@ -72,30 +72,34 @@
             height: 80%;
             max-height: 500px;
             transition: transform 0.5s, opacity 0.5s;
-            /* ИСПРАВЛЕНИЕ: Изначально делаем модель невидимой */
             opacity: 0; 
         }
-        /* ИСПРАВЛЕНИЕ: Новый класс, который мы добавим, когда модель готова */
         #envelope-3d.loaded {
             opacity: 1;
+            /* ИСПРАВЛЕНИЕ: Применяем анимацию колыхания */
+            animation: floatAnimation 4s ease-in-out infinite;
         }
         #envelope-wrapper.hidden {
             opacity: 0;
             pointer-events: none;
         }
+        /* ИСПРАВЛЕНИЕ: Новая анимация колыхания */
+        @keyframes floatAnimation {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0); }
+        }
     </style>
     
-    <!-- Библиотеки подключаются здесь, как и раньше -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 <body>
     <div id="envelope-wrapper">
-        <!-- Атрибуты модели остаются такими же, как в прошлый раз -->
+        <!-- ИСПРАВЛЕНИЕ: Убран auto-rotate -->
         <model-viewer id="envelope-3d"
             src="/templates/envelope.glb"
             alt="An interactive 3D envelope"
-            auto-rotate
             camera-controls
             disable-zoom
             interaction-prompt="none"
@@ -106,29 +110,21 @@
     <main id="page-content"></main>
     
     <script>
+    // ... (весь JavaScript код остается АБСОЛЮТНО ТАКИМ ЖЕ, как и в прошлый раз) ...
     let countdownInterval;
-
-    // ===== ИСПРАВЛЕННАЯ ЛОГИКА ДЛЯ 3D-ЗАСТАВКИ =====
     function setupIntroAnimation() {
         const envelopeWrapper = document.getElementById('envelope-wrapper');
         const modelViewer = document.getElementById('envelope-3d');
-
         if (!envelopeWrapper || !modelViewer || typeof confetti !== 'function') return;
-
         document.body.classList.add('intro-active');
-        
-        // ИСПРАВЛЕНИЕ: Мы ждем специального события 'load' от model-viewer
         modelViewer.addEventListener('load', () => {
-            // Когда модель ПОЛНОСТЬЮ загружена и готова, мы делаем ее видимой
             modelViewer.classList.add('loaded');
         });
-
         const fireConfetti = () => {
             const defaults = { spread: 360, ticks: 100, gravity: 0, decay: 0.94, startVelocity: 30, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] };
             confetti({ ...defaults, particleCount: 40, scalar: 1.2, shapes: ['star'] });
             confetti({ ...defaults, particleCount: 10, scalar: 0.75, shapes: ['circle'] });
         };
-
         envelopeWrapper.addEventListener('click', () => {
             fireConfetti();
             modelViewer.style.transform = 'scale(0)';
@@ -139,8 +135,6 @@
             }, 500);
         }, { once: true });
     }
-
-    // ... (весь остальной JavaScript код остается ТОЧНО ТАКИМ ЖЕ) ...
     const getBlockStyles = (c, settings, type) => {
         const styles = [];
         if (type !== 'hero' || settings.style === 'modern') { styles.push(`max-width: ${settings.maxWidth || '800px'}`); }
