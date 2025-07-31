@@ -16,6 +16,7 @@
         h1,h2,h3{font-family:'Playfair Display',serif;text-align:center}
         h2{font-size:2.2rem;margin-top: 0; margin-bottom:30px}
         
+        /* ===== ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ ДЛЯ HERO BLOCK ===== */
         .hero-block {
             display: flex;
             flex-direction: column;
@@ -25,13 +26,17 @@
             text-align: center;
             position: relative;
             background-size: cover;
+            /* background-position УПРАВЛЯЕТСЯ ЧЕРЕЗ JAVASCRIPT */
             overflow: hidden;
             width: 100%;
-            aspect-ratio: 16 / 9;
+            /* ИСПОЛЬЗУЕМ СООТНОШЕНИЕ СТОРОН ВМЕСТО ВЫСОТЫ */
+            aspect-ratio: 16 / 9; /* Стандартное широкоэкранное соотношение для ПК */
         }
+        /* Адаптивность для телефонов */
         @media (max-width: 600px) {
             .hero-block {
-                aspect-ratio: 9 / 12;
+                /* Более вертикальное соотношение для мобильных */
+                aspect-ratio: 9 / 12; 
             }
         }
         .hero-block::before{
@@ -48,6 +53,7 @@
             position:relative;
             z-index: 2;
         }
+        /* ===== КОНЕЦ ФИНАЛЬНОГО ИСПРАВЛЕНИЯ ===== */
 
         .hero-content h1{font-size:4rem;margin:10px 0; line-height: 1.2;}
         .hero-content p{font-size:1.2rem;letter-spacing:2px; margin: 0;}
@@ -76,9 +82,11 @@
         .image-block img { max-width: 100%; border-radius: 8px; } 
         .image-block figcaption { margin-top: 10px; font-style: italic; color: #777; }
         @media (max-width: 768px) { .content-section { margin-left: 15px; margin-right: 15px; } }
+        /* Медиа-запрос для мобильных телефонов находится выше, чтобы быть более специфичным */
         @media (max-width: 600px) {
              .hero-content h1 { font-size: 2.8rem; } h2 { font-size: 1.8rem; } .content-section { padding: 30px 20px; margin: 20px 10px; } .schedule-item { flex-direction: column; align-items: flex-start; gap: 10px; } .time-block { padding: 15px; min-width: 60px; } .time-block .number { font-size: 2rem; } #countdown { gap: 10px; } 
         }
+        /* ... (ВСЕ СТИЛИ ДЛЯ КОНВЕРТА ОСТАЮТСЯ БЕЗ ИЗМЕНЕНИЙ) ... */
         #envelope-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; z-index: 1000; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 1.5s ease-in-out; } body.intro-active main { opacity: 0; } #envelope-3d { width: 80%; max-width: 500px; height: 80%; max-height: 500px; transition: transform 0.5s, opacity 0.5s; opacity: 0; } #envelope-3d.loaded { opacity: 1; animation: floatAnimation 4s ease-in-out infinite; } #envelope-wrapper.hidden { opacity: 0; pointer-events: none; } @keyframes floatAnimation { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0); } } @media (min-width: 768px) { #envelope-3d { max-width: 700px; max-height: 700px; } }
     </style>
     
@@ -93,23 +101,20 @@
     
     <script>
     let countdownInterval;
-    function setupIntroAnimation() { /* ... (без изменений) ... */ }
+    function setupIntroAnimation() { /* ... (эта функция остается без изменений) ... */ }
     
+    // ===== ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ В JAVASCRIPT =====
     const createHeroHTML = (c, s) => {
         const styles = [
             `background-image: url('${c.imageUrl}')`,
             `background-position: ${c.backgroundPosition || 'center center'}`,
         ];
-        if (c.height && c.height !== 'auto') {
-            styles.push(`height: ${c.height}`);
-            styles.push(`aspect-ratio: auto`);
-        }
         const styleAttribute = styles.filter(Boolean).join('; ');
         return `<header class="hero-block" style="${styleAttribute}"><div class="hero-content"><p>${c.subtitle}</p><h1>${c.names}</h1><p>${c.date}</p></div></header>`;
     };
 
+    const processText = (text) => (text || '').replace(/\n/g, '<br>'); // ... (все остальные функции остаются без изменений)
     function setupIntroAnimation() { const envelopeWrapper = document.getElementById('envelope-wrapper'); const modelViewer = document.getElementById('envelope-3d'); if (!envelopeWrapper || !modelViewer || typeof confetti !== 'function') return; document.body.classList.add('intro-active'); modelViewer.addEventListener('load', () => { modelViewer.classList.add('loaded'); }); const fireConfetti = () => { const defaults = { spread: 360, ticks: 150, gravity: 0, decay: 0.95, startVelocity: 35, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] }; confetti({ ...defaults, particleCount: 60, scalar: 1.2, shapes: ['star'] }); confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] }); }; envelopeWrapper.addEventListener('click', () => { fireConfetti(); modelViewer.style.transform = 'scale(0)'; modelViewer.style.opacity = '0'; setTimeout(() => { document.body.classList.remove('intro-active'); envelopeWrapper.classList.add('hidden'); }, 500); }, { once: true }); }
-    const processText = (text) => (text || '').replace(/\n/g, '<br>');
     const createCountdownHTML = (c, s) => `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 id="countdown-title">${c.title}</h2><div id="countdown"><div class="time-block"><div id="days" class="number">00</div><div>Days</div></div><div class="time-block"><div id="hours" class="number">00</div><div>Hours</div></div><div class="time-block"><div id="minutes" class="number">00</div><div>Minutes</div></div><div class="time-block"><div id="seconds" class="number">00</div><div>Seconds</div></div></div></section>`;
     const createScheduleHTML = (c, s) => `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2>${c.title}</h2><ul class="schedule-list">${c.items.map(i => `<li class="schedule-item"><div class="schedule-time">${i.time}</div><div class="schedule-event"><h3>${i.title}</h3><p>${processText(i.desc)}</p></div></li>`).join('')}</ul></section>`;
     const createLocationHTML = (c, s) => `<section class="content-section location-block" style="max-width: ${s.maxWidth || '800px'};"><h2>${c.title}</h2><p>${processText(c.address)}</p><img src="${c.imageUrl}" alt="Venue"><a href="${c.mapLink}" class="rsvp-button" target="_blank" style="margin-top: 30px;">View on Map</a></section>`;
