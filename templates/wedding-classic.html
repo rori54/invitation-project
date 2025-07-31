@@ -89,6 +89,15 @@
             50% { transform: translateY(-15px); }
             100% { transform: translateY(0); }
         }
+        
+        /* ===== АДАПТИВНОСТЬ ДЛЯ БОЛЬШИХ ЭКРАНОВ ===== */
+    @media (min-width: 768px) {
+        #envelope-3d {
+            max-width: 700px;
+            max-height: 700px;
+        }
+    }
+    
     </style>
     
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -121,9 +130,9 @@
             modelViewer.classList.add('loaded');
         });
         const fireConfetti = () => {
-            const defaults = { spread: 360, ticks: 100, gravity: 0, decay: 0.94, startVelocity: 30, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] };
-            confetti({ ...defaults, particleCount: 40, scalar: 1.2, shapes: ['star'] });
-            confetti({ ...defaults, particleCount: 10, scalar: 0.75, shapes: ['circle'] });
+            const defaults = { spread: 360, ticks: 200, gravity: 0, decay: 0.96, startVelocity: 45, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] };
+            confetti({ ...defaults, particleCount: 100, scalar: 1.2, shapes: ['star'] });
+            confetti({ ...defaults, particleCount: 30, scalar: 0.75, shapes: ['circle'] });
         };
         envelopeWrapper.addEventListener('click', () => {
             fireConfetti();
