@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wedding Invitation</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,25 +25,13 @@
             color: white;
             text-align: center;
             position: relative;
-            /* УБИРАЕМ фон отсюда, он больше не нужен */
+            background-size: cover; /* Возвращаем COVER по умолчанию */
+            /* background-position УПРАВЛЯЕТСЯ ЧЕРЕЗ JAVASCRIPT */
             overflow: hidden;
             padding: 40px 20px;
             box-sizing: border-box;
             width: 100%;
         }
-        /* Новый стиль для картинки внутри */
-        .hero-block .hero-image {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            /* Картинка всегда будет вписана целиком */
-            object-fit: contain; 
-            /* Ставим ее на самый нижний слой */
-            z-index: 0; 
-        }
-        /* Затемняющий слой теперь лежит поверх картинки */
         .hero-block::before{
             content:'';
             position:absolute;
@@ -52,12 +40,11 @@
             width:100%;
             height:100%;
             background:rgba(0,0,0,.4); 
-            z-index: 1; /* z-index: 1 (выше картинки) */
+            z-index: 1;
         }
-        /* Текст лежит поверх затемняющего слоя */
         .hero-content{
             position:relative;
-            z-index: 2; /* z-index: 2 (самый верхний) */
+            z-index: 2;
         }
         /* ===== КОНЕЦ ФИНАЛЬНОГО ИСПРАВЛЕНИЯ ===== */
 
@@ -89,15 +76,8 @@
         .image-block figcaption { margin-top: 10px; font-style: italic; color: #777; }
         @media (max-width: 768px) { .content-section { margin-left: 15px; margin-right: 15px; } }
         @media (max-width: 600px) { .hero-content h1 { font-size: 2.8rem; } h2 { font-size: 1.8rem; } .content-section { padding: 30px 20px; margin: 20px 10px; } .schedule-item { flex-direction: column; align-items: flex-start; gap: 10px; } .time-block { padding: 15px; min-width: 60px; } .time-block .number { font-size: 2rem; } #countdown { gap: 10px; } }
-
         /* ... (ВСЕ СТИЛИ ДЛЯ КОНВЕРТА ОСТАЮТСЯ БЕЗ ИЗМЕНЕНИЙ) ... */
-        #envelope-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; z-index: 1000; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 1.5s ease-in-out; }
-        body.intro-active main { opacity: 0; }
-        #envelope-3d { width: 80%; max-width: 500px; height: 80%; max-height: 500px; transition: transform 0.5s, opacity 0.5s; opacity: 0; }
-        #envelope-3d.loaded { opacity: 1; animation: floatAnimation 4s ease-in-out infinite; }
-        #envelope-wrapper.hidden { opacity: 0; pointer-events: none; }
-        @keyframes floatAnimation { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0); } }
-        @media (min-width: 768px) { #envelope-3d { max-width: 700px; max-height: 700px; } }
+        #envelope-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; z-index: 1000; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 1.5s ease-in-out; } body.intro-active main { opacity: 0; } #envelope-3d { width: 80%; max-width: 500px; height: 80%; max-height: 500px; transition: transform 0.5s, opacity 0.5s; opacity: 0; } #envelope-3d.loaded { opacity: 1; animation: floatAnimation 4s ease-in-out infinite; } #envelope-wrapper.hidden { opacity: 0; pointer-events: none; } @keyframes floatAnimation { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0); } } @media (min-width: 768px) { #envelope-3d { max-width: 700px; max-height: 700px; } }
     </style>
     
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -141,20 +121,13 @@
     
     // ===== ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ В JAVASCRIPT =====
     const createHeroHTML = (c, s) => {
-        // Стиль теперь применяется только для высоты блока
-        const headerStyles = getBlockStyles(c, s, 'hero');
-
-        return `
-            <header class="hero-block" style="${headerStyles}">
-                <!-- Эта картинка всегда будет видна целиком -->
-                <img class="hero-image" src="${c.imageUrl}" alt="Main photo">
-                
-                <div class="hero-content">
-                    <p>${c.subtitle}</p>
-                    <h1>${c.names}</h1>
-                    <p>${c.date}</p>
-                </div>
-            </header>`;
+        const styles = [
+            `background-image: url('${c.imageUrl}')`,
+            `background-position: ${c.backgroundPosition || 'center center'}`, // Используем новое свойство
+            getBlockStyles(c, s, 'hero')
+        ];
+        const styleAttribute = styles.filter(Boolean).join('; ');
+        return `<header class="hero-block" style="${styleAttribute}"><div class="hero-content"><p>${c.subtitle}</p><h1>${c.names}</h1><p>${c.date}</p></div></header>`;
     };
 
     const processText = (text) => (text || '').replace(/\n/g, '<br>'); // ... (все остальные функции остаются без изменений)
