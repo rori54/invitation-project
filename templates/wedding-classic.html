@@ -67,11 +67,9 @@
     const createHeroHTML = (c, s) => {
         const imageHTML = c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'};" alt="Wedding background">` : '';
         const headerStyle = c.aspectRatio ? `aspect-ratio: ${c.aspectRatio};` : '';
-        
         const subtitleHTML = (c.subtitle && c.subtitle.enabled) ? `<p style="${getStyleString(c.subtitle.style)}">${c.subtitle.text}</p>` : '';
         const namesHTML = (c.names && c.names.enabled) ? `<h1 style="${getStyleString(c.names.style)}">${c.names.text}</h1>` : '';
         const dateHTML = (c.date && c.date.enabled) ? `<p style="${getStyleString(c.date.style)}">${c.date.text}</p>` : '';
-
         let innerBlocksHTML = '';
         if (c.innerBlocks && c.innerBlocks.length > 0) {
             innerBlocksHTML = `<div class="hero-inner-blocks">${c.innerBlocks.map(b => {
@@ -81,7 +79,6 @@
                 return '';
             }).join('')}</div>`;
         }
-
         return `<header class="hero-block" style="${headerStyle}">
                     ${imageHTML}
                     <div class="hero-content">
@@ -141,9 +138,36 @@
         });
         if (countdownBlock) startCountdown(countdownBlock.targetDate);
     }
-    // ... countdown and data loading functions are correct and unchanged ...
+    
     function startCountdown(targetDate) { if (!targetDate) return; if (countdownInterval) clearInterval(countdownInterval); const targetTime = new Date(targetDate).getTime(); countdownInterval = setInterval(() => { const now = new Date().getTime(), distance = targetTime - now; if (distance < 0) { clearInterval(countdownInterval); const e = document.getElementById("countdown"); if (e) e.innerHTML = "<h2>The event has already happened!</h2>"; return; } const D = document.getElementById("days"), H = document.getElementById("hours"), M = document.getElementById("minutes"), S = document.getElementById("seconds"); if(D) D.innerText = Math.floor(distance / 864e5).toString().padStart(2, '0'); if(H) H.innerText = Math.floor(distance % 864e5 / 36e5).toString().padStart(2, '0'); if(M) M.innerText = Math.floor(distance % 36e5 / 6e4).toString().padStart(2, '0'); if(S) S.innerText = Math.floor(distance % 6e4 / 1e3).toString().padStart(2, '0'); }, 1000); }
-    function setupIntroAnimation() { const envelopeWrapper = document.getElementById('envelope-wrapper'); const modelViewer = document.getElementById('envelope-3d'); const mainContent = document.querySelector('main'); if (!envelopeWrapper || !modelViewer || typeof confetti !== 'function') { mainContent.style.opacity = 1; document.body.style.opacity = 1; return; } document.body.classList.add('intro-active'); modelViewer.addEventListener('load', () => modelViewer.classList.add('loaded')); const fireConfetti = () => { const defaults = { spread: 360, ticks: 150, gravity: 0, decay: 0.95, startVelocity: 35, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] }; confetti({ ...defaults, particleCount: 60, scalar: 1.2, shapes: ['star'] }); confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] }); }; envelopeWrapper.addEventListener('click', () => { fireConfetti(); modelViewer.style.transform = 'scale(0)'; modelViewer.style.opacity = '0'; setTimeout(() => { document.body.classList.remove('intro-active'); envelopeWrapper.classList.add('hidden'); mainContent.style.opacity = 1; document.body.style.opacity = 1; }, 500); }, { once: true }); }
+    
+    function setupIntroAnimation() {
+        const envelopeWrapper = document.getElementById('envelope-wrapper');
+        const modelViewer = document.getElementById('envelope-3d');
+        const mainContent = document.querySelector('main');
+        if (!envelopeWrapper || !modelViewer || typeof confetti !== 'function') {
+            document.body.style.opacity = 1; // Fallback to just show the page
+            if(envelopeWrapper) envelopeWrapper.style.display = 'none';
+            return;
+        }
+        document.body.classList.add('intro-active');
+        document.body.style.opacity = 1; // Make body visible to show envelope
+        
+        modelViewer.addEventListener('load', () => modelViewer.classList.add('loaded'));
+        
+        const fireConfetti = () => { const defaults = { spread: 360, ticks: 150, gravity: 0, decay: 0.95, startVelocity: 35, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] }; confetti({ ...defaults, particleCount: 60, scalar: 1.2, shapes: ['star'] }); confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] }); };
+        
+        envelopeWrapper.addEventListener('click', () => {
+            fireConfetti();
+            modelViewer.style.transform = 'scale(0)';
+            modelViewer.style.opacity = '0';
+            setTimeout(() => {
+                document.body.classList.remove('intro-active');
+                envelopeWrapper.classList.add('hidden');
+            }, 500);
+        }, { once: true });
+    }
+
     async function loadInvitationData() {
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id'), pageType = params.get('page') || 'main';
@@ -154,7 +178,7 @@
                 const data = (await r.json()).record;
                 const pageData = data[pageType];
                 if (!pageData) throw new Error(`Page data ('${pageType}') not found.`);
-                const rsvpTemplateFile = data.rsvp.template;
+                const rsvpTemplateFile = data.rsvp ? data.rsvp.template : 'rsvp-form.html';
                 const rsvpLink = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)}${rsvpTemplateFile}?id=${id}&page=rsvp`;
                 renderPage(pageData.blocks, pageData.settings, rsvpLink);
             } catch (e) {
@@ -162,6 +186,7 @@
             }
         }
     }
+
     if (window.self === window.top) { // Final page logic
         loadInvitationData();
         setupIntroAnimation();

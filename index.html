@@ -52,7 +52,6 @@
             const textContentField = innerBlock.type === 'heading'
                 ? `<input type="text" data-key="innerBlocks.${index}.text" value="${innerBlock.text || ''}">`
                 : `<textarea data-key="innerBlocks.${index}.text">${innerBlock.text || ''}</textarea>`;
-            
             return `<div class="inner-block-editor" data-index="${index}">
                 <button class="delete-inner-block-btn" title="Delete this element">×</button>
                 <label style="text-transform: capitalize;">${innerBlock.type} Text</label>
@@ -60,7 +59,6 @@
                 ${createStyleControlsHTML(`innerBlocks.${index}.style`, innerBlock.style, { textAlign: true, color: true, size: true, weight: true, family: true })}
             </div>`;
         }).join('');
-
         return `<div class="inner-blocks-container">
             <label style="font-weight: bold; color: #333;">Additional Elements</label>
             <div class="inner-blocks-list">${innerBlocksHTML}</div>
@@ -94,7 +92,7 @@
         let fieldsHTML = '';
         const c = block.content;
         const bgPosField = `<div class="control-group"><label>Background Focus Point</label><input type="text" data-key="backgroundPosition" value="${c.backgroundPosition || 'center center'}" placeholder="e.g., center 30%"></div>`;
-        const aspectRatioField = `<div class="control-group"><label>Block Shape (Height)</label><select data-key="aspectRatio"> <option value="21/9" ${c.aspectRatio === '21/9' ? 'selected' : ''}>Cinematic (Very Wide)</option> <option value="16/9" ${c.aspectRatio === '16/9' ? 'selected' : ''}>Widescreen (Standard)</option> <option value="8/5" ${c.aspectRatio === '8/5' ? 'selected' : ''}>Landscape (Wide)</option> <option value="3/2"  ${c.aspectRatio === '3/2' ? 'selected' : ''}>Landscape (Classic)</option> <option value="4/3"  ${c.aspectRatio === '4/3' ? 'selected' : ''}>Standard (4:3)</option> <option value="1/1"  ${c.aspectRatio === '1/1' ? 'selected' : ''}>Square</option> <option value="9/12" ${c.aspectRatio === '9/12' ? 'selected' : ''}>Portrait (Standard)</option> <option value="9/16" ${c.aspectRatio === '9/16' ? 'selected' : ''}>Portrait (Tall)</option> </select></div>`;
+        const aspectRatioField = `<div class="control-group"><label>Block Shape (Height)</label><select data-key="aspectRatio"> <option value="21/9" ${c.aspectRatio === '21/9' ? 'selected' : ''}>Cinematic</option> <option value="16/9" ${c.aspectRatio === '16/9' ? 'selected' : ''}>Widescreen</option> <option value="8/5" ${c.aspectRatio === '8/5' ? 'selected' : ''}>Landscape (Wide)</option> <option value="3/2"  ${c.aspectRatio === '3/2' ? 'selected' : ''}>Landscape (Classic)</option> <option value="4/3"  ${c.aspectRatio === '4/3' ? 'selected' : ''}>Standard (4:3)</option> <option value="1/1"  ${c.aspectRatio === '1/1' ? 'selected' : ''}>Square</option> <option value="9/12" ${c.aspectRatio === '9/12' ? 'selected' : ''}>Portrait (Standard)</option> <option value="9/16" ${c.aspectRatio === '9/16' ? 'selected' : ''}>Portrait (Tall)</option> </select></div>`;
         const titleStyleField = (styleObj) => `<label>Title Style</label>${createStyleControlsHTML('titleStyle', styleObj, { textAlign: true, color: true, size: true, weight: true, family: true })}`;
         const sectionTitleField = (title) => `<div class="control-group"><label>Section Title</label><input type="text" data-key="title" value="${title}"></div>`;
         
@@ -133,16 +131,42 @@
                 fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}`;
                 if(block.type === 'countdown') fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Target Date & Time</label><input type="datetime-local" data-key="targetDate" value="${c.targetDate}"></div>`;
                 if(block.type === 'schedule') { let items = (c.items || []).map(item => `<div class="sub-item-editor" data-item-id="${item.id}"><input type="text" placeholder="Time" class="sub-item-input" data-item-key="time" value="${item.time}"><input type="text" placeholder="Title" class="sub-item-input" data-item-key="title" value="${item.title}"><button class="delete-sub-item-btn">×</button><textarea class="sub-item-input" data-item-key="desc" placeholder="Description">${item.desc}</textarea></div>`).join(''); fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Items</label>${items}</div><button class="add-sub-item-btn action-button" data-list-key="items" style="font-size: 12px; padding: 5px; margin-top: 10px;">+ Add Item</button>`; }
-                if(block.type === 'location') { fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Smart Location Search</label><input type="text" class="smart-location-search" placeholder="e.g., Per Se, New York"></div><div class="control-group"><label>Address</label><textarea data-key="address">${c.address}</textarea></div><div class="control-group"><label>Photo URL</label><input type="url" data-key="imageUrl" value="${c.imageUrl}"></div><div class="control-group"><label>Google Maps Link</label><input type="url" data-key="mapLink" value="${c.mapLink}"></div>`; }
+                if(block.type === 'location') { fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Smart Location Search</label><input type="text" class="smart-location-search" placeholder="e.g., Per Se, New York"></div><div class="control-group"><label>Address</label><textarea data-key="address">${c.address || ''}</textarea></div><div class="control-group"><label>Photo URL</label><input type="url" data-key="imageUrl" value="${c.imageUrl || ''}"></div><div class="control-group"><label>Google Maps Link</label><input type="url" data-key="mapLink" value="${c.mapLink || ''}"></div>`; }
                 break;
-            // ... (other cases are unchanged)
             default: fieldsHTML = 'No editor available for this block type.';
         }
         return fieldsHTML;
     }
 
     function renderEditor() { const container = document.getElementById('editor-content'); const currentlyOpen = [...container.querySelectorAll('.editor-block-content.is-open')].map(el => el.closest('.editor-block').dataset.id); container.innerHTML = ''; pageBlocks.forEach(block => { const tpl = document.getElementById('editor-block-template').content.cloneNode(true); const editorBlock = tpl.querySelector('.editor-block'); editorBlock.dataset.id = block.id; const title = block.type.charAt(0).toUpperCase() + block.type.slice(1).replace(/-/g, ' '); editorBlock.querySelector('.editor-block-title').textContent = title; const contentDiv = editorBlock.querySelector('.editor-block-content'); contentDiv.innerHTML = createEditorFieldsForBlock(block); if (currentlyOpen.includes(block.id)) { contentDiv.classList.add('is-open'); editorBlock.querySelector('.toggle-btn').textContent = '▲'; } container.appendChild(tpl); }); initializeMapsForEditor(); }
-    function initializeMapsForEditor() { if (typeof google === 'undefined' || typeof google.maps === 'undefined') return; document.querySelectorAll('.smart-location-search').forEach(input => { if (input.dataset.mapsInitialized) return; input.dataset.mapsInitialized = 'true'; const autocomplete = new google.maps.places.Autocomplete(input, { fields: ["name", "formatted_address", "photos", "url"], types: ["establishment"] }); autocomplete.addListener('place_changed', () => { const place = autocomplete.getPlace(); if (!place) return; const blockDiv = input.closest('.editor-block'); const blockId = blockDiv.dataset.id; const blockIndex = pageBlocks.findIndex(b => b.id === blockId); if (blockIndex === -1) return; const content = pageBlocks[blockIndex].content; content.title = place.name; content.address = place.formatted_address; content.mapLink = place.url; if (place.photos && place.photos.length > 0) content.imageUrl = place.photos[0].getUrl({ 'maxWidth': 1600 }); renderEditor(); renderPreview(); }); }); }
+    
+    function initializeMapsForEditor() {
+        if (typeof google === 'undefined' || typeof google.maps === 'undefined' || typeof google.maps.places === 'undefined') { console.warn("Google Maps script not ready."); return; }
+        document.querySelectorAll('.smart-location-search').forEach(input => {
+            if (input.dataset.mapsInitialized) return;
+            input.dataset.mapsInitialized = 'true';
+            const autocomplete = new google.maps.places.Autocomplete(input, { fields: ["name", "formatted_address", "photos", "url"], types: ["establishment"] });
+            autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+                if (!place) return;
+                const blockDiv = input.closest('.editor-block');
+                const blockId = blockDiv.dataset.id;
+                const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
+                if (blockIndex === -1) return;
+                
+                const content = pageBlocks[blockIndex].content;
+                content.title = place.name || '';
+                content.address = place.formatted_address || '';
+                content.mapLink = place.url || '';
+                if (place.photos && place.photos.length > 0) {
+                    content.imageUrl = place.photos[0].getUrl({ 'maxWidth': 1600 });
+                }
+                
+                renderEditor();
+                renderPreview();
+            });
+        });
+    }
     
     function setupEventListeners() {
         const editorContent = document.getElementById('editor-content');
@@ -185,7 +209,7 @@
 
             if (target.matches('.add-inner-block-btn')) {
                 const type = target.dataset.innerType;
-                const newInnerBlock = { id: `inner-${Date.now()}`, type, text: `New ${type}`, style: type === 'heading' ? {...defaultTitleStyle} : {...defaultTextStyle} };
+                const newInnerBlock = { id: `inner-${Date.now()}`, type, text: `New ${type}`, style: type === 'heading' ? {...defaultTitleStyle, color: '#FFFFFF'} : {...defaultTextStyle, color: '#FFFFFF'} };
                 if (!pageBlocks[blockIndex].content.innerBlocks) {
                     pageBlocks[blockIndex].content.innerBlocks = [];
                 }
@@ -203,7 +227,6 @@
             else if (target.closest('.editor-block-header')) { const content = blockDiv.querySelector('.editor-block-content'); if (content) { content.classList.toggle('is-open'); blockDiv.querySelector('.toggle-btn').textContent = content.classList.contains('is-open') ? '▲' : '▼'; } }
         });
     }
-    // ... rest of the script (modal, observer, sortable, share, etc.) is unchanged and correct ...
     const addBlockModal = document.getElementById('add-block-modal'); document.getElementById('add-block-btn').addEventListener('click', () => addBlockModal.classList.add('is-visible')); document.getElementById('modal-close-btn').addEventListener('click', () => addBlockModal.classList.remove('is-visible')); addBlockModal.addEventListener('click', (e) => { if (e.target === addBlockModal) addBlockModal.classList.remove('is-visible'); }); document.getElementById('add-block-options').addEventListener('click', (e) => { if (e.target.tagName === 'BUTTON' && e.target.dataset.type) { const newBlock = getNewBlockData(e.target.dataset.type); pageBlocks.push(newBlock); renderEditor(); renderPreview(); addBlockModal.classList.remove('is-visible'); } });
     let resizeObserver; function setupResizeObserver() { if (resizeObserver) resizeObserver.disconnect(); const previewBody = iframe.contentWindow.document.body; if (!previewBody) return; resizeObserver = new ResizeObserver(() => { iframe.style.height = previewBody.scrollHeight + 'px'; }); resizeObserver.observe(previewBody); iframe.style.height = previewBody.scrollHeight + 'px'; }
     function renderPreview() { if (iframe.contentWindow && typeof iframe.contentWindow.renderPage === 'function') { iframe.contentWindow.renderPage(pageBlocks, pageSettings); } }
@@ -220,10 +243,10 @@
     editRsvpBtn.addEventListener('click', () => { if (currentTemplate !== rsvpFormData.template) { saveCurrentPageData(); switchEditorMode(rsvpFormData); } });
     function initEditor() {
         const params = new URLSearchParams(window.location.search), id = params.get('id'), isCustomerMode = !!id;
-        const initialize = () => { if (isCustomerMode) document.querySelector('.global-settings')?.remove(); initSortable(); setupEventListeners(); iframe.onload = () => { renderEditor(); renderPreview(); setupResizeObserver(); }; switchEditorMode(mainPageData); mapsReady(); };
+        const initialize = () => { if (isCustomerMode) document.querySelector('.global-settings')?.remove(); initSortable(); setupEventListeners(); iframe.onload = () => { renderEditor(); renderPreview(); setupResizeObserver(); }; switchEditorMode(mainPageData); };
         if (isCustomerMode) { const status = document.getElementById('status-text'); status.innerText = 'Loading...'; fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, { headers: { 'X-Access-Key': '__JSONBIN_ACCESS_KEY__' } }).then(r => r.ok ? r.json() : Promise.reject(new Error('Could not load template.'))).then(d => { mainPageData = d.record.main; rsvpFormData = d.record.rsvp; status.innerText = ''; initialize(); }).catch(e => document.body.innerHTML = `<h1>Error</h1><p>${e.message}</p>`); } else { initialize(); }
     }
-    function mapsReady() { if (typeof google !== 'undefined' && google.maps) { initializeMapsForEditor(); } }
+    function mapsReady() { initializeMapsForEditor(); }
     initEditor();
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=__GOOGLE_MAPS_API_KEY__&libraries=places&callback=mapsReady"></script>
