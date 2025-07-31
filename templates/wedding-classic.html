@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
     <style>
-        /* ... (ВСЕ ВАШИ СТАНДАРТНЫЕ СТИЛИ ОСТАЮТСЯ БЕЗ ИЗМЕНЕНИЙ) ... */
         :root{--accent-color:#c5a98b;--background-color:#f8f7f5}
         body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.7;background-color:var(--background-color);color:#333;opacity:0;transition:opacity .5s ease-in-out; background-size: cover; background-position: center; background-attachment: fixed;}
         .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; position: relative; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); box-sizing: border-box;}
@@ -16,7 +15,27 @@
         #page-content > .hero-block + .content-section { margin-top: 30px; border-radius: 8px; }
         h1,h2,h3{font-family:'Playfair Display',serif;text-align:center}
         h2{font-size:2.2rem;margin-top: 0; margin-bottom:30px}
-        .hero-block {display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; background-size: cover; background-position: center; overflow: hidden; padding: 40px 20px; box-sizing: border-box; width: 100%;}
+        
+        /* ===== НАЧАЛО ИСПРАВЛЕНИЯ ДЛЯ HERO BLOCK ===== */
+        .hero-block {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            position: relative;
+            background-color: #333;      /* Черный фон на случай пустых полей */
+            background-size: contain;    /* Картинка будет видна целиком */
+            background-repeat: no-repeat;  /* Убираем повторение картинки */
+            background-position: center;   /* Центрируем, как и раньше */
+            overflow: hidden;
+            padding: 40px 20px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        /* ===== КОНЕЦ ИСПРАВЛЕНИЯ ===== */
+
         .hero-block::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4); z-index: 1;}
         .hero-content{position:relative;z-index:2}
         .hero-content h1{font-size:4rem;margin:10px 0; line-height: 1.2;}
@@ -48,7 +67,7 @@
         @media (max-width: 768px) { .content-section { margin-left: 15px; margin-right: 15px; } }
         @media (max-width: 600px) { .hero-content h1 { font-size: 2.8rem; } h2 { font-size: 1.8rem; } .content-section { padding: 30px 20px; margin: 20px 10px; } .schedule-item { flex-direction: column; align-items: flex-start; gap: 10px; } .time-block { padding: 15px; min-width: 60px; } .time-block .number { font-size: 2rem; } #countdown { gap: 10px; } }
 
-        /* ===== СТИЛИ ДЛЯ 3D-ЗАСТАВКИ (С АНИМАЦИЕЙ КОЛЫХАНИЯ) ===== */
+        /* ... (ВСЕ ОСТАЛЬНЫЕ СТИЛИ ДЛЯ КОНВЕРТА И АДАПТИВНОСТИ ОСТАЮТСЯ КАК ЕСТЬ) ... */
         #envelope-wrapper {
             position: fixed;
             top: 0;
@@ -76,28 +95,23 @@
         }
         #envelope-3d.loaded {
             opacity: 1;
-            /* ИСПРАВЛЕНИЕ: Применяем анимацию колыхания */
             animation: floatAnimation 4s ease-in-out infinite;
         }
         #envelope-wrapper.hidden {
             opacity: 0;
             pointer-events: none;
         }
-        /* ИСПРАВЛЕНИЕ: Новая анимация колыхания */
         @keyframes floatAnimation {
             0% { transform: translateY(0); }
             50% { transform: translateY(-15px); }
             100% { transform: translateY(0); }
         }
-        
-        /* ===== АДАПТИВНОСТЬ ДЛЯ БОЛЬШИХ ЭКРАНОВ ===== */
-    @media (min-width: 768px) {
-        #envelope-3d {
-            max-width: 700px;
-            max-height: 700px;
+        @media (min-width: 768px) {
+            #envelope-3d {
+                max-width: 700px;
+                max-height: 700px;
+            }
         }
-    }
-    
     </style>
     
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -105,7 +119,6 @@
 </head>
 <body>
     <div id="envelope-wrapper">
-        <!-- ИСПРАВЛЕНИЕ: Убран auto-rotate -->
         <model-viewer id="envelope-3d"
             src="/templates/envelope.glb"
             alt="An interactive 3D envelope"
@@ -119,7 +132,7 @@
     <main id="page-content"></main>
     
     <script>
-    // ... (весь JavaScript код остается АБСОЛЮТНО ТАКИМ ЖЕ, как и в прошлый раз) ...
+    // ... (ВЕСЬ ВАШ JAVASCRIPT КОД ОСТАЕТСЯ БЕЗ ИЗМЕНЕНИЙ) ...
     let countdownInterval;
     function setupIntroAnimation() {
         const envelopeWrapper = document.getElementById('envelope-wrapper');
@@ -129,22 +142,19 @@
         modelViewer.addEventListener('load', () => {
             modelViewer.classList.add('loaded');
         });
-        // ПРАВИЛЬНАЯ (сбалансированная) ВЕРСИЯ
-    const fireConfetti = () => {
-        const defaults = {
-            spread: 360,
-            ticks: 150,      // Чуть короче, но все равно долго
-            gravity: 0,
-            decay: 0.95,     // Плавное затухание
-            startVelocity: 35, // Мягкий взрыв
-            shapes: ['star'],
-            colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8']
+        const fireConfetti = () => {
+            const defaults = {
+                spread: 360,
+                ticks: 150,
+                gravity: 0,
+                decay: 0.95,
+                startVelocity: 35,
+                shapes: ['star'],
+                colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8']
+            };
+            confetti({ ...defaults, particleCount: 60, scalar: 1.2, shapes: ['star'] });
+            confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] });
         };
-
-        // Оптимальное количество частиц для всех устройств
-        confetti({ ...defaults, particleCount: 60, scalar: 1.2, shapes: ['star'] });
-        confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] });
-    };
         envelopeWrapper.addEventListener('click', () => {
             fireConfetti();
             modelViewer.style.transform = 'scale(0)';
