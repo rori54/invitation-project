@@ -129,11 +129,22 @@
         modelViewer.addEventListener('load', () => {
             modelViewer.classList.add('loaded');
         });
-        const fireConfetti = () => {
-            const defaults = { spread: 360, ticks: 200, gravity: 0, decay: 0.96, startVelocity: 45, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] };
-            confetti({ ...defaults, particleCount: 100, scalar: 1.2, shapes: ['star'] });
-            confetti({ ...defaults, particleCount: 30, scalar: 0.75, shapes: ['circle'] });
+        // ПРАВИЛЬНАЯ (сбалансированная) ВЕРСИЯ
+    const fireConfetti = () => {
+        const defaults = {
+            spread: 360,
+            ticks: 150,      // Чуть короче, но все равно долго
+            gravity: 0,
+            decay: 0.95,     // Плавное затухание
+            startVelocity: 35, // Мягкий взрыв
+            shapes: ['star'],
+            colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8']
         };
+
+        // Оптимальное количество частиц для всех устройств
+        confetti({ ...defaults, particleCount: 60, scalar: 1.2, shapes: ['star'] });
+        confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] });
+    };
         envelopeWrapper.addEventListener('click', () => {
             fireConfetti();
             modelViewer.style.transform = 'scale(0)';
