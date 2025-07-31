@@ -27,12 +27,6 @@
             background-size: cover;
             overflow: hidden;
             width: 100%;
-            aspect-ratio: 16 / 9;
-        }
-        @media (max-width: 600px) {
-            .hero-block {
-                aspect-ratio: 9 / 12;
-            }
         }
         .hero-block::before{
             content:'';
@@ -99,11 +93,9 @@
         const styles = [
             `background-image: url('${c.imageUrl}')`,
             `background-position: ${c.backgroundPosition || 'center center'}`,
+            // Используем 'height' напрямую, если он задан
+            c.height && c.height !== 'auto' ? `height: ${c.height}` : `aspect-ratio: 16/9`
         ];
-        if (c.height && c.height !== 'auto') {
-            styles.push(`height: ${c.height}`);
-            styles.push(`aspect-ratio: auto`);
-        }
         const styleAttribute = styles.filter(Boolean).join('; ');
         return `<header class="hero-block" style="${styleAttribute}"><div class="hero-content"><p>${c.subtitle}</p><h1>${c.names}</h1><p>${c.date}</p></div></header>`;
     };
