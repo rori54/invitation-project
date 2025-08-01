@@ -16,10 +16,10 @@
         #page-content > .hero-block + .content-section { margin-top: 30px; border-radius: 8px; }
         h1,h2,h3{ text-align:center; margin: 15px 0; }
         p { margin: 15px 0; }
-        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; overflow: hidden; width: 100%; }
-        .hero-background-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
-        .hero-block::before{ content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); z-index: 1; }
-        .hero-content{ position:relative; z-index: 2; width: 90%; max-width: 1000px; padding: 40px 0; }
+        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; overflow: hidden; width: 100%; user-select: none; }
+        .hero-background-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; }
+        .hero-block::before{ content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); z-index: 1; pointer-events: none;}
+        .hero-content{ position:relative; z-index: 2; width: 90%; max-width: 1000px; padding: 40px 0; pointer-events: none;}
         .hero-content h1, .hero-content p, .hero-content h3 { margin: 10px 0; line-height: 1.3; }
         .hero-inner-blocks { margin-top: 25px; }
         .style-modern .content-section {background: rgba(255, 255, 255, 0.85); box-shadow: none; }
@@ -38,9 +38,22 @@
         .rsvp-button:hover{transform:scale(1.05)}
         .text-block-content p { white-space: pre-wrap; }
         #envelope-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; z-index: 1000; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 1.5s ease-in-out; } #envelope-3d { width: 80%; max-width: 500px; height: 80%; max-height: 500px; transition: transform 0.5s, opacity 0.5s; opacity: 0; } #envelope-3d.loaded { opacity: 1; animation: floatAnimation 4s ease-in-out infinite; } #envelope-wrapper.hidden { opacity: 0; pointer-events: none; } @keyframes floatAnimation { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { translateY(0); } }
+
+        /* Styles for Stickers Interaction */
+        .sticker-wrapper { position: absolute; box-sizing: border-box; z-index: 5; }
+        .sticker-wrapper img { width: 100%; height: 100%; display: block; }
+        .sticker-wrapper.selected { outline: 2px solid #007bff; }
+        .sticker-wrapper .resize-handle { position: absolute; width: 12px; height: 12px; background: #fff; border: 1px solid #007bff; border-radius: 50%; display: none; }
+        .sticker-wrapper.selected .resize-handle { display: block; }
+        .resize-handle.se { bottom: -6px; right: -6px; cursor: se-resize; }
+        .sticker-wrapper .rotate-handle { position: absolute; top: -30px; left: calc(50% - 8px); width: 16px; height: 16px; background: #fff; border: 1px solid #007bff; border-radius: 50%; cursor: grab; display: none; }
+        .sticker-wrapper .rotate-handle::before { content: ''; position: absolute; top: -15px; left: 50%; width: 1px; height: 15px; background: #007bff; transform: translateX(-50%); }
+        .sticker-wrapper.selected .rotate-handle { display: block; }
+
     </style>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 </head>
 <body>
     <div id="envelope-wrapper">
@@ -52,17 +65,7 @@
     let countdownInterval;
 
     const processText = (text) => (text || '').replace(/\n/g, '<br>');
-    const getStyleString = (style) => {
-        if (!style) return '';
-        let str = '';
-        if (style.fontFamily) str += `font-family: '${style.fontFamily}', sans-serif; `;
-        if (style.fontSize) str += `font-size: ${style.fontSize}; `;
-        if (style.color) str += `color: ${style.color}; `;
-        if (style.fontWeight) str += `font-weight: ${style.fontWeight}; `;
-        if (style.textAlign) str += `text-align: ${style.textAlign}; `;
-        if (style.backgroundColor) str += `background-color: ${style.backgroundColor}; `;
-        return str;
-    };
+    const getStyleString = (style) => { if (!style) return ''; let str = ''; if (style.fontFamily) str += `font-family: '${style.fontFamily}', sans-serif; `; if (style.fontSize) str += `font-size: ${style.fontSize}; `; if (style.color) str += `color: ${style.color}; `; if (style.fontWeight) str += `font-weight: ${style.fontWeight}; `; if (style.textAlign) str += `text-align: ${style.textAlign}; `; if (style.backgroundColor) str += `background-color: ${style.backgroundColor}; `; return str; };
 
     const createHeroHTML = (c, s) => {
         const imageHTML = c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'};" alt="Wedding background">` : '';
@@ -70,63 +73,13 @@
         const subtitleHTML = (c.subtitle && c.subtitle.enabled) ? `<p style="${getStyleString(c.subtitle.style)}">${c.subtitle.text}</p>` : '';
         const namesHTML = (c.names && c.names.enabled) ? `<h1 style="${getStyleString(c.names.style)}">${c.names.text}</h1>` : '';
         const dateHTML = (c.date && c.date.enabled) ? `<p style="${getStyleString(c.date.style)}">${c.date.text}</p>` : '';
-        let innerBlocksHTML = '';
-        if (c.innerBlocks && c.innerBlocks.length > 0) {
-            innerBlocksHTML = `<div class="hero-inner-blocks">${c.innerBlocks.map(b => {
-                const style = getStyleString(b.style);
-                if (b.type === 'heading') return `<h3 style="${style}">${b.text}</h3>`;
-                if (b.type === 'paragraph') return `<p style="${style}">${processText(b.text)}</p>`;
-                return '';
-            }).join('')}</div>`;
-        }
-        
-        let stickersHTML = '';
-        if (c.stickers && c.stickers.length > 0) {
-            stickersHTML = c.stickers.map(sticker => {
-                const style = `
-                    position: absolute; 
-                    left: ${sticker.x}px; 
-                    top: ${sticker.y}px; 
-                    width: ${sticker.width}px; 
-                    opacity: ${sticker.opacity || 1};
-                    transform: rotate(${sticker.rotation || 0}deg);
-                    z-index: 5;
-                    pointer-events: none;
-                `;
-                return `<img src="${sticker.src}" style="${style}" data-sticker-id="${sticker.id}">`;
-            }).join('');
-        }
-
-        return `<header class="hero-block" style="position: relative; ${headerStyle}">
-                    ${imageHTML}
-                    <div class="hero-content">
-                        ${subtitleHTML}
-                        ${namesHTML}
-                        ${dateHTML}
-                        ${innerBlocksHTML}
-                    </div>
-                    ${stickersHTML}
-                </header>`;
+        let innerBlocksHTML = ''; if (c.innerBlocks && c.innerBlocks.length > 0) { innerBlocksHTML = `<div class="hero-inner-blocks">${c.innerBlocks.map(b => { const style = getStyleString(b.style); if (b.type === 'heading') return `<h3 style="${style}">${b.text}</h3>`; if (b.type === 'paragraph') return `<p style="${style}">${processText(b.text)}</p>`; return ''; }).join('')}</div>`; }
+        let stickersHTML = ''; if (c.stickers && c.stickers.length > 0) { stickersHTML = c.stickers.map(sticker => { return `<div class="sticker-wrapper" data-sticker-id="${sticker.id}" style="left: ${sticker.x}px; top: ${sticker.y}px; width: ${sticker.width}px; transform: rotate(${sticker.rotation || 0}deg);"> <img src="${sticker.src}" alt="sticker"> <div class="rotate-handle"></div> <div class="resize-handle se"></div> </div>`; }).join(''); }
+        return `<header class="hero-block" style="${headerStyle}"> ${imageHTML} <div class="hero-content"> ${subtitleHTML} ${namesHTML} ${dateHTML} ${innerBlocksHTML} </div> ${stickersHTML} </header>`;
     };
     
-    const createTextBlockHTML = (c, s) => {
-        const titleStyle = getStyleString(c.titleStyle);
-        const textStyle = getStyleString(c.textStyle);
-        const titleHTML = c.title ? `<h2 style="${titleStyle}">${c.title}</h2>` : '';
-        const textHTML = c.text ? `<div class="text-block-content"><p style="${textStyle}">${processText(c.text)}</p></div>` : '';
-        return `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
-                    ${titleHTML}${textHTML}
-                </section>`;
-    };
-
-    const createSectionWithTitleHTML = (type, c, s, innerHTML) => {
-        const titleStyle = getStyleString(c.titleStyle);
-        return `<section class="content-section ${type}-block" style="max-width: ${s.maxWidth || '800px'};">
-                    <h2 style="${titleStyle}">${c.title}</h2>
-                    ${innerHTML}
-                </section>`;
-    };
-
+    const createTextBlockHTML = (c, s) => { const titleStyle = getStyleString(c.titleStyle); const textStyle = getStyleString(c.textStyle); const titleHTML = c.title ? `<h2 style="${titleStyle}">${c.title}</h2>` : ''; const textHTML = c.text ? `<div class="text-block-content"><p style="${textStyle}">${processText(c.text)}</p></div>` : ''; return `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};"> ${titleHTML}${textHTML} </section>`; };
+    const createSectionWithTitleHTML = (type, c, s, innerHTML) => { const titleStyle = getStyleString(c.titleStyle); return `<section class="content-section ${type}-block" style="max-width: ${s.maxWidth || '800px'};"> <h2 style="${titleStyle}">${c.title}</h2> ${innerHTML} </section>`; };
     const createCountdownHTML = (c, s) => createSectionWithTitleHTML('countdown', c, s, `<div id="countdown"><div class="time-block"><div id="days" class="number">00</div><div>Days</div></div><div class="time-block"><div id="hours" class="number">00</div><div>Hours</div></div><div class="time-block"><div id="minutes" class="number">00</div><div>Minutes</div></div><div class="time-block"><div id="seconds" class="number">00</div><div>Seconds</div></div></div>`);
     const createScheduleHTML = (c, s) => createSectionWithTitleHTML('schedule', c, s, `<ul class="schedule-list">${(c.items || []).map(i => `<li class="schedule-item"><div class="schedule-time">${i.time}</div><div class="schedule-event"><h3>${i.title}</h3><p>${processText(i.desc)}</p></div></li>`).join('')}</ul>`);
     const createLocationHTML = (c, s) => createSectionWithTitleHTML('location', c, s, `<p>${processText(c.address)}</p><img src="${c.imageUrl}" alt="Venue"><a href="${c.mapLink}" class="rsvp-button" target="_blank">View on Map</a>`);
@@ -156,37 +109,91 @@
             container.innerHTML += blockHTML;
         });
         if (countdownBlock) startCountdown(countdownBlock.targetDate);
+        
+        // Initialize sticker interaction only if in an iframe (editor mode)
+        if (window.self !== window.top) {
+             setTimeout(() => initStickerInteraction(blocks), 50);
+        }
     }
     
     function startCountdown(targetDate) { if (!targetDate) return; if (countdownInterval) clearInterval(countdownInterval); const targetTime = new Date(targetDate).getTime(); countdownInterval = setInterval(() => { const now = new Date().getTime(), distance = targetTime - now; if (distance < 0) { clearInterval(countdownInterval); const e = document.getElementById("countdown"); if (e) e.innerHTML = "<h2>The event has already happened!</h2>"; return; } const D = document.getElementById("days"), H = document.getElementById("hours"), M = document.getElementById("minutes"), S = document.getElementById("seconds"); if(D) D.innerText = Math.floor(distance / 864e5).toString().padStart(2, '0'); if(H) H.innerText = Math.floor(distance % 864e5 / 36e5).toString().padStart(2, '0'); if(M) M.innerText = Math.floor(distance % 36e5 / 6e4).toString().padStart(2, '0'); if(S) S.innerText = Math.floor(distance % 6e4 / 1e3).toString().padStart(2, '0'); }, 1000); }
     
+    function initStickerInteraction(blocks) {
+        if (typeof interact === 'undefined') return;
+        const heroBlock = document.querySelector('.hero-block');
+        if (!heroBlock) return;
+        const blockId = blocks.find(b => b.type === 'hero')?.id;
+
+        interact('.sticker-wrapper')
+            .draggable({
+                listeners: {
+                    start(event) { event.target.classList.add('selected'); },
+                    move(event) {
+                        const target = event.target;
+                        let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                        let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                        target.style.left = `${x}px`;
+                        target.style.top = `${y}px`;
+                        target.setAttribute('data-x', x);
+                        target.setAttribute('data-y', y);
+                    },
+                    end(event) {
+                        const newProps = { x: parseFloat(event.target.getAttribute('data-x')), y: parseFloat(event.target.getAttribute('data-y')) };
+                        window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
+                    }
+                },
+                modifiers: [ interact.modifiers.restrictRect({ restriction: 'parent' }) ]
+            })
+            .resizable({
+                edges: { right: '.resize-handle.se', bottom: '.resize-handle.se' },
+                listeners: {
+                    move(event) {
+                        let { x, y } = event.target.dataset;
+                        Object.assign(event.target.style, { width: `${event.rect.width}px`, height: 'auto' });
+                        event.target.setAttribute('data-x', x);
+                        event.target.setAttribute('data-y', y);
+                    },
+                     end(event) {
+                        const newProps = { width: event.rect.width };
+                        window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
+                    }
+                },
+                modifiers: [ interact.modifiers.aspectRatio({ ratio: 'preserve' }) ]
+            })
+            .gesturable({ // For rotation
+                listeners: {
+                    move (event) {
+                        const target = event.target;
+                        let angle = (parseFloat(target.getAttribute('data-angle')) || 0) + event.da;
+                        target.style.transform = `rotate(${angle}deg)`;
+                        target.setAttribute('data-angle', angle);
+                    },
+                    end(event) {
+                        const newProps = { rotation: parseFloat(event.target.getAttribute('data-angle')) };
+                        window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
+                    }
+                }
+            })
+            .on('tap', (event) => {
+                document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected'));
+                event.currentTarget.classList.add('selected');
+            });
+
+        heroBlock.addEventListener('click', (e) => {
+            if (e.target.closest('.sticker-wrapper')) return;
+            document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected'));
+        });
+    }
+
     function setupIntroAnimation() {
         const envelopeWrapper = document.getElementById('envelope-wrapper');
         const modelViewer = document.getElementById('envelope-3d');
-        const mainContent = document.querySelector('main');
-        
-        if (!envelopeWrapper || !modelViewer || typeof confetti !== 'function') {
-            document.body.style.opacity = 1; 
-            if(envelopeWrapper) envelopeWrapper.style.display = 'none';
-            return;
-        }
-        
+        if (!envelopeWrapper || !modelViewer || typeof confetti !== 'function') { document.body.style.opacity = 1; if(envelopeWrapper) envelopeWrapper.style.display = 'none'; return; }
         document.body.classList.add('intro-active');
         document.body.style.opacity = 1; 
-        
         modelViewer.addEventListener('load', () => modelViewer.classList.add('loaded'));
-        
         const fireConfetti = () => { const defaults = { spread: 360, ticks: 150, gravity: 0, decay: 0.95, startVelocity: 35, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] }; confetti({ ...defaults, particleCount: 60, scalar: 1.2, shapes: ['star'] }); confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] }); };
-        
-        envelopeWrapper.addEventListener('click', () => {
-            fireConfetti();
-            modelViewer.style.transform = 'scale(0)';
-            modelViewer.style.opacity = '0';
-            setTimeout(() => {
-                document.body.classList.remove('intro-active');
-                envelopeWrapper.classList.add('hidden');
-            }, 500);
-        }, { once: true });
+        envelopeWrapper.addEventListener('click', () => { fireConfetti(); modelViewer.style.transform = 'scale(0)'; modelViewer.style.opacity = '0'; setTimeout(() => { document.body.classList.remove('intro-active'); envelopeWrapper.classList.add('hidden'); }, 500); }, { once: true });
     }
 
     async function loadInvitationData() {
@@ -208,12 +215,9 @@
         }
     }
 
-    if (window.self === window.top) {
-        window.addEventListener('load', () => {
-            loadInvitationData();
-            setupIntroAnimation();
-        });
-    } else {
+    if (window.self === window.top) { // Final page
+        window.addEventListener('load', () => { loadInvitationData(); setupIntroAnimation(); });
+    } else { // Editor mode
         document.body.style.opacity = 1;
         const envelope = document.getElementById('envelope-wrapper');
         if (envelope) envelope.style.display = 'none';
