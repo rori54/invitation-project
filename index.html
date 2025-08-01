@@ -22,7 +22,7 @@
     const defaultTextStyle = { fontFamily: 'Montserrat', fontSize: '1rem', color: '#333333', fontWeight: '400' };
     const defaultTitleStyle = { fontFamily: 'Playfair Display', fontSize: '2.2rem', color: '#111111', fontWeight: '700' };
 
-    let mainPageData = { template: 'wedding-classic.html', settings: { maxWidth: '800px', style: 'classic', backgroundImage: '' }, blocks: [ { type: 'hero', id: `block-${Date.now()}-1`, content: { subtitle: { text: 'WE ARE GETTING MARRIED', enabled: true, style: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#FFFFFF', fontWeight: '400' } }, names: { text: 'John & Jane', enabled: true, style: { fontFamily: 'Great Vibes', fontSize: '4rem', color: '#FFFFFF', fontWeight: '400' } }, date: { text: 'September 15, 2025', enabled: true, style: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#FFFFFF', fontWeight: '400' } }, imageUrl: 'https://cdn.pixabay.com/photo/2018/03/01/01/07/blossom-3189810_1280.jpg', backgroundPosition: 'center 30%', aspectRatio: '9/16', innerBlocks: [] }}, { type: 'text-block', id: `block-${Date.now()}-3`, content: { title: 'A few words', text: 'We are excited to share this special day with our closest family and friends.', titleStyle: { ...defaultTitleStyle, fontSize: '2.5rem' }, textStyle: { ...defaultTextStyle, fontSize: '1.1rem', textAlign: 'center' } }}, { type: 'countdown', id: `block-${Date.now()}-2`, content: { title: 'Until Our Big Day', targetDate: '2025-09-15T16:00', titleStyle: { ...defaultTitleStyle } }}, { type: 'schedule', id: `block-${Date.now()}-4`, content: { title: "The Day's Schedule", items: [], titleStyle: { ...defaultTitleStyle } }}, { type: 'location', id: `block-${Date.now()}-5`, content: { title: 'Venue', address: 'The Grand Hall, 123 Celebration Ave, New York', imageUrl: 'https://images.unsplash.com/photo-1511795408833-2a1e94992e7a?q=80&w=2070&auto=format&fit=crop', mapLink: 'https://maps.google.com', titleStyle: { ...defaultTitleStyle } }}, { type: 'rsvp', id: `block-${Date.now()}-6`, content: { title: 'Confirm Your Attendance', subtitle: 'Please reply by September 1st.', titleStyle: { ...defaultTitleStyle }, buttonStyle: { fontFamily: 'Montserrat', fontSize: '1.1rem', color: '#FFFFFF', fontWeight: '700', backgroundColor: '#c5a98b' } }} ] };
+    let mainPageData = { template: 'wedding-classic.html', settings: { maxWidth: '800px', style: 'classic', backgroundImage: '' }, blocks: [ { type: 'hero', id: `block-${Date.now()}-1`, content: { subtitle: { text: 'WE ARE GETTING MARRIED', enabled: true, style: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#FFFFFF', fontWeight: '400' } }, names: { text: 'John & Jane', enabled: true, style: { fontFamily: 'Great Vibes', fontSize: '4rem', color: '#FFFFFF', fontWeight: '400' } }, date: { text: 'September 15, 2025', enabled: true, style: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#FFFFFF', fontWeight: '400' } }, imageUrl: 'https://cdn.pixabay.com/photo/2018/03/01/01/07/blossom-3189810_1280.jpg', backgroundPosition: 'center 30%', aspectRatio: '9/16', innerBlocks: [], stickers: [] }}, { type: 'text-block', id: `block-${Date.now()}-3`, content: { title: 'A few words', text: 'We are excited to share this special day with our closest family and friends.', titleStyle: { ...defaultTitleStyle, fontSize: '2.5rem' }, textStyle: { ...defaultTextStyle, fontSize: '1.1rem', textAlign: 'center' } }}, { type: 'countdown', id: `block-${Date.now()}-2`, content: { title: 'Until Our Big Day', targetDate: '2025-09-15T16:00', titleStyle: { ...defaultTitleStyle } }}, { type: 'schedule', id: `block-${Date.now()}-4`, content: { title: "The Day's Schedule", items: [], titleStyle: { ...defaultTitleStyle } }}, { type: 'location', id: `block-${Date.now()}-5`, content: { title: 'Venue', address: 'The Grand Hall, 123 Celebration Ave, New York', imageUrl: 'https://images.unsplash.com/photo-1511795408833-2a1e94992e7a?q=80&w=2070&auto=format&fit=crop', mapLink: 'https://maps.google.com', titleStyle: { ...defaultTitleStyle } }}, { type: 'rsvp', id: `block-${Date.now()}-6`, content: { title: 'Confirm Your Attendance', subtitle: 'Please reply by September 1st.', titleStyle: { ...defaultTitleStyle }, buttonStyle: { fontFamily: 'Montserrat', fontSize: '1.1rem', color: '#FFFFFF', fontWeight: '700', backgroundColor: '#c5a98b' } }} ] };
     let rsvpFormData = { template: 'rsvp-form.html', settings: { maxWidth: '800px', style: 'classic', backgroundImage: '' }, blocks: [ ] };
     
     const fontOptionsHTML = `
@@ -72,7 +72,7 @@
     function getNewBlockData(type) {
         const newBlock = { type: type, id: `block-${Date.now()}`, content: {} };
         switch(type) {
-            case 'hero': newBlock.content = { subtitle: { text: 'WE ARE GETTING MARRIED', enabled: true, style: { ...defaultTextStyle, color: '#FFFFFF' } }, names: { text: 'John & Jane', enabled: true, style: { ...defaultTitleStyle, fontFamily: 'Great Vibes', fontSize: '4rem', color: '#FFFFFF'} }, date: { text: 'September 15, 2025', enabled: true, style: { ...defaultTextStyle, color: '#FFFFFF' } }, imageUrl: 'https://images.unsplash.com/photo-1522158637959-30385a09e0da?q=80&w=2070&auto=format&fit=crop', backgroundPosition: 'center center', aspectRatio: '16/9', innerBlocks: [] }; break;
+            case 'hero': newBlock.content = { subtitle: { text: 'WE ARE GETTING MARRIED', enabled: true, style: { ...defaultTextStyle, color: '#FFFFFF' } }, names: { text: 'John & Jane', enabled: true, style: { ...defaultTitleStyle, fontFamily: 'Great Vibes', fontSize: '4rem', color: '#FFFFFF'} }, date: { text: 'September 15, 2025', enabled: true, style: { ...defaultTextStyle, color: '#FFFFFF' } }, imageUrl: 'https://images.unsplash.com/photo-1522158637959-30385a09e0da?q=80&w=2070&auto=format&fit=crop', backgroundPosition: 'center center', aspectRatio: '16/9', innerBlocks: [], stickers: [] }; break;
             case 'text-block': newBlock.content = { title: 'New Title', text: 'New paragraph text.', titleStyle: { ...defaultTitleStyle }, textStyle: { ...defaultTextStyle } }; break;
             case 'countdown': newBlock.content = { title: 'New Countdown', targetDate: '', titleStyle: { ...defaultTitleStyle } }; break;
             case 'schedule': newBlock.content = { title: 'New Schedule', items: [], titleStyle: { ...defaultTitleStyle } }; break;
@@ -108,6 +108,14 @@
                 ${createStyleControlsHTML(`${key}.style`, element.style)}
             </div>`;
         };
+        
+        const createStickerEditor = (block) => {
+            return `<hr class="style-separator">
+                    <div class="control-group">
+                        <label>Decorative Elements</label>
+                        <button class="add-sticker-btn" style="width: auto; padding: 8px 12px; background-color: #e9ecef;">+ Add Decorative Sticker</button>
+                    </div>`;
+        };
 
         switch(block.type) {
             case 'hero':
@@ -119,7 +127,8 @@
                     ${createOptionalElementEditor('date', 'Date')}
                     <hr class="style-separator">
                     ${aspectRatioField}${bgPosField}
-                    ${createInnerBlocksEditor(block)}`;
+                    ${createInnerBlocksEditor(block)}
+                    ${createStickerEditor(block)}`;
                 break;
             case 'text-block':
                 fieldsHTML = `<div class="control-group"><label>Title (optional)</label><input type="text" data-key="title" value="${c.title || ''}"></div>${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Paragraph Text</label><textarea data-key="text">${c.text}</textarea></div>${createStyleControlsHTML('textStyle', c.textStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}`;
@@ -257,12 +266,19 @@
             const blockId = blockDiv.dataset.id;
             const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
 
-            if (target.matches('.add-inner-block-btn')) {
+            if (target.matches('.add-sticker-btn')) {
+                 const newSticker = {
+                    id: `sticker-${Date.now()}`,
+                    src: 'https://i.imgur.com/gT3hTfT.png', // A transparent PNG of wedding rings
+                    x: 20, y: 20, width: 120, rotation: 0, opacity: 0.8
+                };
+                if (!pageBlocks[blockIndex].content.stickers) pageBlocks[blockIndex].content.stickers = [];
+                pageBlocks[blockIndex].content.stickers.push(newSticker);
+                renderPreview();
+            } else if (target.matches('.add-inner-block-btn')) {
                 const type = target.dataset.innerType;
                 const newInnerBlock = { id: `inner-${Date.now()}`, type, text: `New ${type}`, style: type === 'heading' ? {...defaultTitleStyle, color: '#FFFFFF'} : {...defaultTextStyle, color: '#FFFFFF'} };
-                if (!pageBlocks[blockIndex].content.innerBlocks) {
-                    pageBlocks[blockIndex].content.innerBlocks = [];
-                }
+                if (!pageBlocks[blockIndex].content.innerBlocks) pageBlocks[blockIndex].content.innerBlocks = [];
                 pageBlocks[blockIndex].content.innerBlocks.push(newInnerBlock);
                 renderEditor();
                 renderPreview();

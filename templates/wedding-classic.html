@@ -79,7 +79,25 @@
                 return '';
             }).join('')}</div>`;
         }
-        return `<header class="hero-block" style="${headerStyle}">
+        
+        let stickersHTML = '';
+        if (c.stickers && c.stickers.length > 0) {
+            stickersHTML = c.stickers.map(sticker => {
+                const style = `
+                    position: absolute; 
+                    left: ${sticker.x}px; 
+                    top: ${sticker.y}px; 
+                    width: ${sticker.width}px; 
+                    opacity: ${sticker.opacity || 1};
+                    transform: rotate(${sticker.rotation || 0}deg);
+                    z-index: 5;
+                    pointer-events: none;
+                `;
+                return `<img src="${sticker.src}" style="${style}" data-sticker-id="${sticker.id}">`;
+            }).join('');
+        }
+
+        return `<header class="hero-block" style="position: relative; ${headerStyle}">
                     ${imageHTML}
                     <div class="hero-content">
                         ${subtitleHTML}
@@ -87,6 +105,7 @@
                         ${dateHTML}
                         ${innerBlocksHTML}
                     </div>
+                    ${stickersHTML}
                 </header>`;
     };
     
