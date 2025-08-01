@@ -13,17 +13,16 @@
         main { transition: opacity 1s ease-in-out; } body.intro-active main { opacity: 0; }
         .block-wrapper { position: relative; }
         .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; position: relative; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); box-sizing: border-box;}
-        #page-content > .block-wrapper:first-child .content-section { margin-top: 0; border-radius: 0; }
-        #page-content > .block-wrapper:first-child .hero-block + .block-wrapper .content-section { margin-top: 30px; border-radius: 8px; }
-        h1,h2,h3{ text-align:center; margin: 15px 0; }
-        p { margin: 15px 0; }
         .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; overflow: hidden; width: 100%; user-select: none; }
+        .hero-block.limited-width { margin: 0 auto; border-radius: 8px; }
         .hero-background-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; }
         .hero-block::before{ content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); z-index: 1; pointer-events: none;}
         .hero-content{ position:relative; z-index: 2; width: 90%; max-width: 1000px; padding: 40px 0; pointer-events: none;}
         .hero-content h1, .hero-content p, .hero-content h3 { margin: 10px 0; line-height: 1.3; }
         .hero-inner-blocks { margin-top: 25px; }
         .style-modern .content-section {background: rgba(255, 255, 255, 0.85); box-shadow: none; }
+        h1,h2,h3{ text-align:center; margin: 15px 0; }
+        p { margin: 15px 0; }
         #countdown{display:flex;justify-content:center;gap:20px;text-align:center}
         .time-block{background:#f4f4f4;padding:20px;border-radius:5px;min-width:80px}
         .time-block .number{font-size:2.5rem;font-weight:700;color:var(--accent-color)}
@@ -38,6 +37,9 @@
         .rsvp-button{display:inline-block; padding:15px 30px;text-decoration:none;border-radius:50px;transition:transform .2s ease; margin: 10px;}
         .rsvp-button:hover{transform:scale(1.05)}
         .text-block-content p { white-space: pre-wrap; }
+        .image-block figure { margin: 0; }
+        .image-block img { width: 100%; height: auto; border-radius: 8px; }
+        .image-block figcaption { margin-top: 10px; font-style: italic; color: #666; }
         #envelope-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; z-index: 1000; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 1.5s ease-in-out; } #envelope-3d { width: 80%; max-width: 500px; height: 80%; max-height: 500px; transition: transform 0.5s, opacity 0.5s; opacity: 0; } #envelope-3d.loaded { opacity: 1; animation: floatAnimation 4s ease-in-out infinite; } #envelope-wrapper.hidden { opacity: 0; pointer-events: none; } @keyframes floatAnimation { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { translateY(0); } }
 
         /* Styles for Stickers Interaction */
@@ -80,12 +82,14 @@
         const imageOpacityStyle = (c.opacity !== undefined) ? `opacity: ${c.opacity};` : '';
         const imageHTML = c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'}; ${imageOpacityStyle}" alt="Wedding background">` : '';
         const headerStyle = c.aspectRatio ? `aspect-ratio: ${c.aspectRatio};` : '';
+        const widthStyle = (!c.fullWidth) ? `max-width: ${s.maxWidth || '800px'};` : '';
+        const widthClass = (!c.fullWidth) ? 'limited-width' : '';
         const subtitleHTML = (c.subtitle && c.subtitle.enabled) ? `<p style="${getStyleString(c.subtitle.style)}">${c.subtitle.text}</p>` : '';
         const namesHTML = (c.names && c.names.enabled) ? `<h1 style="${getStyleString(c.names.style)}">${c.names.text}</h1>` : '';
         const dateHTML = (c.date && c.date.enabled) ? `<p style="${getStyleString(c.date.style)}">${c.date.text}</p>` : '';
         let innerBlocksHTML = ''; if (c.innerBlocks && c.innerBlocks.length > 0) { innerBlocksHTML = `<div class="hero-inner-blocks">${c.innerBlocks.map(b => { const style = getStyleString(b.style); if (b.type === 'heading') return `<h3 style="${style}">${b.text}</h3>`; if (b.type === 'paragraph') return `<p style="${style}">${processText(b.text)}</p>`; return ''; }).join('')}</div>`; }
         const stickersHTML = renderStickers(c.stickers);
-        return `<div class="block-wrapper"><header class="hero-block" style="${headerStyle}"> ${imageHTML} <div class="hero-content"> ${subtitleHTML} ${namesHTML} ${dateHTML} ${innerBlocksHTML} </div> ${stickersHTML} </header></div>`;
+        return `<div class="block-wrapper"><header class="hero-block ${widthClass}" style="${headerStyle}${widthStyle}"> ${imageHTML} <div class="hero-content"> ${subtitleHTML} ${namesHTML} ${dateHTML} ${innerBlocksHTML} </div> ${stickersHTML} </header></div>`;
     };
     
     const createTextBlockHTML = (c, s) => { 
@@ -94,7 +98,7 @@
         const titleHTML = c.title ? `<h2 style="${titleStyle}">${c.title}</h2>` : ''; 
         const textHTML = c.text ? `<div class="text-block-content"><p style="${textStyle}">${processText(c.text)}</p></div>` : ''; 
         const stickersHTML = renderStickers(c.stickers);
-        return `<div class="block-wrapper"><section class="content-section text-block" style="max-width: ${s.maxWidth || '800px'};"> ${titleHTML}${textHTML} ${stickersHTML} </section></div>`; 
+        return `<div class="block-wrapper"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};"> ${titleHTML}${textHTML} ${stickersHTML} </section></div>`; 
     };
 
     const createSectionWithTitleHTML = (type, c, s, innerHTML) => { 
@@ -104,17 +108,38 @@
     };
 
     const createCountdownHTML = (c, s) => createSectionWithTitleHTML('countdown', c, s, `<div id="countdown"><div class="time-block"><div id="days" class="number">00</div><div>Days</div></div><div class="time-block"><div id="hours" class="number">00</div><div>Hours</div></div><div class="time-block"><div id="minutes" class="number">00</div><div>Minutes</div></div><div class="time-block"><div id="seconds" class="number">00</div><div>Seconds</div></div></div>`);
-    const createScheduleHTML = (c, s) => createSectionWithTitleHTML('schedule', c, s, `<ul class="schedule-list">${(c.items || []).map(i => `<li class="schedule-item"><div class="schedule-time">${i.time}</div><div class="schedule-event"><h3>${i.title}</h3><p>${processText(i.desc)}</p></div></li>`).join('')}</ul>`);
+    
+    const createScheduleHTML = (c, s) => {
+        const scheduleItemsHTML = (c.items || []).map(item => {
+            const timeStyle = getStyleString(item.timeStyle);
+            const titleStyle = getStyleString(item.titleStyle);
+            const descStyle = getStyleString(item.descStyle);
+            return `<li class="schedule-item">
+                <div class="schedule-time" style="${timeStyle}">${item.time}</div>
+                <div class="schedule-event">
+                    <h3 style="${titleStyle}">${item.title}</h3>
+                    <p style="${descStyle}">${processText(item.desc)}</p>
+                </div>
+            </li>`;
+        }).join('');
+        return createSectionWithTitleHTML('schedule', c, s, `<ul class="schedule-list">${scheduleItemsHTML}</ul>`);
+    };
+    
     const createLocationHTML = (c, s) => {
         const imageOpacityStyle = (c.opacity !== undefined) ? `opacity: ${c.opacity};` : '';
         const locationImage = c.imageUrl ? `<img src="${c.imageUrl}" alt="Venue" style="${imageOpacityStyle}">` : '';
         return createSectionWithTitleHTML('location', c, s, `<p>${processText(c.address)}</p>${locationImage}<a href="${c.mapLink}" class="rsvp-button" target="_blank">View on Map</a>`);
     };
     const createRsvpHTML = (c, s, rsvpLink) => createSectionWithTitleHTML('rsvp', c, s, `<p>${processText(c.subtitle)}</p><div><a href="${rsvpLink}" class="rsvp-button" style="${getStyleString(c.buttonStyle)}">I'll Be There!</a></div>`);
+    
     const createImageHTML = (c, s) => {
         const imageOpacityStyle = (c.opacity !== undefined) ? `opacity: ${c.opacity};` : '';
+        const titleStyle = getStyleString(c.titleStyle);
+        const descriptionStyle = getStyleString(c.descriptionStyle);
+        const titleHTML = c.title ? `<h2 style="${titleStyle}">${c.title}</h2>` : '';
+        const descriptionHTML = c.description ? `<div style="${descriptionStyle}">${processText(c.description)}</div>` : '';
         const stickersHTML = renderStickers(c.stickers);
-        return `<div class="block-wrapper"><section class="content-section image-block" style="max-width: ${s.maxWidth || '800px'};"><figure><img src="${c.imageUrl}" alt="${c.caption}" style="${imageOpacityStyle}"><figcaption>${c.caption}</figcaption></figure>${stickersHTML}</section></div>`;
+        return `<div class="block-wrapper"><section class="content-section image-block" style="max-width: ${s.maxWidth || '800px'};"> ${titleHTML} ${descriptionHTML} <figure><img src="${c.imageUrl}" alt="${c.caption}" style="${imageOpacityStyle}"><figcaption>${c.caption}</figcaption></figure> ${stickersHTML}</section></div>`;
     };
 
     function renderPage(blocks, settings, rsvpLink = '#') {
@@ -153,8 +178,12 @@
         if (typeof interact === 'undefined') return;
         
         blocks.forEach(block => {
-            const blockWrapper = document.querySelector(`.${block.type}-block`)?.closest('.block-wrapper') || 
-                                document.querySelector('.hero-block')?.closest('.block-wrapper');
+            let blockWrapper;
+            if (block.type === 'hero') {
+                blockWrapper = document.querySelector('.hero-block')?.closest('.block-wrapper');
+            } else {
+                blockWrapper = document.querySelector(`.${block.type}-block`)?.closest('.block-wrapper');
+            }
             if (!blockWrapper) return;
             
             const blockId = block.id;

@@ -16,7 +16,7 @@
         .image-library-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 15px; } .image-library-item { cursor: pointer; border: 2px solid transparent; border-radius: 8px; overflow: hidden; transition: border-color 0.2s; } .image-library-item:hover { border-color: #007bff; } .image-library-item img { width: 100%; height: 80px; object-fit: cover; display: block; }
         .upload-section { border: 2px dashed #ddd; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 20px; } .upload-section.dragover { border-color: #007bff; background-color: #f8f9fa; } .upload-btn { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; } .upload-btn:hover { background: #218838; }
         .opacity-control { margin-top: 10px; } .opacity-slider { width: 100%; margin-top: 5px; }
-        .sticker-library-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 15px; max-height: 200px; overflow-y: auto; } .sticker-library-grid .image-library-item img { height: 60px; object-fit: contain; background: #f8f9fa; }
+        .schedule-item-editor { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; margin-bottom: 15px; } .schedule-item-editor-header { display: flex; justify-content: between; align-items: center; margin-bottom: 10px; } .schedule-item-editor-header h4 { margin: 0; flex-grow: 1; } .delete-schedule-item-btn { background: #ff4d4d; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-weight: bold; cursor: pointer; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -25,7 +25,7 @@
     <div id="image-library-modal" class="modal-overlay">
         <div class="modal-content">
             <span class="modal-close" onclick="closeImageLibrary()">×</span>
-            <h3>Image & Sticker Library</h3>
+            <h3>Image Library</h3>
             
             <div class="upload-section" id="upload-section">
                 <p>Drag & drop an image here or</p>
@@ -34,14 +34,27 @@
                 <p style="font-size: 12px; color: #666; margin-top: 10px;">Uploads via ImgBB (free image hosting)</p>
             </div>
             
-            <h4>Background Images</h4>
             <div class="image-library-grid" id="image-library-grid">
                 <!-- Predefined images will be populated here -->
             </div>
+        </div>
+    </div>
+
+    <div id="element-library-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeElementLibrary()">×</span>
+            <h3>Element Library</h3>
             
-            <h4>Decorative Stickers</h4>
-            <div class="sticker-library-grid" id="sticker-library-grid">
-                <!-- Predefined stickers will be populated here -->
+            <div class="upload-section" id="element-upload-section">
+                <p>Upload Your Own Element</p>
+                <p>Drag & drop an image here or</p>
+                <button class="upload-btn" onclick="document.getElementById('element-file-input').click()">Choose File</button>
+                <input type="file" id="element-file-input" accept="image/*" style="display: none;">
+                <p style="font-size: 12px; color: #666; margin-top: 10px;">Uploads via ImgBB (free image hosting)</p>
+            </div>
+            
+            <div class="image-library-grid" id="element-library-grid">
+                <!-- Predefined elements will be populated here -->
             </div>
         </div>
     </div>
@@ -51,11 +64,12 @@
     let pageBlocks = []; let pageSettings = {}; let currentTemplate = '';
     let apiKeys = {}; // For storing API keys from server
     let currentImageTarget = null; // For image library
+    let currentElementBlock = null; // For element library
     
     const defaultTextStyle = { fontFamily: 'Montserrat', fontSize: '1rem', color: '#333333', fontWeight: '400' };
     const defaultTitleStyle = { fontFamily: 'Playfair Display', fontSize: '2.2rem', color: '#111111', fontWeight: '700' };
 
-    let mainPageData = { template: 'wedding-classic.html', settings: { maxWidth: '800px', style: 'classic', backgroundImage: '' }, blocks: [ { type: 'hero', id: `block-${Date.now()}-1`, content: { subtitle: { text: 'WE ARE GETTING MARRIED', enabled: true, style: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#FFFFFF', fontWeight: '400' } }, names: { text: 'John & Jane', enabled: true, style: { fontFamily: 'Great Vibes', fontSize: '4rem', color: '#FFFFFF', fontWeight: '400' } }, date: { text: 'September 15, 2025', enabled: true, style: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#FFFFFF', fontWeight: '400' } }, imageUrl: 'https://cdn.pixabay.com/photo/2018/03/01/01/07/blossom-3189810_1280.jpg', backgroundPosition: 'center 30%', aspectRatio: '9/16', opacity: 1, innerBlocks: [], stickers: [] }}, { type: 'text-block', id: `block-${Date.now()}-3`, content: { title: 'A few words', text: 'We are excited to share this special day with our closest family and friends.', titleStyle: { ...defaultTitleStyle, fontSize: '2.5rem' }, textStyle: { ...defaultTextStyle, fontSize: '1.1rem', textAlign: 'center' }, stickers: [] }}, { type: 'countdown', id: `block-${Date.now()}-2`, content: { title: 'Until Our Big Day', targetDate: '2025-09-15T16:00', titleStyle: { ...defaultTitleStyle }, stickers: [] }}, { type: 'schedule', id: `block-${Date.now()}-4`, content: { title: "The Day's Schedule", items: [], titleStyle: { ...defaultTitleStyle }, stickers: [] }}, { type: 'location', id: `block-${Date.now()}-5`, content: { title: 'Venue', address: 'The Grand Hall, 123 Celebration Ave, New York', imageUrl: 'https://images.unsplash.com/photo-1511795408833-2a1e94992e7a?q=80&w=2070&auto=format&fit=crop', opacity: 1, mapLink: 'https://maps.google.com', titleStyle: { ...defaultTitleStyle }, stickers: [] }}, { type: 'rsvp', id: `block-${Date.now()}-6`, content: { title: 'Confirm Your Attendance', subtitle: 'Please reply by September 1st.', titleStyle: { ...defaultTitleStyle }, buttonStyle: { fontFamily: 'Montserrat', fontSize: '1.1rem', color: '#FFFFFF', fontWeight: '700', backgroundColor: '#c5a98b' }, stickers: [] }} ] };
+    let mainPageData = { template: 'wedding-classic.html', settings: { maxWidth: '800px', style: 'classic', backgroundImage: '' }, blocks: [ { type: 'hero', id: `block-${Date.now()}-1`, content: { subtitle: { text: 'WE ARE GETTING MARRIED', enabled: true, style: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#FFFFFF', fontWeight: '400' } }, names: { text: 'John & Jane', enabled: true, style: { fontFamily: 'Great Vibes', fontSize: '4rem', color: '#FFFFFF', fontWeight: '400' } }, date: { text: 'September 15, 2025', enabled: true, style: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#FFFFFF', fontWeight: '400' } }, imageUrl: 'https://cdn.pixabay.com/photo/2018/03/01/01/07/blossom-3189810_1280.jpg', backgroundPosition: 'center 30%', aspectRatio: '9/16', opacity: 1, innerBlocks: [], stickers: [], fullWidth: true }}, { type: 'text-block', id: `block-${Date.now()}-3`, content: { title: 'A few words', text: 'We are excited to share this special day with our closest family and friends.', titleStyle: { ...defaultTitleStyle, fontSize: '2.5rem' }, textStyle: { ...defaultTextStyle, fontSize: '1.1rem', textAlign: 'center' }, stickers: [] }}, { type: 'countdown', id: `block-${Date.now()}-2`, content: { title: 'Until Our Big Day', targetDate: '2025-09-15T16:00', titleStyle: { ...defaultTitleStyle }, stickers: [] }}, { type: 'schedule', id: `block-${Date.now()}-4`, content: { title: "The Day's Schedule", items: [{ id: `item-${Date.now()}-1`, time: '3:00 PM', title: 'Ceremony', desc: 'Join us for the wedding ceremony at the Grand Hall.', timeStyle: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#c5a98b', fontWeight: '700' }, titleStyle: { fontFamily: 'Playfair Display', fontSize: '1.4rem', color: '#333333', fontWeight: '700' }, descStyle: { fontFamily: 'Montserrat', fontSize: '1rem', color: '#666666', fontWeight: '400' } }, { id: `item-${Date.now()}-2`, time: '5:00 PM', title: 'Reception', desc: 'Dinner, dancing, and celebration!', timeStyle: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#c5a98b', fontWeight: '700' }, titleStyle: { fontFamily: 'Playfair Display', fontSize: '1.4rem', color: '#333333', fontWeight: '700' }, descStyle: { fontFamily: 'Montserrat', fontSize: '1rem', color: '#666666', fontWeight: '400' } }], titleStyle: { ...defaultTitleStyle }, stickers: [] }}, { type: 'location', id: `block-${Date.now()}-5`, content: { title: 'Venue', address: 'The Grand Hall, 123 Celebration Ave, New York', imageUrl: 'https://images.unsplash.com/photo-1511795408833-2a1e94992e7a?q=80&w=2070&auto=format&fit=crop', opacity: 1, mapLink: 'https://maps.google.com', titleStyle: { ...defaultTitleStyle }, stickers: [] }}, { type: 'rsvp', id: `block-${Date.now()}-6`, content: { title: 'Confirm Your Attendance', subtitle: 'Please reply by September 1st.', titleStyle: { ...defaultTitleStyle }, buttonStyle: { fontFamily: 'Montserrat', fontSize: '1.1rem', color: '#FFFFFF', fontWeight: '700', backgroundColor: '#c5a98b' }, stickers: [] }} ] };
     let rsvpFormData = { template: 'rsvp-form.html', settings: { maxWidth: '800px', style: 'classic', backgroundImage: '' }, blocks: [ ] };
     
     const fontOptionsHTML = `<optgroup label="Script/Handwritten"> <option value="Great Vibes">Great Vibes</option> <option value="Dancing Script">Dancing Script</option> <option value="Allura">Allura</option> <option value="Sacramento">Sacramento</option> <option value="Alex Brush">Alex Brush</option> <option value="Satisfy">Satisfy</option> <option value="Kaushan Script">Kaushan Script</option> <option value="Pacifico">Pacifico</option> <option value="Caveat">Caveat</option> <option value="Cookie">Cookie</option> </optgroup> <optgroup label="Elegant Serif"> <option value="Playfair Display">Playfair Display</option> <option value="Crimson Text">Crimson Text</option> <option value="Cormorant Garamond">Cormorant Garamond</option> <option value="EB Garamond">EB Garamond</option> <option value="Libre Baskerville">Libre Baskerville</option> <option value="Lora">Lora</option> <option value="Merriweather">Merriweather</option> <option value="Vollkorn">Vollkorn</option> </optgroup> <optgroup label="Decorative"> <option value="Cinzel">Cinzel</option> <option value="Abril Fatface">Abril Fatface</option> <option value="Amatic SC">Amatic SC</option> <option value="Fredoka One">Fredoka One</option> <option value="Lobster">Lobster</option> </optgroup> <optgroup label="Modern Sans-Serif"> <option value="Montserrat">Montserrat</option> <option value="Raleway">Raleway</option> <option value="Lato">Lato</option> <option value="Open Sans">Open Sans</option> <option value="Poppins">Poppins</option> </optgroup>`;
@@ -71,34 +85,22 @@
         'https://images.unsplash.com/photo-1606800052052-a08af7148866?q=80&w=2070&auto=format&fit=crop'
     ];
 
-    const predefinedStickers = [
+    const predefinedElements = [
         'https://www.pngkey.com/png/full/15-154942_wedding-rings-png-image-background-gold-wedding-rings.png',
         'https://static.vecteezy.com/system/resources/previews/009/341/365/original/heart-shape-outline-love-symbol-icon-free-png.png',
-        'https://www.pngall.com/wp-content/uploads/5/Golden-Heart-PNG-Image.png',
-        'https://www.pngall.com/wp-content/uploads/2016/05/Rose-Free-Download-PNG.png',
-        'https://www.pngall.com/wp-content/uploads/2016/05/Butterfly-Free-Download-PNG.png',
-        'https://www.pngall.com/wp-content/uploads/8/Dove-PNG-Free-Download.png',
-        'https://www.pngall.com/wp-content/uploads/2016/04/Diamond-Ring-PNG-Image.png',
-        'https://www.pngall.com/wp-content/uploads/2016/05/Crown-Free-Download-PNG.png'
+        'https://pngimg.com/uploads/rose/rose_PNG11018.png',
+        'https://www.pngplay.com/wp-content/uploads/12/Wedding-Dove-PNG-Clipart-Background.png'
     ];
 
     function openImageLibrary(targetInputId) {
         currentImageTarget = targetInputId;
         const modal = document.getElementById('image-library-modal');
-        const imageGrid = document.getElementById('image-library-grid');
-        const stickerGrid = document.getElementById('sticker-library-grid');
+        const grid = document.getElementById('image-library-grid');
         
         // Populate predefined images
-        imageGrid.innerHTML = predefinedImages.map(url => 
+        grid.innerHTML = predefinedImages.map(url => 
             `<div class="image-library-item" onclick="selectImage('${url}')">
                 <img src="${url}" alt="Image option" loading="lazy">
-            </div>`
-        ).join('');
-        
-        // Populate predefined stickers
-        stickerGrid.innerHTML = predefinedStickers.map(url => 
-            `<div class="image-library-item" onclick="selectImage('${url}')">
-                <img src="${url}" alt="Sticker option" loading="lazy">
             </div>`
         ).join('');
         
@@ -108,6 +110,48 @@
     function closeImageLibrary() {
         document.getElementById('image-library-modal').classList.remove('is-visible');
         currentImageTarget = null;
+    }
+
+    function openElementLibrary(blockId) {
+        currentElementBlock = blockId;
+        const modal = document.getElementById('element-library-modal');
+        const grid = document.getElementById('element-library-grid');
+        
+        // Populate predefined elements
+        grid.innerHTML = predefinedElements.map(url => 
+            `<div class="image-library-item" onclick="selectElement('${url}')">
+                <img src="${url}" alt="Element option" loading="lazy">
+            </div>`
+        ).join('');
+        
+        modal.classList.add('is-visible');
+    }
+
+    function closeElementLibrary() {
+        document.getElementById('element-library-modal').classList.remove('is-visible');
+        currentElementBlock = null;
+    }
+
+    function selectElement(elementUrl) {
+        if (currentElementBlock) {
+            const blockIndex = pageBlocks.findIndex(b => b.id === currentElementBlock);
+            if (blockIndex !== -1) {
+                const newSticker = {
+                    id: `sticker-${Date.now()}`,
+                    src: elementUrl,
+                    x: 20,
+                    y: 20,
+                    width: 150,
+                    rotation: 0,
+                    opacity: 1
+                };
+                if (!pageBlocks[blockIndex].content.stickers) pageBlocks[blockIndex].content.stickers = [];
+                pageBlocks[blockIndex].content.stickers.push(newSticker);
+                renderEditor();
+                renderPreview();
+            }
+        }
+        closeElementLibrary();
     }
 
     function selectImage(imageUrl) {
@@ -144,7 +188,7 @@
         return result.data.url;
     }
 
-    // Setup file upload
+    // Setup file upload for images
     document.getElementById('file-input').addEventListener('change', async (e) => {
         if (e.target.files.length === 0) return;
         
@@ -163,7 +207,26 @@
         }
     });
 
-    // Setup drag and drop
+    // Setup file upload for elements
+    document.getElementById('element-file-input').addEventListener('change', async (e) => {
+        if (e.target.files.length === 0) return;
+        
+        const file = e.target.files[0];
+        const statusText = document.getElementById('status-text');
+        
+        try {
+            statusText.textContent = 'Uploading element...';
+            const elementUrl = await uploadToImgBB(file);
+            selectElement(elementUrl);
+            statusText.textContent = 'Element uploaded successfully!';
+            setTimeout(() => statusText.textContent = '', 3000);
+        } catch (error) {
+            statusText.textContent = `Upload failed: ${error.message}`;
+            setTimeout(() => statusText.textContent = '', 5000);
+        }
+    });
+
+    // Setup drag and drop for images
     const uploadSection = document.getElementById('upload-section');
     uploadSection.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -197,6 +260,40 @@
         }
     });
 
+    // Setup drag and drop for elements
+    const elementUploadSection = document.getElementById('element-upload-section');
+    elementUploadSection.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        elementUploadSection.classList.add('dragover');
+    });
+    
+    elementUploadSection.addEventListener('dragleave', () => {
+        elementUploadSection.classList.remove('dragover');
+    });
+    
+    elementUploadSection.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        elementUploadSection.classList.remove('dragover');
+        
+        if (e.dataTransfer.files.length === 0) return;
+        
+        const file = e.dataTransfer.files[0];
+        if (!file.type.startsWith('image/')) return;
+        
+        const statusText = document.getElementById('status-text');
+        
+        try {
+            statusText.textContent = 'Uploading element...';
+            const elementUrl = await uploadToImgBB(file);
+            selectElement(elementUrl);
+            statusText.textContent = 'Element uploaded successfully!';
+            setTimeout(() => statusText.textContent = '', 3000);
+        } catch (error) {
+            statusText.textContent = `Upload failed: ${error.message}`;
+            setTimeout(() => statusText.textContent = '', 5000);
+        }
+    });
+
     function createStyleControlsHTML(prefix, styleObject, options = { color: true, size: true, weight: true, family: true, textAlign: false }) { 
         if (!styleObject) return ''; 
         return `<div class="style-controls"> ${options.family ? `<div class="control-group"><label>Font Family</label><select data-key="${prefix}.fontFamily">${fontOptionsHTML.replace(`value="${styleObject.fontFamily}"`, `value="${styleObject.fontFamily}" selected`)}</select></div>` : ''} <div class="style-controls-grid"> ${options.size ? `<div class="control-group"><label>Font Size</label><input type="text" data-key="${prefix}.fontSize" value="${styleObject.fontSize || ''}" placeholder="e.g. 16px or 1.2rem"></div>` : ''} ${options.color ? `<div class="control-group"><label>Color</label><input type="color" data-key="${prefix}.color" value="${styleObject.color || '#000000'}"></div>` : ''} </div> <div class="style-controls-grid" style="margin-top: 10px;"> ${options.weight ? `<div class="control-group"><label>Font Weight</label><select data-key="${prefix}.fontWeight"><option value="400" ${styleObject.fontWeight == '400' ? 'selected' : ''}>Normal</option><option value="700" ${styleObject.fontWeight == '700' ? 'selected' : ''}>Bold</option></select></div>` : ''} ${options.textAlign ? `<div class="control-group"><label>Text Align</label><select data-key="${prefix}.textAlign"><option value="left" ${styleObject.textAlign == 'left' ? 'selected' : ''}>Left</option><option value="center" ${styleObject.textAlign == 'center' ? 'selected' : ''}>Center</option><option value="right" ${styleObject.textAlign == 'right' ? 'selected' : ''}>Right</option></select></div>` : ''} </div> </div>`; 
@@ -208,6 +305,40 @@
             return `<div class="inner-block-editor" data-index="${index}"> <button class="delete-inner-block-btn" title="Delete this element">×</button> <label style="text-transform: capitalize;">${innerBlock.type} Text</label> ${textContentField} ${createStyleControlsHTML(`innerBlocks.${index}.style`, innerBlock.style, { textAlign: true, color: true, size: true, weight: true, family: true })} </div>`; 
         }).join(''); 
         return `<div class="inner-blocks-container"> <label style="font-weight: bold; color: #333;">Additional Elements</label> <div class="inner-blocks-list">${innerBlocksHTML}</div> <div class="add-inner-block-controls"> <button class="add-inner-block-btn" data-inner-type="heading">+ Add Heading</button> <button class="add-inner-block-btn" data-inner-type="paragraph">+ Add Paragraph</button> </div> </div>`; 
+    }
+
+    function createScheduleItemsEditor(block) {
+        let itemsHTML = (block.content.items || []).map((item, index) => {
+            return `<div class="schedule-item-editor" data-item-id="${item.id}">
+                <div class="schedule-item-editor-header">
+                    <h4>Schedule Item ${index + 1}</h4>
+                    <button class="delete-schedule-item-btn" title="Delete this item">Delete</button>
+                </div>
+                <div class="control-group">
+                    <label>Time</label>
+                    <input type="text" class="sub-item-input" data-item-key="time" value="${item.time || ''}" placeholder="e.g., 3:00 PM">
+                    ${createStyleControlsHTML(`items.${index}.timeStyle`, item.timeStyle, { color: true, size: true, weight: true, family: true })}
+                </div>
+                <hr class="style-separator">
+                <div class="control-group">
+                    <label>Title</label>
+                    <input type="text" class="sub-item-input" data-item-key="title" value="${item.title || ''}" placeholder="e.g., Ceremony">
+                    ${createStyleControlsHTML(`items.${index}.titleStyle`, item.titleStyle, { color: true, size: true, weight: true, family: true })}
+                </div>
+                <hr class="style-separator">
+                <div class="control-group">
+                    <label>Description</label>
+                    <textarea class="sub-item-input" data-item-key="desc" placeholder="Additional details...">${item.desc || ''}</textarea>
+                    ${createStyleControlsHTML(`items.${index}.descStyle`, item.descStyle, { color: true, size: true, weight: true, family: true })}
+                </div>
+            </div>`;
+        }).join('');
+        
+        return `<div class="control-group">
+            <label style="font-weight: bold; color: #333;">Schedule Items</label>
+            <div class="schedule-items-list">${itemsHTML}</div>
+            <button class="add-sub-item-btn action-button" data-list-key="items" style="font-size: 12px; padding: 5px; margin-top: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px;">+ Add Schedule Item</button>
+        </div>`;
     }
     
     function getNewBlockData(type) { 
@@ -223,7 +354,8 @@
                     aspectRatio: '16/9', 
                     opacity: 1,
                     innerBlocks: [], 
-                    stickers: [] 
+                    stickers: [],
+                    fullWidth: true
                 }; 
                 break; 
             case 'text-block': 
@@ -233,7 +365,7 @@
                 newBlock.content = { title: 'New Countdown', targetDate: '', titleStyle: { ...defaultTitleStyle }, stickers: [] }; 
                 break; 
             case 'schedule': 
-                newBlock.content = { title: 'New Schedule', items: [], titleStyle: { ...defaultTitleStyle }, stickers: [] }; 
+                newBlock.content = { title: 'New Schedule', items: [{ id: `item-${Date.now()}`, time: '3:00 PM', title: 'New Event', desc: 'Event description', timeStyle: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#c5a98b', fontWeight: '700' }, titleStyle: { fontFamily: 'Playfair Display', fontSize: '1.4rem', color: '#333333', fontWeight: '700' }, descStyle: { fontFamily: 'Montserrat', fontSize: '1rem', color: '#666666', fontWeight: '400' } }], titleStyle: { ...defaultTitleStyle }, stickers: [] }; 
                 break; 
             case 'location': 
                 newBlock.content = { title: 'New Location', address: '', imageUrl: '', opacity: 1, mapLink: '#', titleStyle: { ...defaultTitleStyle }, stickers: [] }; 
@@ -242,7 +374,7 @@
                 newBlock.content = { title: 'New RSVP Block', subtitle: 'New subtitle text', titleStyle: { ...defaultTitleStyle }, buttonStyle: { fontFamily: 'Montserrat', fontSize: '1.1rem', color: '#FFFFFF', fontWeight: '700', backgroundColor: '#c5a98b' }, stickers: [] }; 
                 break; 
             case 'image': 
-                newBlock.content = { imageUrl: 'https://via.placeholder.com/800x400', opacity: 1, caption: 'Image caption', stickers: [] }; 
+                newBlock.content = { imageUrl: 'https://via.placeholder.com/800x400', opacity: 1, caption: '', title: '', description: '', titleStyle: { ...defaultTitleStyle }, descriptionStyle: { ...defaultTextStyle }, stickers: [] }; 
                 break; 
             case 'form-header': 
                 newBlock.content = { title: 'RSVP', subtitle: 'Please fill out the form below', imageUrl: '', opacity: 1, aspectRatio: '16/9', stickers: [] }; 
@@ -296,10 +428,7 @@
         return `<hr class="style-separator">
                 <div class="control-group">
                     <label>Decorative Elements</label>
-                    <div class="add-sticker-controls" style="display: flex; gap: 10px;">
-                        <button class="add-sticker-btn" data-sticker-src="${predefinedStickers[0]}" style="flex: 1; background-color: #e9ecef;">+ Add Rings</button>
-                        <button class="add-sticker-btn" data-sticker-src="${predefinedStickers[1]}" style="flex: 1; background-color: #e9ecef;">+ Add Heart</button>
-                    </div>
+                    <button class="add-element-btn" data-block-id="${block.id}" style="width: 100%; background-color: #6f42c1; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">+ Add Element</button>
                 </div>
                 <div id="sticker-editors-container">${stickersHTML}</div>`;
     }
@@ -340,6 +469,13 @@
             case 'hero': 
                 fieldsHTML = `${createImageInputHTML('imageUrl', c.imageUrl, 'Background Image URL')}
                     ${createOpacityControl('opacity', c.opacity, 'Background Opacity')}
+                    <div class="control-group">
+                        <label>Block Width</label>
+                        <select data-key="fullWidth">
+                            <option value="true" ${c.fullWidth ? 'selected' : ''}>Full Width</option>
+                            <option value="false" ${!c.fullWidth ? 'selected' : ''}>Limited (use global width)</option>
+                        </select>
+                    </div>
                     ${createOptionalElementEditor('names', 'Names')} 
                     <hr class="style-separator"> 
                     ${createOptionalElementEditor('subtitle', 'Subtitle')} 
@@ -357,22 +493,26 @@
                 fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${c.subtitle}</textarea></div><hr class="style-separator"><label>Button Style</label><div class="style-controls"><div class="style-controls-grid"><div class="control-group"><label>Background Color</label><input type="color" data-key="buttonStyle.backgroundColor" value="${c.buttonStyle.backgroundColor || '#c5a98b'}"></div><div class="control-group"><label>Text Color</label><input type="color" data-key="buttonStyle.color" value="${c.buttonStyle.color || '#FFFFFF'}"></div></div><div style="margin-top: 10px;">${createStyleControlsHTML('buttonStyle', c.buttonStyle, {color: false, size: true, weight: true, family: true})}</div></div>${createStickerEditor(block)}`; 
                 break; 
             case 'countdown': 
-            case 'schedule': 
             case 'location': 
                 fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}`; 
                 if(block.type === 'countdown') fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Target Date & Time</label><input type="datetime-local" data-key="targetDate" value="${c.targetDate}"></div>`; 
-                if(block.type === 'schedule') { 
-                    let items = (c.items || []).map(item => `<div class="sub-item-editor" data-item-id="${item.id}"><input type="text" placeholder="Time" class="sub-item-input" data-item-key="time" value="${item.time}"><input type="text" placeholder="Title" class="sub-item-input" data-item-key="title" value="${item.title}"><button class="delete-sub-item-btn">×</button><textarea class="sub-item-input" data-item-key="desc" placeholder="Description">${item.desc}</textarea></div>`).join(''); 
-                    fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Items</label>${items}</div><button class="add-sub-item-btn action-button" data-list-key="items" style="font-size: 12px; padding: 5px; margin-top: 10px;">+ Add Item</button>`; 
-                } 
                 if(block.type === 'location') { 
                     fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Smart Location Search</label><input type="text" class="smart-location-search" placeholder="e.g., Per Se, New York"></div><div class="control-group"><label>Address</label><textarea data-key="address">${c.address || ''}</textarea></div>${createImageInputHTML('imageUrl', c.imageUrl, 'Photo URL')}${createOpacityControl('opacity', c.opacity, 'Photo Opacity')}<div class="control-group"><label>Google Maps Link</label><input type="url" data-key="mapLink" value="${c.mapLink || ''}"></div>`; 
                 } 
                 fieldsHTML += createStickerEditor(block);
                 break; 
+            case 'schedule':
+                fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator">${createScheduleItemsEditor(block)}${createStickerEditor(block)}`;
+                break;
             case 'image':
                 fieldsHTML = `${createImageInputHTML('imageUrl', c.imageUrl, 'Image URL')}
                     ${createOpacityControl('opacity', c.opacity, 'Image Opacity')}
+                    <div class="control-group"><label>Title (optional)</label><input type="text" data-key="title" value="${c.title || ''}"></div>
+                    ${createStyleControlsHTML('titleStyle', c.titleStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}
+                    <hr class="style-separator">
+                    <div class="control-group"><label>Description (optional)</label><textarea data-key="description">${c.description || ''}</textarea></div>
+                    ${createStyleControlsHTML('descriptionStyle', c.descriptionStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}
+                    <hr class="style-separator">
                     <div class="control-group"><label>Caption (optional)</label><input type="text" data-key="caption" value="${c.caption || ''}"></div>
                     ${createStickerEditor(block)}`;
                 break;
@@ -486,7 +626,7 @@
             if (blockIndex === -1) return; 
             const key = input.dataset.key; 
             if (input.matches('.sub-item-input')) { 
-                const subItemDiv = input.closest('.sub-item-editor'); 
+                const subItemDiv = input.closest('.schedule-item-editor'); 
                 const subItemId = subItemDiv.dataset.itemId; 
                 const subItemKey = input.dataset.itemKey; 
                 const listKey = pageBlocks[blockIndex].content.items ? 'items' : 'options'; 
@@ -496,6 +636,7 @@
                 let value = input.type === 'checkbox' ? input.checked : input.value; 
                 if (input.type === 'number') value = parseFloat(value) || 0; 
                 if (input.type === 'range') value = parseFloat(value);
+                if (key === 'fullWidth') value = value === 'true';
                 const keys = key.split('.'); 
                 let current = pageBlocks[blockIndex].content; 
                 for (let i = 0; i < keys.length - 1; i++) { 
@@ -529,20 +670,8 @@
             const blockId = blockDiv.dataset.id; 
             const blockIndex = pageBlocks.findIndex(b => b.id === blockId); 
             
-            if (target.matches('.add-sticker-btn')) { 
-                const newSticker = { 
-                    id: `sticker-${Date.now()}`, 
-                    src: target.dataset.stickerSrc, 
-                    x: 20, 
-                    y: 20, 
-                    width: 150, 
-                    rotation: 0,
-                    opacity: 1
-                }; 
-                if (!pageBlocks[blockIndex].content.stickers) pageBlocks[blockIndex].content.stickers = []; 
-                pageBlocks[blockIndex].content.stickers.push(newSticker); 
-                renderEditor(); 
-                renderPreview(); 
+            if (target.matches('.add-element-btn')) {
+                openElementLibrary(target.dataset.blockId);
             } else if (target.matches('.delete-sticker-btn')) { 
                 const stickerIndex = parseInt(target.closest('.sticker-editor').dataset.stickerIndex, 10); 
                 pageBlocks[blockIndex].content.stickers.splice(stickerIndex, 1); 
@@ -573,11 +702,23 @@
                 } 
             } else if (target.closest('.add-sub-item-btn')) { 
                 const listKey = target.dataset.listKey; 
-                pageBlocks[blockIndex].content[listKey].push({ id: `s-${Date.now()}`, time: 'New', title: 'New', desc: '' }); 
+                if (listKey === 'items') {
+                    pageBlocks[blockIndex].content[listKey].push({ 
+                        id: `item-${Date.now()}`, 
+                        time: '3:00 PM', 
+                        title: 'New Event', 
+                        desc: 'Event description',
+                        timeStyle: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#c5a98b', fontWeight: '700' },
+                        titleStyle: { fontFamily: 'Playfair Display', fontSize: '1.4rem', color: '#333333', fontWeight: '700' },
+                        descStyle: { fontFamily: 'Montserrat', fontSize: '1rem', color: '#666666', fontWeight: '400' }
+                    });
+                } else {
+                    pageBlocks[blockIndex].content[listKey].push({ id: `s-${Date.now()}`, time: 'New', title: 'New', desc: '' });
+                }
                 renderEditor(); 
                 renderPreview(); 
-            } else if (target.closest('.delete-sub-item-btn')) { 
-                const subItemId = target.closest('.sub-item-editor').dataset.itemId; 
+            } else if (target.closest('.delete-schedule-item-btn')) { 
+                const subItemId = target.closest('.schedule-item-editor').dataset.itemId; 
                 const listKey = pageBlocks[blockIndex].content.items ? 'items' : 'options'; 
                 pageBlocks[blockIndex].content[listKey] = pageBlocks[blockIndex].content[listKey].filter(i => i.id !== subItemId); 
                 renderEditor(); 

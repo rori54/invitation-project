@@ -6,16 +6,18 @@
     <title>RSVP Form</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Allura&family=Sacramento&family=Alex+Brush&family=Satisfy&family=Kaushan+Script&family=Pacifico&family=Caveat:wght@400;700&family=Cookie&family=Playfair+Display:wght@400;700&family=Crimson+Text:wght@400;700&family=Cormorant+Garamond:wght@400;700&family=EB+Garamond:wght@400;700&family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;700&family=Merriweather:wght@400;700&family=Vollkorn:wght@400;700&family=Cinzel:wght@400;700&family=Abril+Fatface&family=Amatic+SC:wght@400;700&family=Fredoka+One&family=Lobster&family=Montserrat:wght@300;400;700&family=Raleway:wght@300;400;700&family=Lato:wght@300;400;700&family=Open+Sans:wght@300;400;700&family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
     <style>
         :root{--accent-color:#c5a98b;--background-color:#f8f7f5}
         body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.7;background-color:var(--background-color);color:#333;opacity:0;transition:opacity .5s ease-in-out; padding: 20px 0; background-size: cover; background-position: center; background-attachment: fixed;}
+        .block-wrapper { position: relative; }
         .content-section{margin: 0 auto; padding:0 20px; text-align:center; position:relative;}
         h1,h2,h3{font-family:'Playfair Display',serif;text-align:center}
         h1 { font-size: 2.5rem; }
         h2{font-size:2.2rem;margin-bottom:30px}
         form{width:100%}
-        .form-block{text-align:left;background:#fff;padding:30px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.07);margin-bottom:25px; margin-left: auto; margin-right: auto; box-sizing: border-box;}
+        .form-block{text-align:left;background:#fff;padding:30px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.07);margin-bottom:25px; margin-left: auto; margin-right: auto; box-sizing: border-box; position: relative;}
         .form-block label{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:15px;display:block}
         .form-block label.required::after{content:'*';color:crimson;margin-left:5px}
         .form-block input[type="text"],.form-block textarea{width:100%;padding:12px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;font-family:'Montserrat',sans-serif;font-size:1rem}
@@ -25,29 +27,131 @@
         .form-block .radio-options-list label{font-family:'Montserrat',sans-serif;font-size:1rem;display:flex;align-items:center;cursor:pointer;font-weight:400}
         .form-block .radio-options-list label.required::after{content:''}
         .form-block .radio-options-list input[type="radio"]{margin-right:10px;width:auto; transform: scale(1.2);}
-        .form-header-block { text-align: center; margin-left: auto; margin-right: auto; padding: 20px 0; }
+        .form-header-block { text-align: center; margin-left: auto; margin-right: auto; padding: 20px 0; position: relative; overflow: hidden; }
         .form-header-block img { max-width: 100%; height: auto; object-fit: cover; border-radius: 8px; margin-bottom: 20px; }
         .form-header-block p { white-space: pre-wrap; }
-        .form-footer-block { text-align: center; margin-top: 40px; }
+        .form-footer-block { text-align: center; margin-top: 40px; position: relative; }
         .submit-button-wrapper { text-align: center; margin-top: 30px; }
         .submit-button{display:inline-block;background:var(--accent-color);color:#fff!important;padding:15px 40px;text-decoration:none;border-radius:50px;transition:transform .2s ease;font-size:1.2rem;border:none;cursor:pointer;font-family:'Playfair Display',serif}
         .submit-button:hover{transform:scale(1.05)}
         .style-modern .form-block, .style-modern .form-header-block, .style-modern .form-footer-block { background: rgba(255, 255, 255, 0.9); box-shadow: none; }
         .style-modern .form-header-block h1, .style-modern .form-footer-block h2 { text-shadow: 1px 1px 3px rgba(0,0,0,0.2); }
+        
+        /* Styles for Stickers Interaction */
+        .sticker-wrapper { position: absolute; box-sizing: border-box; z-index: 5; }
+        .sticker-wrapper img { width: 100%; height: 100%; display: block; }
+        .sticker-wrapper.selected { outline: 2px solid #007bff; }
+        .sticker-wrapper .resize-handle { position: absolute; width: 12px; height: 12px; background: #fff; border: 1px solid #007bff; border-radius: 50%; display: none; }
+        .sticker-wrapper.selected .resize-handle { display: block; }
+        .resize-handle.se { bottom: -6px; right: -6px; cursor: se-resize; }
+        .sticker-wrapper .rotate-handle { position: absolute; top: -30px; left: calc(50% - 8px); width: 16px; height: 16px; background: #fff; border: 1px solid #007bff; border-radius: 50%; cursor: grab; display: none; }
+        .sticker-wrapper .rotate-handle::before { content: ''; position: absolute; top: -15px; left: 50%; width: 1px; height: 15px; background: #007bff; transform: translateX(-50%); }
+        .sticker-wrapper.selected .rotate-handle { display: block; }
+        
         @media (max-width: 600px) { body { padding: 10px 0; } h1 { font-size: 2rem; } h2 { font-size: 1.8rem; } .form-block label { font-size: 1.2rem; } .content-section { padding: 0 15px; } .form-block { padding: 20px; } }
     </style>
 </head>
 <body>
     <main id="page-content"></main>
     <script>
-    const getBlockStyles = (c, settings) => { let styles = `max-width: ${settings.maxWidth || '800px'};`; if (c.height) styles += ` min-height: ${c.height};`; return styles; };
     const processText = (text) => (text || '').replace(/\n/g, '<br>');
+    const getStyleString = (style) => { if (!style) return ''; let str = ''; if (style.fontFamily) str += `font-family: '${style.fontFamily}', sans-serif; `; if (style.fontSize) str += `font-size: ${style.fontSize}; `; if (style.color) str += `color: ${style.color}; `; if (style.fontWeight) str += `font-weight: ${style.fontWeight}; `; if (style.textAlign) str += `text-align: ${style.textAlign}; `; if (style.backgroundColor) str += `background-color: ${style.backgroundColor}; `; return str; };
+
+    const renderStickers = (stickers) => {
+        if (!stickers || stickers.length === 0) return '';
+        return stickers.map(sticker => {
+            const opacityStyle = (sticker.opacity !== undefined) ? `opacity: ${sticker.opacity};` : '';
+            return `<div class="sticker-wrapper" data-sticker-id="${sticker.id}" style="left: ${sticker.x}px; top: ${sticker.y}px; width: ${sticker.width}px; transform: rotate(${sticker.rotation || 0}deg); ${opacityStyle}"> <img src="${sticker.src}" alt="sticker"> <div class="rotate-handle"></div> <div class="resize-handle se"></div> </div>`;
+        }).join('');
+    };
+
+    const getBlockStyles = (c, settings) => { let styles = `max-width: ${settings.maxWidth || '800px'};`; if (c.height) styles += ` min-height: ${c.height};`; return styles; };
     
-    const createFormHeaderHTML = (c, s) => `<div class="form-header-block" style="${getBlockStyles(c, s)}">${c.imageUrl ? `<img src="${c.imageUrl}" alt="Header">` : ''}<h1>${c.title}</h1><p>${processText(c.subtitle)}</p></div>`;
-    const createInputQuestionHTML = (c, s) => `<div class="form-block" style="${getBlockStyles(c, s)}"><label for="${c.id}" class="${c.required ? 'required' : ''}">${c.title}</label><input type="text" id="${c.id}" name="${c.title}" ${c.required ? 'required' : ''}></div>`;
-    const createTextareaQuestionHTML = (c, s) => `<div class="form-block" style="${getBlockStyles(c, s)}"><label for="${c.id}" class="${c.required ? 'required' : ''}">${c.title}</label><textarea id="${c.id}" name="${c.title}" ${c.required ? 'required' : ''}></textarea></div>`;
-    const createRadioQuestionHTML = (c, s) => `<div class="form-block" style="${getBlockStyles(c, s)}"><label class="${c.required ? 'required' : ''}">${c.title}</label><ul class="radio-options-list">${c.options.map(opt => `<li><label><input type="radio" name="${c.id}" value="${opt.text}" ${c.required ? 'required' : ''}><span>${opt.text}</span></label></li>`).join('')}</ul></div>`;
-    const createFormFooterHTML = (c, s) => `<div class="form-footer-block" style="${getBlockStyles(c, s)}"><h2>${c.text}</h2></div>`;
+    const createFormHeaderHTML = (c, s) => {
+        const imageOpacityStyle = (c.opacity !== undefined) ? `opacity: ${c.opacity};` : '';
+        const imageHTML = c.imageUrl ? `<img src="${c.imageUrl}" alt="Header" style="${imageOpacityStyle}">` : '';
+        const stickersHTML = renderStickers(c.stickers);
+        return `<div class="block-wrapper"><div class="form-header-block" style="${getBlockStyles(c, s)}">${imageHTML}<h1>${c.title}</h1><p>${processText(c.subtitle)}</p>${stickersHTML}</div></div>`;
+    };
+    
+    const createInputQuestionHTML = (c, s) => `<div class="block-wrapper"><div class="form-block" style="${getBlockStyles(c, s)}"><label for="${c.id}" class="${c.required ? 'required' : ''}">${c.title}</label><input type="text" id="${c.id}" name="${c.title}" ${c.required ? 'required' : ''}></div></div>`;
+    const createTextareaQuestionHTML = (c, s) => `<div class="block-wrapper"><div class="form-block" style="${getBlockStyles(c, s)}"><label for="${c.id}" class="${c.required ? 'required' : ''}">${c.title}</label><textarea id="${c.id}" name="${c.title}" ${c.required ? 'required' : ''}></textarea></div></div>`;
+    const createRadioQuestionHTML = (c, s) => `<div class="block-wrapper"><div class="form-block" style="${getBlockStyles(c, s)}"><label class="${c.required ? 'required' : ''}">${c.title}</label><ul class="radio-options-list">${c.options.map(opt => `<li><label><input type="radio" name="${c.id}" value="${opt.text}" ${c.required ? 'required' : ''}><span>${opt.text}</span></label></li>`).join('')}</ul></div></div>`;
+    const createFormFooterHTML = (c, s) => {
+        const stickersHTML = renderStickers(c.stickers);
+        return `<div class="block-wrapper"><div class="form-footer-block" style="${getBlockStyles(c, s)}"><h2>${c.text}</h2>${stickersHTML}</div></div>`;
+    };
+
+    function initStickerInteraction(blocks) {
+        if (typeof interact === 'undefined') return;
+        
+        blocks.forEach(block => {
+            const blockWrapper = document.querySelector(`[data-block-id="${block.id}"]`)?.closest('.block-wrapper');
+            if (!blockWrapper) return;
+            
+            const blockId = block.id;
+
+            interact(blockWrapper.querySelectorAll('.sticker-wrapper'))
+                .draggable({
+                    listeners: {
+                        start(event) { event.target.classList.add('selected'); },
+                        move(event) {
+                            const target = event.target;
+                            let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                            let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                            target.style.left = `${x}px`;
+                            target.style.top = `${y}px`;
+                            target.setAttribute('data-x', x);
+                            target.setAttribute('data-y', y);
+                        },
+                        end(event) {
+                            const newProps = { x: parseFloat(event.target.getAttribute('data-x')), y: parseFloat(event.target.getAttribute('data-y')) };
+                            window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
+                        }
+                    },
+                    modifiers: [ interact.modifiers.restrictRect({ restriction: 'parent' }) ]
+                })
+                .resizable({
+                    edges: { right: '.resize-handle.se', bottom: '.resize-handle.se' },
+                    listeners: {
+                        move(event) {
+                            let { x, y } = event.target.dataset;
+                            Object.assign(event.target.style, { width: `${event.rect.width}px`, height: 'auto' });
+                            event.target.setAttribute('data-x', x);
+                            event.target.setAttribute('data-y', y);
+                        },
+                         end(event) {
+                            const newProps = { width: event.rect.width };
+                            window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
+                        }
+                    },
+                    modifiers: [ interact.modifiers.aspectRatio({ ratio: 'preserve' }) ]
+                })
+                .gesturable({ // For rotation
+                    listeners: {
+                        move (event) {
+                            const target = event.target;
+                            let angle = (parseFloat(target.getAttribute('data-angle')) || 0) + event.da;
+                            target.style.transform = `rotate(${angle}deg)`;
+                            target.setAttribute('data-angle', angle);
+                        },
+                        end(event) {
+                            const newProps = { rotation: parseFloat(event.target.getAttribute('data-angle')) };
+                            window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
+                        }
+                    }
+                })
+                .on('tap', (event) => {
+                    document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected'));
+                    event.currentTarget.classList.add('selected');
+                });
+
+            blockWrapper.addEventListener('click', (e) => {
+                if (e.target.closest('.sticker-wrapper')) return;
+                document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected'));
+            });
+        });
+    }
 
     function renderPage(blocks, settings) {
         if (!blocks || !settings) return;
@@ -66,18 +170,35 @@
         let hasFooter = false;
 
         blocks.forEach(block => {
-            if (block.type === 'form-footer') { footerHTML = createFormFooterHTML(block.content, settings); hasFooter = true; return; }
-            switch(block.type) {
-                case 'form-header': formHTML += createFormHeaderHTML(block.content, settings); break;
-                case 'input-question': formHTML += createInputQuestionHTML(block.content, settings); break;
-                case 'textarea-question': formHTML += createTextareaQuestionHTML(block.content, settings); break;
-                case 'radio-question': formHTML += createRadioQuestionHTML(block.content, settings); break;
+            if (block.type === 'form-footer') { 
+                footerHTML = createFormFooterHTML(block.content, settings); 
+                hasFooter = true; 
+                return; 
             }
+            let blockHTML = '';
+            switch(block.type) {
+                case 'form-header': blockHTML = createFormHeaderHTML(block.content, settings); break;
+                case 'input-question': blockHTML = createInputQuestionHTML(block.content, settings); break;
+                case 'textarea-question': blockHTML = createTextareaQuestionHTML(block.content, settings); break;
+                case 'radio-question': blockHTML = createRadioQuestionHTML(block.content, settings); break;
+            }
+            // Add data-block-id for sticker interaction
+            if (blockHTML && (block.content.stickers || block.type === 'form-header' || block.type === 'form-footer')) {
+                blockHTML = blockHTML.replace('<div class="form-block"', `<div class="form-block" data-block-id="${block.id}"`);
+                blockHTML = blockHTML.replace('<div class="form-header-block"', `<div class="form-header-block" data-block-id="${block.id}"`);
+                blockHTML = blockHTML.replace('<div class="form-footer-block"', `<div class="form-footer-block" data-block-id="${block.id}"`);
+            }
+            formHTML += blockHTML;
         });
 
         formHTML += `<div class="submit-button-wrapper"><button type="submit" class="submit-button">Send Response</button></div>`;
         if (hasFooter) { formHTML += footerHTML; }
         form.innerHTML = formHTML;
+
+        // Initialize sticker interaction only if in an iframe (editor mode)
+        if (window.self !== window.top) {
+            setTimeout(() => initStickerInteraction(blocks), 50);
+        }
     }
 
     async function loadInvitationData() {
@@ -88,8 +209,7 @@
 
         if (id && pageType) {
             try {
-                // ВАЖНО: Заглушка __JSONBIN_ACCESS_KEY__ будет заменена при сборке
-                const r = await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, { headers: { 'X-Access-Key': '__JSONBIN_ACCESS_KEY__' }});
+                const r = await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, { headers: { 'X-Access-Key': '$2a$10$c.QWLI8NIw84W3uqmH/mUez32F1LK7KPBirRW7hr1nE0mJ9CAATC6' }});
                 if (!r.ok) throw new Error('Could not load form data.');
                 const data = (await r.json()).record;
                 const pageData = data[pageType];
