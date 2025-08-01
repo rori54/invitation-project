@@ -34,6 +34,8 @@
         .sticker-wrapper .rotate-handle { position: absolute; top: -30px; left: calc(50% - 8px); width: 16px; height: 16px; background: #fff; border: 1px solid #007bff; border-radius: 50%; cursor: grab; display: none; }
         .sticker-wrapper .rotate-handle::before { content: ''; position: absolute; top: -15px; left: 50%; width: 1px; height: 15px; background: #007bff; transform: translateX(-50%); }
         .sticker-wrapper.selected .rotate-handle { display: block; }
+        .rsvp-button{display:inline-block; padding:15px 30px;text-decoration:none;border-radius:50px;transition:transform .2s ease; margin: 10px;}
+        .rsvp-button:hover{transform:scale(1.05)}
     </style>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 </head>
@@ -41,12 +43,14 @@
     <main id="page-content"></main>
     <script>
     const getStyleString = (style) => { if (!style) return ''; let str = ''; if (style.fontFamily) str += `font-family: '${style.fontFamily}', sans-serif; `; if (style.fontSize) str += `font-size: ${style.fontSize}; `; if (style.color) str += `color: ${style.color}; `; if (style.fontWeight) str += `font-weight: ${style.fontWeight}; `; if (style.textAlign) str += `text-align: ${style.textAlign}; `; if (style.backgroundColor) str += `background-color: ${style.backgroundColor}; `; return str; };
-    const renderStickers = (stickers) => { if (!stickers || stickers.length === 0) return ''; return stickers.map(s => `<div class="sticker-wrapper" data-sticker-id="${s.id}" style="opacity: ${s.opacity === undefined ? 1 : s.opacity}; left: ${s.x}px; top: ${s.y}px; width: ${s.width}px; transform: rotate(${s.rotation || 0}deg);"> <img src="${s.src}" alt="sticker"> <div class="rotate-handle"></div> <div class="resize-handle se"></div> </div>`).join(''); };
+    const renderStickers = (stickers) => { if (!stickers || stickers.length === 0) return ''; return stickers.map(s => `<div class="sticker-wrapper" data-sticker-id="${s.id}" style="opacity: ${s.opacity === undefined ? 1 : s.opacity}; left: ${s.x || 0}px; top: ${s.y || 0}px; width: ${s.width || 150}px; transform: rotate(${s.rotation || 0}deg);"> <img src="${s.src}" alt="sticker"> <div class="rotate-handle"></div> <div class="resize-handle se"></div> </div>`).join(''); };
+    
     const createBlockHTML = (block, settings, rsvpLink) => {
         const c = block.content;
         let innerHTML = '';
         const wrapperClass = block.type === 'hero' ? 'hero-block block-wrapper' : 'block-wrapper';
         const wrapperStyle = block.type === 'hero' ? `aspect-ratio:${c.aspectRatio||'16/9'};` : '';
+        const sectionStyle = `max-width:${settings.maxWidth || '800px'};`;
 
         switch(block.type) {
             case 'hero':
@@ -56,17 +60,22 @@
                 innerHTML = `<img class="hero-background-image" src="${c.imageUrl}" style="object-position:${c.backgroundPosition || 'center center'};"> <div class="hero-content">${subtitle}${names}${date}</div>`;
                 break;
             case 'text-block':
-                innerHTML = `<section class="content-section">${c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : ''}<div class="text-block-content"><p style="${getStyleString(c.textStyle)}">${c.text || ''}</p></div></section>`;
+                innerHTML = `<section class="content-section" style="${sectionStyle}">${c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : ''}<div class="text-block-content"><p style="${getStyleString(c.textStyle)}">${(c.text || '').replace(/\n/g, '<br>')}</p></div></section>`;
                 break;
             case 'image':
-                innerHTML = `<section class="content-section"><figure><img src="${c.imageUrl}" alt="${c.caption}"><figcaption>${c.caption}</figcaption></figure></section>`;
+                innerHTML = `<section class="content-section" style="${sectionStyle}"><figure><img src="${c.imageUrl}" alt="${c.caption}"><figcaption>${c.caption}</figcaption></figure></section>`;
                 break;
             case 'location':
-                innerHTML = `<section class="content-section">${c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : ''}<p>${c.address||''}</p><img src="${c.imageUrl}" alt="Venue"><a href="${c.mapLink}" target="_blank">View Map</a></section>`;
+                innerHTML = `<section class="content-section" style="${sectionStyle}">${c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : ''}<p>${(c.address||'').replace(/\n/g, '<br>')}</p>${c.imageUrl ? `<img src="${c.imageUrl}" alt="Venue">`: ''}<a href="${c.mapLink}" class="rsvp-button" target="_blank">View on Map</a></section>`;
                 break;
-             // Add other cases here
+            case 'rsvp':
+                innerHTML = `<section class="content-section" style="${sectionStyle}">${c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : ''}<p>${(c.subtitle||'').replace(/\n/g, '<br>')}</p><a href="${rsvpLink}" class="rsvp-button" style="${getStyleString(c.buttonStyle)}">I'll Be There!</a></section>`;
+                break;
+            case 'countdown':
+                 innerHTML = `<section class="content-section" style="${sectionStyle}"><div id="countdown"></div></section>`;
+                 break;
             default:
-                innerHTML = `<section class="content-section">Unsupported block type: ${block.type}</section>`;
+                innerHTML = `<section class="content-section" style="${sectionStyle}">Unsupported block type: ${block.type}</section>`;
         }
         return `<div class="${wrapperClass}" data-block-id="${block.id}" style="${wrapperStyle}">${innerHTML}${renderStickers(c.stickers)}</div>`;
     };
@@ -81,11 +90,11 @@
         container.innerHTML = blocks.map(block => createBlockHTML(block, settings, rsvpLink)).join('');
         
         if (window.self !== window.top) {
-            setTimeout(() => initStickerInteraction(blocks), 100);
+            setTimeout(() => initStickerInteraction(), 100);
         }
     }
     
-    function initStickerInteraction(blocks) {
+    function initStickerInteraction() {
         if (typeof interact === 'undefined') return;
 
         interact('.sticker-wrapper').on('tap', event => { document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected')); event.currentTarget.classList.add('selected'); event.stopPropagation(); });
@@ -120,7 +129,7 @@
                 move(event) {
                     const target = event.target;
                     target.style.width = `${event.rect.width}px`;
-                    target.style.height = `${event.rect.height}px`;
+                    target.style.height = 'auto';
                 },
                 end(event) {
                     const blockId = event.target.closest('.block-wrapper').dataset.blockId;

@@ -121,6 +121,8 @@
                 fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${c.subtitle||''}</textarea></div>`;
                 if(c.buttonStyle) fieldsHTML += `<hr class="style-separator"><label>Button Style</label><div class="style-controls"><div class="style-controls-grid"><div class="control-group"><label>Background Color</label><input type="color" data-key="buttonStyle.backgroundColor" value="${c.buttonStyle.backgroundColor||'#c5a98b'}"></div><div class="control-group"><label>Text Color</label><input type="color" data-key="buttonStyle.color" value="${c.buttonStyle.color||'#FFFFFF'}"></div></div><div style="margin-top:10px;">${createStyleControls('buttonStyle',c.buttonStyle,{color:false,size:true,weight:true,family:true})}</div></div>`;
                 break;
+            default:
+                 fieldsHTML = `<p>No editor configured for block type: <b>${block.type}</b></p>`;
         }
         return fieldsHTML + createStickerEditor(block);
     }
