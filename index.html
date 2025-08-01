@@ -297,18 +297,80 @@
         </div>`;
     }
 
-    function createEditorFieldsForBlock(block) { 
-        let fieldsHTML = ''; 
-        const c = block.content; 
-        const bgPosField = `<div class="control-group"><label>Background Focus Point</label><input type="text" data-key="backgroundPosition" value="${c.backgroundPosition || 'center center'}" placeholder="e.g., center 30%"></div>`; 
-        const aspectRatioField = `<div class="control-group"><label>Block Shape (Height)</label><select data-key="aspectRatio"> <option value="21/9" ${c.aspectRatio === '21/9' ? 'selected' : ''}>Cinematic</option> <option value="16/9" ${c.aspectRatio === '16/9' ? 'selected' : ''}>Widescreen</option> <option value="8/5" ${c.aspectRatio === '8/5' ? 'selected' : ''}>Landscape (Wide)</option> <option value="3/2"  ${c.aspectRatio === '3/2' ? 'selected' : ''}>Landscape (Classic)</option> <option value="4/3"  ${c.aspectRatio === '4/3' ? 'selected' : ''}>Standard (4:3)</option> <option value="1/1"  ${c.aspectRatio === '1/1' ? 'selected' : ''}>Square</option> <option value="9/12" ${c.aspectRatio === '9/12' ? 'selected' : ''}>Portrait (Standard)</option> <option value="9/16" ${c.aspectRatio === '9/16' ? 'selected' : ''}>Portrait (Tall)</option> </select></div>`; 
-        const titleStyleField = (styleObj) => `<label>Title Style</label>${createStyleControlsHTML('titleStyle', styleObj, { textAlign: true, color: true, size: true, weight: true, family: true })}`; 
-        const sectionTitleField = (title) => `<div class="control-group"><label>Section Title</label><input type="text" data-key="title" value="${title}"></div>`; 
-        const createOptionalElementEditor = (key, label) => { 
-            const element = c[key]; 
-            if (!element) return ''; 
-            return `<div class="control-group"> <div class="optional-element-header"> <label>${label}</label> <label><input type="checkbox" data-key="${key}.enabled" ${element.enabled ? 'checked' : ''}> Show</label> </div> <input type="text" data-key="${key}.text" value="${element.text}"> ${createStyleControlsHTML(`${key}.style`, element.style)} </div>`; 
-        };
+        function createEditorFieldsForBlock(block) {
+            let fieldsHTML = '';
+            const c = block.content;
+            const bgPosField = `<div class="control-group"><label>Background Focus Point</label><input type="text" data-key="backgroundPosition" value="${c.backgroundPosition || 'center center'}" placeholder="e.g., center 30%"></div>`;
+            const aspectRatioField = `<div class="control-group"><label>Block Shape (Height)</label><select data-key="aspectRatio"> <option value="21/9" ${c.aspectRatio === '21/9' ? 'selected' : ''}>Cinematic</option> <option value="16/9" ${c.aspectRatio === '16/9' ? 'selected' : ''}>Widescreen</option> <option value="8/5" ${c.aspectRatio === '8/5' ? 'selected' : ''}>Landscape (Wide)</option> <option value="3/2"  ${c.aspectRatio === '3/2' ? 'selected' : ''}>Landscape (Classic)</option> <option value="4/3"  ${c.aspectRatio === '4/3' ? 'selected' : ''}>Standard (4:3)</option> <option value="1/1"  ${c.aspectRatio === '1/1' ? 'selected' : ''}>Square</option> <option value="9/12" ${c.aspectRatio === '9/12' ? 'selected' : ''}>Portrait (Standard)</option> <option value="9/16" ${c.aspectRatio === '9/16' ? 'selected' : ''}>Portrait (Tall)</option> </select></div>`;
+            const titleStyleField = (styleObj) => styleObj ? `<label>Title Style</label>${createStyleControlsHTML('titleStyle', styleObj, { textAlign: true, color: true, size: true, weight: true, family: true })}` : '';
+            const sectionTitleField = (title) => `<div class="control-group"><label>Section Title</label><input type="text" data-key="title" value="${title || ''}"></div>`;
+            const createOptionalElementEditor = (key, label) => {
+                const element = c[key];
+                if (!element) return '';
+                return `<div class="control-group"> <div class="optional-element-header"> <label>${label}</label> <label><input type="checkbox" data-key="${key}.enabled" ${element.enabled ? 'checked' : ''}> Show</label> </div> <input type="text" data-key="${key}.text" value="${element.text}"> ${createStyleControlsHTML(`${key}.style`, element.style)} </div>`;
+            };
+
+            switch (block.type) {
+                case 'hero':
+                    fieldsHTML = `${createImageInputHTML('imageUrl', c.imageUrl, 'Background Image URL')}
+                        ${createOpacityControl('opacity', c.opacity, 'Background Opacity')}
+                        ${createOptionalElementEditor('names', 'Names')} 
+                        <hr class="style-separator"> 
+                        ${createOptionalElementEditor('subtitle', 'Subtitle')} 
+                        <hr class="style-separator"> 
+                        ${createOptionalElementEditor('date', 'Date')} 
+                        <hr class="style-separator"> 
+                        ${aspectRatioField}${bgPosField} 
+                        ${createStickerEditor(block)}`;
+                    break;
+
+                case 'text-block':
+                    fieldsHTML = `<div class="control-group"><label>Title (optional)</label><input type="text" data-key="title" value="${c.title || ''}"></div>${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Paragraph Text</label><textarea data-key="text">${c.text || ''}</textarea></div>${createStyleControlsHTML('textStyle', c.textStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}${createStickerEditor(block)}`;
+                    break;
+
+                case 'rsvp':
+                    fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${c.subtitle || ''}</textarea></div><hr class="style-separator"><label>Button Style</label><div class="style-controls"><div class="style-controls-grid"><div class="control-group"><label>Background Color</label><input type="color" data-key="buttonStyle.backgroundColor" value="${c.buttonStyle.backgroundColor || '#c5a98b'}"></div><div class="control-group"><label>Text Color</label><input type="color" data-key="buttonStyle.color" value="${c.buttonStyle.color || '#FFFFFF'}"></div></div><div style="margin-top: 10px;">${createStyleControlsHTML('buttonStyle', c.buttonStyle, {color: false, size: true, weight: true, family: true})}</div></div>${createStickerEditor(block)}`;
+                    break;
+
+                case 'countdown':
+                    fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Target Date & Time</label><input type="datetime-local" data-key="targetDate" value="${c.targetDate || ''}"></div>${createStickerEditor(block)}`;
+                    break;
+
+                case 'schedule':
+                    fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}`;
+                    let items = (c.items || []).map((item, index) =>
+                        `<div class="sub-item-editor" data-item-index="${index}">
+                            <button type="button" class="delete-sub-item-btn">×</button>
+                            <input type="text" placeholder="Time" class="sub-item-input" data-key="items.${index}.time" value="${item.time || ''}">
+                            <input type="text" placeholder="Title" class="sub-item-input" data-key="items.${index}.title" value="${item.title || ''}">
+                            <textarea class="sub-item-input" data-key="items.${index}.desc" placeholder="Description">${item.desc || ''}</textarea>
+                        </div>`
+                    ).join('');
+                    fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Items</label>${items}</div><button type="button" class="add-sub-item-btn" style="font-size: 12px; padding: 5px; margin-top: 10px;">+ Add Item</button>`;
+                    fieldsHTML += createStickerEditor(block);
+                    break;
+
+                case 'location':
+                    fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Address</label><textarea data-key="address">${c.address || ''}</textarea></div>${createImageInputHTML('imageUrl', c.imageUrl, 'Photo URL')}${createOpacityControl('opacity', c.opacity, 'Photo Opacity')}<div class="control-group"><label>Google Maps Link</label><input type="url" data-key="mapLink" value="${c.mapLink || ''}"></div>${createStickerEditor(block)}`;
+                    break;
+
+                case 'image':
+                    fieldsHTML = `${createImageInputHTML('imageUrl', c.imageUrl, 'Image URL')}
+                        ${createOpacityControl('opacity', c.opacity, 'Image Opacity')}
+                        <div class="control-group"><label>Caption (optional)</label><input type="text" data-key="caption" value="${c.caption || ''}"></div>
+                        ${createStickerEditor(block)}`;
+                    break;
+
+                case 'form-header':
+                    fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${c.subtitle || ''}</textarea></div>${createImageInputHTML('imageUrl', c.imageUrl, 'Background Image URL')}${createOpacityControl('opacity', c.opacity, 'Background Opacity')}${aspectRatioField}${createStickerEditor(block)}`;
+                    break;
+
+                default:
+                    fieldsHTML = 'No editor available for this block type.';
+            }
+
+            return fieldsHTML;
+        }
         
         switch(block.type) { 
             case 'hero': 
