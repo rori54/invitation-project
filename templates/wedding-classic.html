@@ -41,8 +41,6 @@
         .image-block img { width: 100%; height: auto; border-radius: 8px; }
         .image-block figcaption { margin-top: 10px; font-style: italic; color: #666; }
         #envelope-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; z-index: 1000; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 1.5s ease-in-out; } #envelope-3d { width: 80%; max-width: 500px; height: 80%; max-height: 500px; transition: transform 0.5s, opacity 0.5s; opacity: 0; } #envelope-3d.loaded { opacity: 1; animation: floatAnimation 4s ease-in-out infinite; } #envelope-wrapper.hidden { opacity: 0; pointer-events: none; } @keyframes floatAnimation { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { translateY(0); } }
-
-        /* Styles for Stickers Interaction */
         .sticker-wrapper { position: absolute; box-sizing: border-box; z-index: 5; cursor: grab; }
         .sticker-wrapper img { width: 100%; height: 100%; display: block; pointer-events: none; }
         .sticker-wrapper.selected { outline: 2px solid #007bff; }
@@ -52,7 +50,6 @@
         .sticker-wrapper .rotate-handle { position: absolute; top: -30px; left: calc(50% - 8px); width: 16px; height: 16px; background: #fff; border: 1px solid #007bff; border-radius: 50%; cursor: grab; display: none; }
         .sticker-wrapper.selected .rotate-handle { display: block; }
         .sticker-wrapper .rotate-handle::before { content: ''; position: absolute; top: -15px; left: 50%; width: 1px; height: 15px; background: #007bff; transform: translateX(-50%); }
-
     </style>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -188,33 +185,31 @@
         
         blocks.forEach(block => {
             const blockWrapper = document.querySelector(`.block-wrapper[data-block-id="${block.id}"]`);
-            if (!blockWrapper) {
-                return; 
-            }
+            if (!blockWrapper) return;
             
             const blockId = block.id;
 
             interact(blockWrapper.querySelectorAll('.sticker-wrapper'))
                 .draggable({
                     listeners: {
-                        start(event) { 
+                        start(event) {
                             document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected'));
-                            event.target.classList.add('selected'); 
+                            event.target.classList.add('selected');
                         },
                         move(event) {
                             const target = event.target;
-                            let x = (parseFloat(target.style.left.replace('px', '')) || 0) + event.dx;
-                            let y = (parseFloat(target.style.top.replace('px', '')) || 0) + event.dy;
+                            let x = (parseFloat(target.style.left) || 0) + event.dx;
+                            let y = (parseFloat(target.style.top) || 0) + event.dy;
                             target.style.left = `${x}px`;
                             target.style.top = `${y}px`;
                         },
                         end(event) {
                             const target = event.target;
-                            const newProps = { 
-                                x: parseFloat(target.style.left.replace('px', '')), 
-                                y: parseFloat(target.style.top.replace('px', ''))
+                            const newProps = {
+                                x: parseFloat(target.style.left),
+                                y: parseFloat(target.style.top)
                             };
-                            window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
+                            window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
                         }
                     },
                     modifiers: [ interact.modifiers.restrictRect({ restriction: 'parent' }) ]
@@ -227,16 +222,16 @@
                             target.style.width = `${event.rect.width}px`;
                             target.style.height = 'auto';
                         },
-                         end(event) {
+                        end(event) {
                             const newProps = { width: event.rect.width };
-                            window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
+                            window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
                         }
                     },
                     modifiers: [ interact.modifiers.aspectRatio({ ratio: 'preserve' }) ]
                 })
                 .gesturable({
                     listeners: {
-                        move (event) {
+                        move(event) {
                             const target = event.target;
                             let angle = (parseFloat(target.getAttribute('data-angle')) || 0) + event.da;
                             target.style.transform = `rotate(${angle}deg)`;
@@ -244,7 +239,7 @@
                         },
                         end(event) {
                             const newProps = { rotation: parseFloat(event.target.getAttribute('data-angle')) };
-                            window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
+                            window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
                         }
                     }
                 })
@@ -255,10 +250,8 @@
                 });
 
             blockWrapper.addEventListener('click', (e) => {
-                if (e.target === blockWrapper || e.target.closest('.content-section') || e.target.closest('.hero-content')) {
-                    if (!e.target.closest('.sticker-wrapper')) {
-                        document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected'));
-                    }
+                if (!e.target.closest('.sticker-wrapper')) {
+                    document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected'));
                 }
             });
         });
@@ -294,9 +287,9 @@
         }
     }
 
-    if (window.self === window.top) { // Final page
+    if (window.self === window.top) {
         window.addEventListener('load', () => { loadInvitationData(); setupIntroAnimation(); });
-    } else { // Editor mode
+    } else {
         window.renderPage = renderPage; 
         document.body.style.opacity = 1;
         const envelope = document.getElementById('envelope-wrapper');
