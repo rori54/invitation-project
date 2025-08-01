@@ -310,7 +310,7 @@
             return `<div class="control-group"> <div class="optional-element-header"> <label>${label}</label> <label><input type="checkbox" data-key="${key}.enabled" ${element.enabled ? 'checked' : ''}> Show</label> </div> <input type="text" data-key="${key}.text" value="${element.text}"> ${createStyleControlsHTML(`${key}.style`, element.style)} </div>`; 
         };
         
-                switch(block.type) { 
+        switch(block.type) { 
             case 'hero': 
                 fieldsHTML = `${createImageInputHTML('imageUrl', c.imageUrl, 'Background Image URL')}
                     ${createOpacityControl('opacity', c.opacity, 'Background Opacity')}
@@ -361,14 +361,13 @@
                     ${createStickerEditor(block)}`;
                 break;
             
-            // Формы для RSVP страницы, если они понадобятся
             case 'form-header':
                 fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${c.subtitle || ''}</textarea></div>${createImageInputHTML('imageUrl', c.imageUrl, 'Background Image URL')}${createOpacityControl('opacity', c.opacity, 'Background Opacity')}${aspectRatioField}${createStickerEditor(block)}`;
                 break;
             
             default: 
                 fieldsHTML = 'No editor available for this block type.'; 
-        } 
+        }
     
     function renderEditor() { 
         const container = document.getElementById('editor-content'); 
@@ -524,24 +523,20 @@
                 pageBlocks[blockIndex].content.stickers.splice(stickerIndex, 1);
                 renderEditor();
                 renderPreview();
-            
-            // --- НАЧАЛО ВСТАВКИ ДЛЯ КНОПОК РАСПИСАНИЯ ---
-            } else if (target.matches('.add-sub-item-btn')) {
+            } else if (target.matches('.add-sub-item-btn')) { // Кнопка "+ Add Item" для Расписания
                 if (!pageBlocks[blockIndex].content.items) {
                     pageBlocks[blockIndex].content.items = [];
                 }
                 pageBlocks[blockIndex].content.items.push({ id: `item-${Date.now()}`, time: '', title: '', desc: '' });
                 renderEditor();
                 renderPreview();
-            } else if (target.matches('.delete-sub-item-btn')) {
+            } else if (target.matches('.delete-sub-item-btn')) { // Кнопка "x" для пункта Расписания
                 const itemIndex = parseInt(target.closest('.sub-item-editor').dataset.itemIndex, 10);
                 if (!isNaN(itemIndex)) {
                     pageBlocks[blockIndex].content.items.splice(itemIndex, 1);
                     renderEditor();
                     renderPreview();
                 }
-            // --- КОНЕЦ ВСТАВКИ ДЛЯ КНОПОК РАСПИСАНИЯ ---
-
             } else if (target.closest('.delete-block-btn')) {
                 if (confirm('Are you sure?')) {
                     pageBlocks.splice(blockIndex, 1);
