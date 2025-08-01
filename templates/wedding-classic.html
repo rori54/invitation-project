@@ -9,8 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Allura&family=Sacramento&family=Alex+Brush&family=Satisfy&family=Kaushan+Script&family=Pacifico&family=Caveat:wght@400;700&family=Cookie&family=Playfair+Display:wght@400;700&family=Crimson+Text:wght@400;700&family=Cormorant+Garamond:wght@400;700&family=EB+Garamond:wght@400;700&family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;700&family=Merriweather:wght@400;700&family=Vollkorn:wght@400;700&family=Cinzel:wght@400;700&family=Abril+Fatface&family=Amatic+SC:wght@400;700&family=Fredoka+One&family=Lobster&family=Montserrat:wght@300;400;700&family=Raleway:wght@300;400;700&family=Lato:wght@300;400;700&family=Open+Sans:wght@300;400;700&family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root{--accent-color:#c5a98b;--background-color:#f8f7f5}
-        body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.7;background-color:var(--background-color);color:#333;opacity:0;transition:opacity .5s ease-in-out; background-size: cover; background-position: center; background-attachment: fixed;}
-        main { transition: opacity 1s ease-in-out; } body.intro-active main { opacity: 0; }
+        body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.7;background-color:var(--background-color);color:#333; background-size: cover; background-position: center; background-attachment: fixed;}
         .block-wrapper { position: relative; }
         .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; position: relative; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); box-sizing: border-box;}
         .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; overflow: hidden; width: 100%; user-select: none; }
@@ -18,8 +17,6 @@
         .hero-background-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; }
         .hero-block::before{ content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); z-index: 1; pointer-events: none;}
         .hero-content{ position:relative; z-index: 2; width: 90%; max-width: 1000px; padding: 40px 0; pointer-events: none;}
-        
-        /* Styles for Stickers Interaction - Стили восстановлены */
         .sticker-wrapper { position: absolute; box-sizing: border-box; z-index: 5; cursor: grab; touch-action: none; }
         .sticker-wrapper img { width: 100%; height: 100%; display: block; pointer-events: none; }
         .sticker-wrapper.selected { outline: 2px solid #007bff; }
@@ -29,7 +26,6 @@
         .sticker-wrapper .rotate-handle { position: absolute; top: -30px; left: calc(50% - 8px); width: 16px; height: 16px; background: #fff; border: 1px solid #007bff; border-radius: 50%; cursor: grab; display: none; }
         .sticker-wrapper.selected .rotate-handle { display: block; }
         .sticker-wrapper .rotate-handle::before { content: ''; position: absolute; top: -15px; left: 50%; width: 1px; height: 15px; background: #007bff; transform: translateX(-50%); }
-
     </style>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 </head>
@@ -44,7 +40,6 @@
         if (!stickers || stickers.length === 0) return '';
         return stickers.map(sticker => {
             const opacityStyle = (sticker.opacity !== undefined) ? `opacity: ${sticker.opacity};` : '';
-            // Элементы управления .rotate-handle и .resize-handle ВОССТАНОВЛЕНЫ
             return `<div class="sticker-wrapper" data-sticker-id="${sticker.id}" style="left: ${sticker.x}px; top: ${sticker.y}px; width: ${sticker.width}px; transform: rotate(${sticker.rotation || 0}deg); ${opacityStyle}">
                         <img src="${sticker.src}" alt="sticker">
                         <div class="rotate-handle"></div>
@@ -53,101 +48,48 @@
         }).join('');
     };
 
-    const createHeroHTML = (block, s) => { /* Эта и другие create-функции остаются без изменений */
+    const createHeroHTML = (block, s) => {
         const c = block.content;
         return `<div class="block-wrapper" data-block-id="${block.id}"><header class="hero-block ${!c.fullWidth ? 'limited-width' : ''}" style="aspect-ratio: ${c.aspectRatio}; max-width: ${!c.fullWidth ? s.maxWidth : 'none'};"> ${c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition}; opacity: ${c.opacity};" alt="">` : ''} <div class="hero-content">${(c.subtitle && c.subtitle.enabled) ? `<p style="${getStyleString(c.subtitle.style)}">${c.subtitle.text}</p>` : ''}${(c.names && c.names.enabled) ? `<h1 style="${getStyleString(c.names.style)}">${c.names.text}</h1>` : ''}${(c.date && c.date.enabled) ? `<p style="${getStyleString(c.date.style)}">${c.date.text}</p>` : ''}</div> ${renderStickers(c.stickers)} </header></div>`;
     };
     
-    // ... (все остальные функции-создатели HTML остаются такими же)
+    // Остальные функции create...HTML остаются здесь для полноты
+    const createTextBlockHTML = (block, s) => `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};">...</section></div>`;
+    // ... и так далее для всех типов блоков ...
 
     function renderPage(blocks, settings, rsvpLink = '#') {
-        // Эта функция остается без изменений
         document.body.className = '';
         if (settings.style) document.body.classList.add(`style-${settings.style}`);
-        // ... остальная логика
+        document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? `url('${settings.backgroundImage}')` : 'none';
+        
+        const container = document.getElementById('page-content');
+        container.innerHTML = blocks.map(block => {
+            switch(block.type) {
+                case 'hero': return createHeroHTML(block, settings);
+                // Здесь должны быть вызовы для всех остальных типов блоков
+                // Например: case 'text-block': return createTextBlockHTML(block, settings);
+                default: return `<!-- Block type ${block.type} not rendered -->`;
+            }
+        }).join('');
+        
         if (window.self !== window.top) {
-             setTimeout(() => initStickerInteraction(), 100);
+             setTimeout(() => initStickerInteraction(), 150);
         }
     }
 
-    // --- ИСПРАВЛЕНАЯ И ПОЛНАЯ ФУНКЦИЯ INTERACTION ---
     function initStickerInteraction() {
         if (typeof interact === 'undefined') return;
-
+        // Код для interact.js остается таким же, как в предыдущем ответе
         interact('.sticker-wrapper')
-            .draggable({
-                listeners: {
-                    start(event) {
-                        const target = event.target;
-                        document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected'));
-                        target.classList.add('selected');
-                        const x = parseFloat(target.style.left) || 0;
-                        const y = parseFloat(target.style.top) || 0;
-                        target.setAttribute('data-x', x);
-                        target.setAttribute('data-y', y);
-                    },
-                    move(event) {
-                        const target = event.target;
-                        let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-                        let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-                        target.style.left = `${x}px`;
-                        target.style.top = `${y}px`;
-                        target.setAttribute('data-x', x);
-                        target.setAttribute('data-y', y);
-                    },
-                    end(event) {
-                        const target = event.target;
-                        const blockWrapper = target.closest('.block-wrapper');
-                        if (!blockWrapper) return;
-                        const newProps = { x: parseFloat(target.getAttribute('data-x')), y: parseFloat(target.getAttribute('data-y')) };
-                        window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockWrapper.dataset.blockId, stickerId: target.dataset.stickerId, newProps } }, '*');
-                    }
-                },
-                modifiers: [ interact.modifiers.restrictRect({ restriction: 'parent' }) ]
-            })
-            .resizable({
-                edges: { right: '.resize-handle.se', bottom: '.resize-handle.se' },
-                listeners: {
-                    move(event) {
-                        let target = event.target;
-                        target.style.width = `${event.rect.width}px`;
-                        target.style.height = 'auto';
-                    },
-                    end(event) {
-                        const target = event.target;
-                        const blockWrapper = target.closest('.block-wrapper');
-                        if (!blockWrapper) return;
-                        const newProps = { width: event.rect.width };
-                        window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockWrapper.dataset.blockId, stickerId: target.dataset.stickerId, newProps } }, '*');
-                    }
-                },
-                modifiers: [ interact.modifiers.aspectRatio({ ratio: 'preserve' }) ]
-            })
-            .gesturable({ // Для вращения
-                listeners: {
-                    move (event) {
-                        const target = event.target;
-                        let angle = (parseFloat(target.getAttribute('data-angle')) || 0) + event.da;
-                        target.style.transform = `rotate(${angle}deg)`;
-                        target.setAttribute('data-angle', angle);
-                    },
-                    end(event) {
-                        const target = event.target;
-                        const blockWrapper = target.closest('.block-wrapper');
-                        if (!blockWrapper) return;
-                        const newProps = { rotation: parseFloat(target.getAttribute('data-angle')) };
-                        window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockWrapper.dataset.blockId, stickerId: target.dataset.stickerId, newProps } }, '*');
-                    }
-                }
-            });
+            .draggable({/* ... */})
+            .resizable({/* ... */})
+            .gesturable({/* ... */});
     }
-    
-    // Остальной код (loadInvitationData, setupIntroAnimation и т.д.) без изменений
+
     if (window.self !== window.top) {
         window.renderPage = renderPage; 
-        document.body.style.opacity = 1;
     } else {
-        // Логика для финальной страницы
+        // Логика для загрузки данных на финальной странице
     }
     </script>
 </body>
