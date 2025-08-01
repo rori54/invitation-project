@@ -12,12 +12,13 @@
         body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.7;background-color:var(--background-color);color:#333;background-size: cover; background-position: center; background-attachment: fixed;}
         main { transition: opacity 1s ease-in-out; }
         .block-wrapper { position: relative; }
-        .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; position: relative; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); box-sizing: border-box;}
-        #page-content > .block-wrapper:first-child .content-section { margin-top: 0; border-radius: 0; }
-        #page-content > .hero-block + .block-wrapper .content-section { margin-top: 30px; border-radius: 8px; }
+        .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); box-sizing: border-box;}
+        #page-content > .block-wrapper:first-child > .content-section, 
+        #page-content > .hero-block { margin-top: 0; border-radius: 0; }
+        .hero-block + .block-wrapper .content-section { margin-top: 30px; border-radius: 8px; }
         h1,h2,h3{ text-align:center; margin: 15px 0; }
         p { margin: 15px 0; }
-        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; overflow: hidden; width: 100%; user-select: none; }
+        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; overflow: hidden; width: 100%; user-select: none; }
         .hero-background-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; }
         .hero-block::before{ content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); z-index: 1; pointer-events: none;}
         .hero-content{ position:relative; z-index: 2; width: 90%; max-width: 1000px; padding: 40px 0; pointer-events: none;}
@@ -44,21 +45,30 @@
     const createBlockHTML = (block, settings, rsvpLink) => {
         const c = block.content;
         let innerHTML = '';
+        const wrapperClass = block.type === 'hero' ? 'hero-block block-wrapper' : 'block-wrapper';
+        const wrapperStyle = block.type === 'hero' ? `aspect-ratio:${c.aspectRatio||'16/9'};` : '';
+
         switch(block.type) {
             case 'hero':
                 const subtitle = (c.subtitle?.enabled) ? `<p style="${getStyleString(c.subtitle.style)}">${c.subtitle.text}</p>` : '';
                 const names = (c.names?.enabled) ? `<h1 style="${getStyleString(c.names.style)}">${c.names.text}</h1>` : '';
                 const date = (c.date?.enabled) ? `<p style="${getStyleString(c.date.style)}">${c.date.text}</p>` : '';
-                return `<header class="hero-block block-wrapper" data-block-id="${block.id}" style="aspect-ratio:${c.aspectRatio||'16/9'};"> <img class="hero-background-image" src="${c.imageUrl}" style="object-position:${c.backgroundPosition || 'center center'};"> <div class="hero-content">${subtitle}${names}${date}</div> ${renderStickers(c.stickers)} </header>`;
+                innerHTML = `<img class="hero-background-image" src="${c.imageUrl}" style="object-position:${c.backgroundPosition || 'center center'};"> <div class="hero-content">${subtitle}${names}${date}</div>`;
+                break;
             case 'text-block':
-                innerHTML = `${c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : ''}<div class="text-block-content"><p style="${getStyleString(c.textStyle)}">${c.text || ''}</p></div>`;
+                innerHTML = `<section class="content-section">${c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : ''}<div class="text-block-content"><p style="${getStyleString(c.textStyle)}">${c.text || ''}</p></div></section>`;
                 break;
             case 'image':
-                innerHTML = `<figure><img src="${c.imageUrl}" alt="${c.caption}"><figcaption>${c.caption}</figcaption></figure>`;
+                innerHTML = `<section class="content-section"><figure><img src="${c.imageUrl}" alt="${c.caption}"><figcaption>${c.caption}</figcaption></figure></section>`;
                 break;
-            // Add other cases here as needed
+            case 'location':
+                innerHTML = `<section class="content-section">${c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : ''}<p>${c.address||''}</p><img src="${c.imageUrl}" alt="Venue"><a href="${c.mapLink}" target="_blank">View Map</a></section>`;
+                break;
+             // Add other cases here
+            default:
+                innerHTML = `<section class="content-section">Unsupported block type: ${block.type}</section>`;
         }
-        return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section ${block.type}-block" style="max-width:${settings.maxWidth || '800px'};">${innerHTML}${renderStickers(c.stickers)}</section></div>`;
+        return `<div class="${wrapperClass}" data-block-id="${block.id}" style="${wrapperStyle}">${innerHTML}${renderStickers(c.stickers)}</div>`;
     };
 
     function renderPage(blocks, settings, rsvpLink = '#') {
@@ -83,6 +93,11 @@
         
         interact('.sticker-wrapper').draggable({
             listeners: {
+                start(event) {
+                    const target = event.target;
+                    target.dataset.x = target.style.left.replace('px','') || 0;
+                    target.dataset.y = target.style.top.replace('px','') || 0;
+                },
                 move(event) {
                     const target = event.target;
                     const x = (parseFloat(target.dataset.x) || 0) + event.dx;
@@ -105,6 +120,7 @@
                 move(event) {
                     const target = event.target;
                     target.style.width = `${event.rect.width}px`;
+                    target.style.height = `${event.rect.height}px`;
                 },
                 end(event) {
                     const blockId = event.target.closest('.block-wrapper').dataset.blockId;
