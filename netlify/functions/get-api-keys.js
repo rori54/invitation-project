@@ -5,7 +5,12 @@ exports.handler = async (event, context) => {
     if (!imgbbApiKey) {
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: 'IMGBB API key not configured' })
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          error: 'ImgBB API key not configured'
+        })
       };
     }
 
@@ -13,9 +18,6 @@ exports.handler = async (event, context) => {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
       },
       body: JSON.stringify({
         imgbb: imgbbApiKey
@@ -24,7 +26,12 @@ exports.handler = async (event, context) => {
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Internal server error' })
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        error: 'Failed to retrieve API keys'
+      })
     };
   }
 };

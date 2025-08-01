@@ -47,11 +47,16 @@
         .sticker-wrapper img { width: 100%; height: 100%; display: block; }
         .sticker-wrapper.selected { outline: 2px solid #007bff; }
         .sticker-wrapper .resize-handle { position: absolute; width: 12px; height: 12px; background: #fff; border: 1px solid #007bff; border-radius: 50%; display: none; }
-        .sticker-wrapper.selected .resize-handle { display: block; }
         .resize-handle.se { bottom: -6px; right: -6px; cursor: se-resize; }
         .sticker-wrapper .rotate-handle { position: absolute; top: -30px; left: calc(50% - 8px); width: 16px; height: 16px; background: #fff; border: 1px solid #007bff; border-radius: 50%; cursor: grab; display: none; }
         .sticker-wrapper .rotate-handle::before { content: ''; position: absolute; top: -15px; left: 50%; width: 1px; height: 15px; background: #007bff; transform: translateX(-50%); }
         .sticker-wrapper.selected .rotate-handle { display: block; }
+        .sticker-wrapper.selected .resize-handle { display: block; }
+        .sticker-wrapper.selected .rotate-handle { display: block; }
+        .sticker-wrapper:hover .resize-handle,
+        .sticker-wrapper:hover .rotate-handle {
+            display: block !important;
+        }
 
     </style>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -188,23 +193,38 @@
             
             const blockId = block.id;
 
+            blockWrapper.querySelectorAll('.sticker-wrapper').forEach(sticker => {
+                const currentLeft = parseInt(sticker.style.left) || 0;
+                const currentTop = parseInt(sticker.style.top) || 0;
+                sticker.setAttribute('data-x', currentLeft);
+                sticker.setAttribute('data-y', currentTop);
+                sticker.setAttribute('data-angle', sticker.style.transform.match(/rotate\(([^)]+)deg\)/)?.[1] || 0);
+            });
+
             interact(blockWrapper.querySelectorAll('.sticker-wrapper'))
                 .draggable({
                     listeners: {
                         start(event) { event.target.classList.add('selected'); },
                         move(event) {
                             const target = event.target;
-                            let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-                            let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                            const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                            const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                            
                             target.style.left = `${x}px`;
                             target.style.top = `${y}px`;
                             target.setAttribute('data-x', x);
                             target.setAttribute('data-y', y);
                         },
                         end(event) {
-                            const newProps = { x: parseFloat(event.target.getAttribute('data-x')), y: parseFloat(event.target.getAttribute('data-y')) };
-                            window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
+                            const x = parseFloat(event.target.getAttribute('data-x')) || 0;
+                            const y = parseFloat(event.target.getAttribute('data-y')) || 0;
+                            const newProps = { x, y };
+                            window.parent.postMessage({ 
+                                type: 'UPDATE_STICKER', 
+                                payload: { blockId, stickerId: event.target.dataset.stickerId, newProps } 
+                            }, '*');
                         }
+                        
                     },
                     modifiers: [ interact.modifiers.restrictRect({ restriction: 'parent' }) ]
                 })
