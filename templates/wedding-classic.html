@@ -9,39 +9,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Allura&family=Sacramento&family=Alex+Brush&family=Satisfy&family=Kaushan+Script&family=Pacifico&family=Caveat:wght@400;700&family=Cookie&family=Playfair+Display:wght@400;700&family=Crimson+Text:wght@400;700&family=Cormorant+Garamond:wght@400;700&family=EB+Garamond:wght@400;700&family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;700&family=Merriweather:wght@400;700&family=Vollkorn:wght@400;700&family=Cinzel:wght@400;700&family=Abril+Fatface&family=Amatic+SC:wght@400;700&family=Fredoka+One&family=Lobster&family=Montserrat:wght@300;400;700&family=Raleway:wght@300;400;700&family=Lato:wght@300;400;700&family=Open+Sans:wght@300;400;700&family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root{--accent-color:#c5a98b;--background-color:#f8f7f5}
-        body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.7;background-color:var(--background-color);color:#333;opacity:0;transition:opacity .5s ease-in-out; background-size: cover; background-position: center; background-attachment: fixed;}
-        main { transition: opacity 1s ease-in-out; } body.intro-active main { opacity: 0; }
-        .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; position: relative; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); box-sizing: border-box;}
-        #page-content > .content-section:first-child { margin-top: 0; border-radius: 0; }
-        #page-content > .hero-block + .content-section { margin-top: 30px; border-radius: 8px; }
+        body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.7;background-color:var(--background-color);color:#333;background-size: cover; background-position: center; background-attachment: fixed;}
+        main { transition: opacity 1s ease-in-out; }
+        .block-wrapper { position: relative; }
+        .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); box-sizing: border-box;}
+        #page-content > .block-wrapper:first-child > .content-section, 
+        #page-content > .hero-block { margin-top: 0; border-radius: 0; }
+        .hero-block + .block-wrapper .content-section { margin-top: 30px; border-radius: 8px; }
         h1,h2,h3{ text-align:center; margin: 15px 0; }
         p { margin: 15px 0; }
-        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; overflow: hidden; width: 100%; user-select: none; }
+        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; overflow: hidden; width: 100%; user-select: none; }
         .hero-background-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; }
         .hero-block::before{ content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); z-index: 1; pointer-events: none;}
         .hero-content{ position:relative; z-index: 2; width: 90%; max-width: 1000px; padding: 40px 0; pointer-events: none;}
         .hero-content h1, .hero-content p, .hero-content h3 { margin: 10px 0; line-height: 1.3; }
-        .hero-inner-blocks { margin-top: 25px; }
         .style-modern .content-section {background: rgba(255, 255, 255, 0.85); box-shadow: none; }
-        #countdown{display:flex;justify-content:center;gap:20px;text-align:center}
-        .time-block{background:#f4f4f4;padding:20px;border-radius:5px;min-width:80px}
-        .time-block .number{font-size:2.5rem;font-weight:700;color:var(--accent-color)}
-        .schedule-list{list-style:none;padding:0;text-align:left; max-width: 600px; margin: 0 auto;}
-        .schedule-item{display:flex;gap:20px;border-bottom:1px solid #eee;padding:20px 0}
-        .schedule-item:last-child{border-bottom:none}
-        .schedule-time{font-weight:700;color:var(--accent-color);font-size:1.2rem;min-width:80px}
-        .schedule-event h3{margin:0;font-size:1.4rem;text-align:left}
-        .schedule-event p{margin:5px 0 0; white-space: pre-wrap;}
-        .location-block p { margin-bottom: 20px; white-space: pre-wrap; }
-        .location-block img { width: 100%; height: auto; max-height: 400px; object-fit: cover; border-radius: 8px; margin-bottom: 20px;}
-        .rsvp-button{display:inline-block; padding:15px 30px;text-decoration:none;border-radius:50px;transition:transform .2s ease; margin: 10px;}
-        .rsvp-button:hover{transform:scale(1.05)}
         .text-block-content p { white-space: pre-wrap; }
-        #envelope-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; z-index: 1000; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 1.5s ease-in-out; } #envelope-3d { width: 80%; max-width: 500px; height: 80%; max-height: 500px; transition: transform 0.5s, opacity 0.5s; opacity: 0; } #envelope-3d.loaded { opacity: 1; animation: floatAnimation 4s ease-in-out infinite; } #envelope-wrapper.hidden { opacity: 0; pointer-events: none; } @keyframes floatAnimation { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { translateY(0); } }
-
-        /* Styles for Stickers Interaction */
-        .sticker-wrapper { position: absolute; box-sizing: border-box; z-index: 5; }
-        .sticker-wrapper img { width: 100%; height: 100%; display: block; }
+        .sticker-wrapper { position: absolute; box-sizing: border-box; z-index: 5; touch-action: none; }
+        .sticker-wrapper img { width: 100%; height: 100%; display: block; pointer-events: none; }
         .sticker-wrapper.selected { outline: 2px solid #007bff; }
         .sticker-wrapper .resize-handle { position: absolute; width: 12px; height: 12px; background: #fff; border: 1px solid #007bff; border-radius: 50%; display: none; }
         .sticker-wrapper.selected .resize-handle { display: block; }
@@ -49,42 +34,51 @@
         .sticker-wrapper .rotate-handle { position: absolute; top: -30px; left: calc(50% - 8px); width: 16px; height: 16px; background: #fff; border: 1px solid #007bff; border-radius: 50%; cursor: grab; display: none; }
         .sticker-wrapper .rotate-handle::before { content: ''; position: absolute; top: -15px; left: 50%; width: 1px; height: 15px; background: #007bff; transform: translateX(-50%); }
         .sticker-wrapper.selected .rotate-handle { display: block; }
-
+        .rsvp-button{display:inline-block; padding:15px 30px;text-decoration:none;border-radius:50px;transition:transform .2s ease; margin: 10px;}
+        .rsvp-button:hover{transform:scale(1.05)}
     </style>
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 </head>
 <body>
-    <div id="envelope-wrapper">
-        <model-viewer id="envelope-3d" src="/templates/envelope.glb" alt="An interactive 3D envelope" camera-controls disable-zoom interaction-prompt="none" camera-orbit="0deg 75deg 105%" style="width: 100%; height: 100%; background: none;"></model-viewer>
-    </div>
     <main id="page-content"></main>
-
     <script>
-    let countdownInterval;
-
-    const processText = (text) => (text || '').replace(/\n/g, '<br>');
     const getStyleString = (style) => { if (!style) return ''; let str = ''; if (style.fontFamily) str += `font-family: '${style.fontFamily}', sans-serif; `; if (style.fontSize) str += `font-size: ${style.fontSize}; `; if (style.color) str += `color: ${style.color}; `; if (style.fontWeight) str += `font-weight: ${style.fontWeight}; `; if (style.textAlign) str += `text-align: ${style.textAlign}; `; if (style.backgroundColor) str += `background-color: ${style.backgroundColor}; `; return str; };
-
-    const createHeroHTML = (c, s) => {
-        const imageHTML = c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'};" alt="Wedding background">` : '';
-        const headerStyle = c.aspectRatio ? `aspect-ratio: ${c.aspectRatio};` : '';
-        const subtitleHTML = (c.subtitle && c.subtitle.enabled) ? `<p style="${getStyleString(c.subtitle.style)}">${c.subtitle.text}</p>` : '';
-        const namesHTML = (c.names && c.names.enabled) ? `<h1 style="${getStyleString(c.names.style)}">${c.names.text}</h1>` : '';
-        const dateHTML = (c.date && c.date.enabled) ? `<p style="${getStyleString(c.date.style)}">${c.date.text}</p>` : '';
-        let innerBlocksHTML = ''; if (c.innerBlocks && c.innerBlocks.length > 0) { innerBlocksHTML = `<div class="hero-inner-blocks">${c.innerBlocks.map(b => { const style = getStyleString(b.style); if (b.type === 'heading') return `<h3 style="${style}">${b.text}</h3>`; if (b.type === 'paragraph') return `<p style="${style}">${processText(b.text)}</p>`; return ''; }).join('')}</div>`; }
-        let stickersHTML = ''; if (c.stickers && c.stickers.length > 0) { stickersHTML = c.stickers.map(sticker => { return `<div class="sticker-wrapper" data-sticker-id="${sticker.id}" style="left: ${sticker.x}px; top: ${sticker.y}px; width: ${sticker.width}px; transform: rotate(${sticker.rotation || 0}deg);"> <img src="${sticker.src}" alt="sticker"> <div class="rotate-handle"></div> <div class="resize-handle se"></div> </div>`; }).join(''); }
-        return `<header class="hero-block" style="${headerStyle}"> ${imageHTML} <div class="hero-content"> ${subtitleHTML} ${namesHTML} ${dateHTML} ${innerBlocksHTML} </div> ${stickersHTML} </header>`;
-    };
+    const renderStickers = (stickers) => { if (!stickers || stickers.length === 0) return ''; return stickers.map(s => `<div class="sticker-wrapper" data-sticker-id="${s.id}" style="opacity: ${s.opacity === undefined ? 1 : s.opacity}; left: ${s.x || 0}px; top: ${s.y || 0}px; width: ${s.width || 150}px; transform: rotate(${s.rotation || 0}deg);"> <img src="${s.src}" alt="sticker"> <div class="rotate-handle"></div> <div class="resize-handle se"></div> </div>`).join(''); };
     
-    const createTextBlockHTML = (c, s) => { const titleStyle = getStyleString(c.titleStyle); const textStyle = getStyleString(c.textStyle); const titleHTML = c.title ? `<h2 style="${titleStyle}">${c.title}</h2>` : ''; const textHTML = c.text ? `<div class="text-block-content"><p style="${textStyle}">${processText(c.text)}</p></div>` : ''; return `<section class="content-section" style="max-width: ${s.maxWidth || '800px'};"> ${titleHTML}${textHTML} </section>`; };
-    const createSectionWithTitleHTML = (type, c, s, innerHTML) => { const titleStyle = getStyleString(c.titleStyle); return `<section class="content-section ${type}-block" style="max-width: ${s.maxWidth || '800px'};"> <h2 style="${titleStyle}">${c.title}</h2> ${innerHTML} </section>`; };
-    const createCountdownHTML = (c, s) => createSectionWithTitleHTML('countdown', c, s, `<div id="countdown"><div class="time-block"><div id="days" class="number">00</div><div>Days</div></div><div class="time-block"><div id="hours" class="number">00</div><div>Hours</div></div><div class="time-block"><div id="minutes" class="number">00</div><div>Minutes</div></div><div class="time-block"><div id="seconds" class="number">00</div><div>Seconds</div></div></div>`);
-    const createScheduleHTML = (c, s) => createSectionWithTitleHTML('schedule', c, s, `<ul class="schedule-list">${(c.items || []).map(i => `<li class="schedule-item"><div class="schedule-time">${i.time}</div><div class="schedule-event"><h3>${i.title}</h3><p>${processText(i.desc)}</p></div></li>`).join('')}</ul>`);
-    const createLocationHTML = (c, s) => createSectionWithTitleHTML('location', c, s, `<p>${processText(c.address)}</p><img src="${c.imageUrl}" alt="Venue"><a href="${c.mapLink}" class="rsvp-button" target="_blank">View on Map</a>`);
-    const createRsvpHTML = (c, s, rsvpLink) => createSectionWithTitleHTML('rsvp', c, s, `<p>${processText(c.subtitle)}</p><div><a href="${rsvpLink}" class="rsvp-button" style="${getStyleString(c.buttonStyle)}">I'll Be There!</a></div>`);
-    const createImageHTML = (c, s) => `<section class="content-section image-block" style="max-width: ${s.maxWidth || '800px'};"><figure><img src="${c.imageUrl}" alt="${c.caption}"><figcaption>${c.caption}</figcaption></figure></section>`;
+    const createBlockHTML = (block, settings, rsvpLink) => {
+        const c = block.content;
+        let innerHTML = '';
+        const wrapperClass = block.type === 'hero' ? 'hero-block block-wrapper' : 'block-wrapper';
+        const wrapperStyle = block.type === 'hero' ? `aspect-ratio:${c.aspectRatio||'16/9'};` : '';
+        const sectionStyle = `max-width:${settings.maxWidth || '800px'};`;
+
+        switch(block.type) {
+            case 'hero':
+                const subtitle = (c.subtitle?.enabled) ? `<p style="${getStyleString(c.subtitle.style)}">${c.subtitle.text}</p>` : '';
+                const names = (c.names?.enabled) ? `<h1 style="${getStyleString(c.names.style)}">${c.names.text}</h1>` : '';
+                const date = (c.date?.enabled) ? `<p style="${getStyleString(c.date.style)}">${c.date.text}</p>` : '';
+                innerHTML = `<img class="hero-background-image" src="${c.imageUrl}" style="object-position:${c.backgroundPosition || 'center center'};"> <div class="hero-content">${subtitle}${names}${date}</div>`;
+                break;
+            case 'text-block':
+                innerHTML = `<section class="content-section" style="${sectionStyle}">${c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : ''}<div class="text-block-content"><p style="${getStyleString(c.textStyle)}">${(c.text || '').replace(/\n/g, '<br>')}</p></div></section>`;
+                break;
+            case 'image':
+                innerHTML = `<section class="content-section" style="${sectionStyle}"><figure><img src="${c.imageUrl}" alt="${c.caption}"><figcaption>${c.caption}</figcaption></figure></section>`;
+                break;
+            case 'location':
+                innerHTML = `<section class="content-section" style="${sectionStyle}">${c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : ''}<p>${(c.address||'').replace(/\n/g, '<br>')}</p>${c.imageUrl ? `<img src="${c.imageUrl}" alt="Venue">`: ''}<a href="${c.mapLink}" class="rsvp-button" target="_blank">View on Map</a></section>`;
+                break;
+            case 'rsvp':
+                innerHTML = `<section class="content-section" style="${sectionStyle}">${c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : ''}<p>${(c.subtitle||'').replace(/\n/g, '<br>')}</p><a href="${rsvpLink}" class="rsvp-button" style="${getStyleString(c.buttonStyle)}">I'll Be There!</a></section>`;
+                break;
+            case 'countdown':
+                 innerHTML = `<section class="content-section" style="${sectionStyle}"><div id="countdown"></div></section>`;
+                 break;
+            default:
+                innerHTML = `<section class="content-section" style="${sectionStyle}">Unsupported block type: ${block.type}</section>`;
+        }
+        return `<div class="${wrapperClass}" data-block-id="${block.id}" style="${wrapperStyle}">${innerHTML}${renderStickers(c.stickers)}</div>`;
+    };
 
     function renderPage(blocks, settings, rsvpLink = '#') {
         if (!blocks || !settings) return;
@@ -92,135 +86,59 @@
         if (settings.style) document.body.classList.add(`style-${settings.style}`);
         document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? `url('${settings.backgroundImage}')` : 'none';
         
-        const container = document.getElementById('page-content'); container.innerHTML = '';
-        let countdownBlock = null;
-
-        blocks.forEach(block => {
-            let blockHTML = '';
-            switch(block.type) {
-                case 'hero': blockHTML = createHeroHTML(block.content, settings); break;
-                case 'text-block': blockHTML = createTextBlockHTML(block.content, settings); break;
-                case 'countdown': blockHTML = createCountdownHTML(block.content, settings); countdownBlock = block.content; break;
-                case 'schedule': blockHTML = createScheduleHTML(block.content, settings); break;
-                case 'location': blockHTML = createLocationHTML(block.content, settings); break;
-                case 'rsvp': blockHTML = createRsvpHTML(block.content, settings, rsvpLink); break;
-                case 'image': blockHTML = createImageHTML(block.content, settings); break;
-            }
-            container.innerHTML += blockHTML;
-        });
-        if (countdownBlock) startCountdown(countdownBlock.targetDate);
+        const container = document.getElementById('page-content');
+        container.innerHTML = blocks.map(block => createBlockHTML(block, settings, rsvpLink)).join('');
         
-        // Initialize sticker interaction only if in an iframe (editor mode)
         if (window.self !== window.top) {
-             setTimeout(() => initStickerInteraction(blocks), 50);
+            setTimeout(() => initStickerInteraction(), 100);
         }
     }
     
-    function startCountdown(targetDate) { if (!targetDate) return; if (countdownInterval) clearInterval(countdownInterval); const targetTime = new Date(targetDate).getTime(); countdownInterval = setInterval(() => { const now = new Date().getTime(), distance = targetTime - now; if (distance < 0) { clearInterval(countdownInterval); const e = document.getElementById("countdown"); if (e) e.innerHTML = "<h2>The event has already happened!</h2>"; return; } const D = document.getElementById("days"), H = document.getElementById("hours"), M = document.getElementById("minutes"), S = document.getElementById("seconds"); if(D) D.innerText = Math.floor(distance / 864e5).toString().padStart(2, '0'); if(H) H.innerText = Math.floor(distance % 864e5 / 36e5).toString().padStart(2, '0'); if(M) M.innerText = Math.floor(distance % 36e5 / 6e4).toString().padStart(2, '0'); if(S) S.innerText = Math.floor(distance % 6e4 / 1e3).toString().padStart(2, '0'); }, 1000); }
-    
-    function initStickerInteraction(blocks) {
+    function initStickerInteraction() {
         if (typeof interact === 'undefined') return;
-        const heroBlock = document.querySelector('.hero-block');
-        if (!heroBlock) return;
-        const blockId = blocks.find(b => b.type === 'hero')?.id;
 
-        interact('.sticker-wrapper')
-            .draggable({
-                listeners: {
-                    start(event) { event.target.classList.add('selected'); },
-                    move(event) {
-                        const target = event.target;
-                        let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-                        let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-                        target.style.left = `${x}px`;
-                        target.style.top = `${y}px`;
-                        target.setAttribute('data-x', x);
-                        target.setAttribute('data-y', y);
-                    },
-                    end(event) {
-                        const newProps = { x: parseFloat(event.target.getAttribute('data-x')), y: parseFloat(event.target.getAttribute('data-y')) };
-                        window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
-                    }
+        interact('.sticker-wrapper').on('tap', event => { document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected')); event.currentTarget.classList.add('selected'); event.stopPropagation(); });
+        document.body.addEventListener('click', () => document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected')));
+        
+        interact('.sticker-wrapper').draggable({
+            listeners: {
+                start(event) {
+                    const target = event.target;
+                    target.dataset.x = target.style.left.replace('px','') || 0;
+                    target.dataset.y = target.style.top.replace('px','') || 0;
                 },
-                modifiers: [ interact.modifiers.restrictRect({ restriction: 'parent' }) ]
-            })
-            .resizable({
-                edges: { right: '.resize-handle.se', bottom: '.resize-handle.se' },
-                listeners: {
-                    move(event) {
-                        let { x, y } = event.target.dataset;
-                        Object.assign(event.target.style, { width: `${event.rect.width}px`, height: 'auto' });
-                        event.target.setAttribute('data-x', x);
-                        event.target.setAttribute('data-y', y);
-                    },
-                     end(event) {
-                        const newProps = { width: event.rect.width };
-                        window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
-                    }
+                move(event) {
+                    const target = event.target;
+                    const x = (parseFloat(target.dataset.x) || 0) + event.dx;
+                    const y = (parseFloat(target.dataset.y) || 0) + event.dy;
+                    target.style.left = `${x}px`;
+                    target.style.top = `${y}px`;
+                    target.dataset.x = x;
+                    target.dataset.y = y;
                 },
-                modifiers: [ interact.modifiers.aspectRatio({ ratio: 'preserve' }) ]
-            })
-            .gesturable({ // For rotation
-                listeners: {
-                    move (event) {
-                        const target = event.target;
-                        let angle = (parseFloat(target.getAttribute('data-angle')) || 0) + event.da;
-                        target.style.transform = `rotate(${angle}deg)`;
-                        target.setAttribute('data-angle', angle);
-                    },
-                    end(event) {
-                        const newProps = { rotation: parseFloat(event.target.getAttribute('data-angle')) };
-                        window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
-                    }
+                end(event) {
+                    const blockId = event.target.closest('.block-wrapper').dataset.blockId;
+                    const newProps = { x: parseFloat(event.target.dataset.x), y: parseFloat(event.target.dataset.y) };
+                    window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
                 }
-            })
-            .on('tap', (event) => {
-                document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected'));
-                event.currentTarget.classList.add('selected');
-            });
-
-        heroBlock.addEventListener('click', (e) => {
-            if (e.target.closest('.sticker-wrapper')) return;
-            document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected'));
+            },
+            modifiers: [interact.modifiers.restrictRect({ restriction: 'parent' })]
+        }).resizable({
+            edges: { right: '.se', bottom: '.se' },
+            listeners: {
+                move(event) {
+                    const target = event.target;
+                    target.style.width = `${event.rect.width}px`;
+                    target.style.height = 'auto';
+                },
+                end(event) {
+                    const blockId = event.target.closest('.block-wrapper').dataset.blockId;
+                    const newProps = { width: event.rect.width };
+                    window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId, stickerId: event.target.dataset.stickerId, newProps } }, '*');
+                }
+            },
+            modifiers: [interact.modifiers.aspectRatio({ ratio: 'preserve' })]
         });
-    }
-
-    function setupIntroAnimation() {
-        const envelopeWrapper = document.getElementById('envelope-wrapper');
-        const modelViewer = document.getElementById('envelope-3d');
-        if (!envelopeWrapper || !modelViewer || typeof confetti !== 'function') { document.body.style.opacity = 1; if(envelopeWrapper) envelopeWrapper.style.display = 'none'; return; }
-        document.body.classList.add('intro-active');
-        document.body.style.opacity = 1; 
-        modelViewer.addEventListener('load', () => modelViewer.classList.add('loaded'));
-        const fireConfetti = () => { const defaults = { spread: 360, ticks: 150, gravity: 0, decay: 0.95, startVelocity: 35, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] }; confetti({ ...defaults, particleCount: 60, scalar: 1.2, shapes: ['star'] }); confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] }); };
-        envelopeWrapper.addEventListener('click', () => { fireConfetti(); modelViewer.style.transform = 'scale(0)'; modelViewer.style.opacity = '0'; setTimeout(() => { document.body.classList.remove('intro-active'); envelopeWrapper.classList.add('hidden'); }, 500); }, { once: true });
-    }
-
-    async function loadInvitationData() {
-        const params = new URLSearchParams(window.location.search);
-        const id = params.get('id'), pageType = params.get('page') || 'main';
-        if (id && pageType) {
-            try {
-                const r = await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, { headers: { 'X-Access-Key': '$2a$10$c.QWLI8NIw84W3uqmH/mUez32F1LK7KPBirRW7hr1nE0mJ9CAATC6' }});
-                if (!r.ok) throw new Error('Could not load invitation data.');
-                const data = (await r.json()).record;
-                const pageData = data[pageType];
-                if (!pageData) throw new Error(`Page data ('${pageType}') not found.`);
-                const rsvpTemplateFile = data.rsvp ? data.rsvp.template : 'rsvp-form.html';
-                const rsvpLink = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)}${rsvpTemplateFile}?id=${id}&page=rsvp`;
-                renderPage(pageData.blocks, pageData.settings, rsvpLink);
-            } catch (e) {
-                document.getElementById('page-content').innerHTML = `<h1>Error</h1><p>${e.message}</p>`;
-            }
-        }
-    }
-
-    if (window.self === window.top) { // Final page
-        window.addEventListener('load', () => { loadInvitationData(); setupIntroAnimation(); });
-    } else { // Editor mode
-        document.body.style.opacity = 1;
-        const envelope = document.getElementById('envelope-wrapper');
-        if (envelope) envelope.style.display = 'none';
     }
     </script>
 </body>
