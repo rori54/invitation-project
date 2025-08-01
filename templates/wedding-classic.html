@@ -171,10 +171,8 @@
         });
         if (countdownBlock) startCountdown(countdownBlock.targetDate);
         
-        // Initialize sticker interaction only if in an iframe (editor mode)
-        if (window.self !== window.top) {
-             setTimeout(() => initStickerInteraction(blocks), 50);
-        }
+        // Initialize sticker interaction
+        setTimeout(() => initStickerInteraction(blocks), 50);
     }
     
     function startCountdown(targetDate) { if (!targetDate) return; if (countdownInterval) clearInterval(countdownInterval); const targetTime = new Date(targetDate).getTime(); countdownInterval = setInterval(() => { const now = new Date().getTime(), distance = targetTime - now; if (distance < 0) { clearInterval(countdownInterval); const e = document.getElementById("countdown"); if (e) e.innerHTML = "<h2>The event has already happened!</h2>"; return; } const D = document.getElementById("days"), H = document.getElementById("hours"), M = document.getElementById("minutes"), S = document.getElementById("seconds"); if(D) D.innerText = Math.floor(distance / 864e5).toString().padStart(2, '0'); if(H) H.innerText = Math.floor(distance % 864e5 / 36e5).toString().padStart(2, '0'); if(M) M.innerText = Math.floor(distance % 36e5 / 6e4).toString().padStart(2, '0'); if(S) S.innerText = Math.floor(distance % 6e4 / 1e3).toString().padStart(2, '0'); }, 1000); }
