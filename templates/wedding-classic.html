@@ -94,7 +94,7 @@
         const titleHTML = c.title ? `<h2 style="${titleStyle}">${c.title}</h2>` : ''; 
         const textHTML = c.text ? `<div class="text-block-content"><p style="${textStyle}">${processText(c.text)}</p></div>` : ''; 
         const stickersHTML = renderStickers(c.stickers);
-        return `<div class="block-wrapper"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};"> ${titleHTML}${textHTML} ${stickersHTML} </section></div>`; 
+        return `<div class="block-wrapper"><section class="content-section text-block" style="max-width: ${s.maxWidth || '800px'};"> ${titleHTML}${textHTML} ${stickersHTML} </section></div>`; 
     };
 
     const createSectionWithTitleHTML = (type, c, s, innerHTML) => { 

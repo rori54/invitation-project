@@ -1,15 +1,30 @@
-exports.handler = async function(event, context) {
-    // Эта функция безопасно берет ключ из переменных окружения на сервере Netlify
-    const { IMGBB_API_KEY } = process.env;
+exports.handler = async (event, context) => {
+  try {
+    const imgbbApiKey = process.env.IMGBB_API_KEY;
+    
+    if (!imgbbApiKey) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'IMGBB API key not configured' })
+      };
+    }
 
     return {
-        statusCode: 200,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        // И отдает его в виде JSON только тому, кто запросил
-        body: JSON.stringify({
-            imgbb: IMGBB_API_KEY 
-        }),
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+      },
+      body: JSON.stringify({
+        imgbb: imgbbApiKey
+      })
     };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Internal server error' })
+    };
+  }
 };
