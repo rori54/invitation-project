@@ -145,13 +145,15 @@
         const envelopeWrapper = document.getElementById('envelope-wrapper');
         const modelViewer = document.getElementById('envelope-3d');
         const mainContent = document.querySelector('main');
+        
         if (!envelopeWrapper || !modelViewer || typeof confetti !== 'function') {
-            document.body.style.opacity = 1; // Fallback to just show the page
+            document.body.style.opacity = 1; 
             if(envelopeWrapper) envelopeWrapper.style.display = 'none';
             return;
         }
+        
         document.body.classList.add('intro-active');
-        document.body.style.opacity = 1; // Make body visible to show envelope
+        document.body.style.opacity = 1; 
         
         modelViewer.addEventListener('load', () => modelViewer.classList.add('loaded'));
         
@@ -187,10 +189,12 @@
         }
     }
 
-    if (window.self === window.top) { // Final page logic
-        loadInvitationData();
-        setupIntroAnimation();
-    } else { // Editor iframe logic
+    if (window.self === window.top) {
+        window.addEventListener('load', () => {
+            loadInvitationData();
+            setupIntroAnimation();
+        });
+    } else {
         document.body.style.opacity = 1;
         const envelope = document.getElementById('envelope-wrapper');
         if (envelope) envelope.style.display = 'none';
