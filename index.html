@@ -112,14 +112,15 @@
         currentImageTarget = null;
     }
 
+    // --- 2. ЗАМЕНИТЕ ЭТУ ФУНКЦИЮ ---
     function openElementLibrary(blockId) {
         currentElementBlock = blockId;
         const modal = document.getElementById('element-library-modal');
         const grid = document.getElementById('element-library-grid');
         
-        // Теперь onclick гарантированно вызывает правильную функцию
         grid.innerHTML = predefinedElements.map(url => 
-            `<div class="image-library-item" onclick="selectElement('${url}')">
+            // ИСПРАВЛЕНИЕ: Теперь окно закрывается здесь
+            `<div class="image-library-item" onclick="selectElement('${url}'); closeElementLibrary();">
                 <img src="${url}" alt="Element option" loading="lazy">
             </div>`
         ).join('');
@@ -159,7 +160,7 @@
                 renderPreview();
             }
         }
-        closeElementLibrary();
+        
     }
 
     function selectImage(imageUrl) {
@@ -294,17 +295,21 @@
         
         const statusText = document.getElementById('status-text');
         
-        try {
-            statusText.textContent = 'Uploading element...';
-            const elementUrl = await uploadToImgBB(file);
-            selectElement(elementUrl);
-            statusText.textContent = 'Element uploaded successfully!';
-            setTimeout(() => statusText.textContent = '', 3000);
-        } catch (error) {
-            statusText.textContent = `Upload failed: ${error.message}`;
-            setTimeout(() => statusText.textContent = '', 5000);
-        }
-    });
+        // --- ПРАВИЛЬНАЯ ВЕРСИЯ ---
+    try {
+        statusText.textContent = 'Uploading element...';
+        const elementUrl = await uploadToImgBB(file);
+        selectElement(elementUrl);
+        statusText.textContent = 'Element uploaded successfully!';
+        setTimeout(() => statusText.textContent = '', 3000);
+
+        // ПРАВИЛЬНОЕ МЕСТО - здесь, после сообщения об успехе
+        closeElementLibrary(); 
+
+    } catch (error) {
+        statusText.textContent = `Upload failed: ${error.message}`;
+        setTimeout(() => statusText.textContent = '', 5000);
+    }
 
     function createStyleControlsHTML(prefix, styleObject, options = { color: true, size: true, weight: true, family: true, textAlign: false }) { 
         if (!styleObject) return ''; 
