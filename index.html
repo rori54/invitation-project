@@ -86,8 +86,8 @@
     ];
 
     const predefinedElements = [
-        'https://ibb.co/tpCKMRP7',
-        'https://ibb.co/6JDbBDKh',
+        'https://i.ibb.co/nMkmsp8H/20250729-2343-simple-compose-01k1byp2fjf26s1j3mwf0szz6d.png',
+        'https://i.ibb.co/Pz14Q12p/Chat-GPT-Image-1-2025-17-32-58.png',
         'https://pngimg.com/uploads/rose/rose_PNG11018.png',
         'https://www.pngplay.com/wp-content/uploads/12/Wedding-Dove-PNG-Clipart-Background.png'
     ];
@@ -117,7 +117,7 @@
         const modal = document.getElementById('element-library-modal');
         const grid = document.getElementById('element-library-grid');
         
-        // Populate predefined elements
+        // Теперь onclick гарантированно вызывает правильную функцию
         grid.innerHTML = predefinedElements.map(url => 
             `<div class="image-library-item" onclick="selectElement('${url}')">
                 <img src="${url}" alt="Element option" loading="lazy">
@@ -215,7 +215,7 @@
         }
     });
 
-    // Setup file upload for elements
+    // --- ЗАМЕНИТЕ ВЕСЬ БЛОК, КОТОРЫЙ ВЫ ВЫДЕЛИЛИ, НА ЭТОТ ---
     document.getElementById('element-file-input').addEventListener('change', async (e) => {
         if (e.target.files.length === 0) return;
         
@@ -225,9 +225,13 @@
         try {
             statusText.textContent = 'Uploading element...';
             const elementUrl = await uploadToImgBB(file);
-            selectElement(elementUrl);
+            
+            // ВАЖНО: Здесь вызывается правильная функция selectElement
+            selectElement(elementUrl); 
+            
             statusText.textContent = 'Element uploaded successfully!';
             setTimeout(() => statusText.textContent = '', 3000);
+            closeElementLibrary();
         } catch (error) {
             statusText.textContent = `Upload failed: ${error.message}`;
             setTimeout(() => statusText.textContent = '', 5000);
