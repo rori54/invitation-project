@@ -86,8 +86,8 @@
     ];
 
     const predefinedElements = [
-        'https://i.ibb.co/nMkmsp8H/20250729-2343-simple-compose-01k1byp2fjf26s1j3mwf0szz6d.png',
-        'https://i.ibb.co/Pz14Q12p/Chat-GPT-Image-1-2025-17-32-58.png',
+        'https://www.pngkey.com/png/full/15-154942_wedding-rings-png-image-background-gold-wedding-rings.png',
+        'https://static.vecteezy.com/system/resources/previews/009/341/365/original/heart-shape-outline-love-symbol-icon-free-png.png',
         'https://pngimg.com/uploads/rose/rose_PNG11018.png',
         'https://www.pngplay.com/wp-content/uploads/12/Wedding-Dove-PNG-Clipart-Background.png'
     ];
@@ -112,15 +112,14 @@
         currentImageTarget = null;
     }
 
-    // --- 2. ЗАМЕНИТЕ ЭТУ ФУНКЦИЮ ---
     function openElementLibrary(blockId) {
         currentElementBlock = blockId;
         const modal = document.getElementById('element-library-modal');
         const grid = document.getElementById('element-library-grid');
         
+        // Populate predefined elements
         grid.innerHTML = predefinedElements.map(url => 
-            // ИСПРАВЛЕНИЕ: Теперь окно закрывается здесь
-            `<div class="image-library-item" onclick="selectElement('${url}'); closeElementLibrary();">
+            `<div class="image-library-item" onclick="selectElement('${url}')">
                 <img src="${url}" alt="Element option" loading="lazy">
             </div>`
         ).join('');
@@ -137,30 +136,22 @@
         if (currentElementBlock) {
             const blockIndex = pageBlocks.findIndex(b => b.id === currentElementBlock);
             if (blockIndex !== -1) {
-                const blockContent = pageBlocks[blockIndex].content;
-                if (!blockContent.stickers) {
-                    blockContent.stickers = [];
-                }
-
-                // Вычисляем смещение, чтобы стикеры не накладывались
-                const offset = blockContent.stickers.length * 15;
-
                 const newSticker = {
                     id: `sticker-${Date.now()}`,
                     src: elementUrl,
-                    x: 20 + offset, // Смещаем по X
-                    y: 20 + offset, // Смещаем по Y
+                    x: 20,
+                    y: 20,
                     width: 150,
                     rotation: 0,
                     opacity: 1
                 };
-                
-                blockContent.stickers.push(newSticker);
+                if (!pageBlocks[blockIndex].content.stickers) pageBlocks[blockIndex].content.stickers = [];
+                pageBlocks[blockIndex].content.stickers.push(newSticker);
                 renderEditor();
                 renderPreview();
             }
         }
-        
+        closeElementLibrary();
     }
 
     function selectImage(imageUrl) {
@@ -216,7 +207,7 @@
         }
     });
 
-    // --- ЗАМЕНИТЕ ВЕСЬ БЛОК, КОТОРЫЙ ВЫ ВЫДЕЛИЛИ, НА ЭТОТ ---
+    // Setup file upload for elements
     document.getElementById('element-file-input').addEventListener('change', async (e) => {
         if (e.target.files.length === 0) return;
         
@@ -226,13 +217,9 @@
         try {
             statusText.textContent = 'Uploading element...';
             const elementUrl = await uploadToImgBB(file);
-            
-            // ВАЖНО: Здесь вызывается правильная функция selectElement
-            selectElement(elementUrl); 
-            
+            selectElement(elementUrl);
             statusText.textContent = 'Element uploaded successfully!';
             setTimeout(() => statusText.textContent = '', 3000);
-            closeElementLibrary();
         } catch (error) {
             statusText.textContent = `Upload failed: ${error.message}`;
             setTimeout(() => statusText.textContent = '', 5000);
@@ -295,21 +282,17 @@
         
         const statusText = document.getElementById('status-text');
         
-        // --- ПРАВИЛЬНАЯ ВЕРСИЯ ---
-    try {
-        statusText.textContent = 'Uploading element...';
-        const elementUrl = await uploadToImgBB(file);
-        selectElement(elementUrl);
-        statusText.textContent = 'Element uploaded successfully!';
-        setTimeout(() => statusText.textContent = '', 3000);
-
-        // ПРАВИЛЬНОЕ МЕСТО - здесь, после сообщения об успехе
-        closeElementLibrary(); 
-
-    } catch (error) {
-        statusText.textContent = `Upload failed: ${error.message}`;
-        setTimeout(() => statusText.textContent = '', 5000);
-    }
+        try {
+            statusText.textContent = 'Uploading element...';
+            const elementUrl = await uploadToImgBB(file);
+            selectElement(elementUrl);
+            statusText.textContent = 'Element uploaded successfully!';
+            setTimeout(() => statusText.textContent = '', 3000);
+        } catch (error) {
+            statusText.textContent = `Upload failed: ${error.message}`;
+            setTimeout(() => statusText.textContent = '', 5000);
+        }
+    });
 
     function createStyleControlsHTML(prefix, styleObject, options = { color: true, size: true, weight: true, family: true, textAlign: false }) { 
         if (!styleObject) return ''; 
