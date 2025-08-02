@@ -7,9 +7,26 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Allura&family=Sacramento&family=Alex+Brush&family=Satisfy&family=Kaushan+Script&family=Pacifico&family=Caveat:wght@400;700&family=Cookie&family=Playfair+Display:wght@400;700&family=Crimson+Text:wght@400;700&family=Cormorant+Garamond:wght@400;700&family=EB+Garamond:wght@400;700&family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;700&family=Merriweather:wght@400;700&family=Vollkorn:wght@400;700&family=Cinzel:wght@400;700&family=Abril+Fatface&family=Amatic+SC:wght@400;700&family=Fredoka+One&family=Lobster&family=Montserrat:wght@300;400;700&family=Raleway:wght@300;400;700&family=Lato:wght@300;400;700&family=Open+Sans:wght@300;400;700&family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <!-- ДОБАВЛЕНО: Скрипты для 3D-модели и конфетти -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    
     <style>
         :root{--accent-color:#c5a98b;--background-color:#f8f7f5}
-        body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.7;background-color:var(--background-color);color:#333; background-size: cover; background-position: center; background-attachment: fixed;}
+        
+        /* ИЗМЕНЕНО: Добавлены стили для плавного появления */
+        body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.7;background-color:var(--background-color);color:#333; background-size: cover; background-position: center; background-attachment: fixed; opacity:0; transition:opacity .5s ease-in-out;}
+        
+        /* ДОБАВЛЕНО: Стили для конверта и анимации */
+        main { transition: opacity 1s ease-in-out; } 
+        body.intro-active main { opacity: 0; }
+        #envelope-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; z-index: 1000; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 1.5s ease-in-out; } 
+        #envelope-3d { width: 80%; max-width: 500px; height: 80%; max-height: 500px; transition: transform 0.5s, opacity 0.5s; opacity: 0; } 
+        #envelope-3d.loaded { opacity: 1; animation: floatAnimation 4s ease-in-out infinite; } 
+        #envelope-wrapper.hidden { opacity: 0; pointer-events: none; } 
+        @keyframes floatAnimation { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { translateY(0); } }
+
         .block-wrapper { position: relative; }
         .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; position: relative; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); box-sizing: border-box;}
         .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; width: 100%; user-select: none; }
@@ -30,9 +47,15 @@
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 </head>
 <body>
+    <!-- ДОБАВЛЕНО: HTML-блок для конверта -->
+    <div id="envelope-wrapper">
+        <model-viewer id="envelope-3d" src="/templates/envelope.glb" alt="An interactive 3D envelope" camera-controls disable-zoom interaction-prompt="none" camera-orbit="0deg 75deg 105%" style="width: 100%; height: 100%; background: none;"></model-viewer>
+    </div>
+
     <main id="page-content"></main>
 
     <script>
+    // Оригинальные функции из wedding-classic.html
     const processText = (text) => (text || '').replace(/\n/g, '<br>');
     const getStyleString = (style) => { if (!style) return ''; let str = ''; if (style.fontFamily) str += `font-family: '${style.fontFamily}', sans-serif; `; if (style.fontSize) str += `font-size: ${style.fontSize}; `; if (style.color) str += `color: ${style.color}; `; if (style.fontWeight) str += `font-weight: ${style.fontWeight}; `; if (style.textAlign) str += `text-align: ${style.textAlign}; `; return str; };
 
@@ -82,7 +105,6 @@
 
     function initStickerInteraction(blocks) {
         if (typeof interact === 'undefined') return;
-
         blocks.forEach(block => {
             if (block.content.stickers) {
                 block.content.stickers.forEach(stickerData => {
@@ -95,82 +117,49 @@
                 });
             }
         });
-        
-        interact('.sticker-wrapper')
-            .draggable({
-                listeners: {
-                    start(event) {
-                        document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected'));
-                        event.target.classList.add('selected');
-                    },
-                    move(event) {
-                        const target = event.target;
-                        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-                        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-                        target.style.left = `${x}px`;
-                        target.style.top = `${y}px`;
-                        target.setAttribute('data-x', x);
-                        target.setAttribute('data-y', y);
-                    },
-                    end(event) {
-                        const target = event.target;
-                        const blockWrapper = target.closest('.block-wrapper');
-                        if (!blockWrapper) return;
-                        const newProps = { x: parseFloat(target.getAttribute('data-x')), y: parseFloat(target.getAttribute('data-y')) };
-                        window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockWrapper.dataset.blockId, stickerId: target.dataset.stickerId, newProps } }, '*');
-                    }
-                }
-            })
-            .resizable({
-                edges: { right: '.resize-handle.se', bottom: '.resize-handle.se' },
-                listeners: {
-                    move(event) {
-                        let target = event.target;
-                        target.style.width = `${event.rect.width}px`;
-                        target.style.height = 'auto';
-                    },
-                    end(event) {
-                        const target = event.target;
-                        const blockWrapper = target.closest('.block-wrapper');
-                        if (!blockWrapper) return;
-                        const newProps = { width: event.rect.width };
-                        window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockWrapper.dataset.blockId, stickerId: target.dataset.stickerId, newProps } }, '*');
-                    }
-                },
-                modifiers: [ interact.modifiers.aspectRatio({ ratio: 'preserve' }) ]
-            });
-
-        interact('.rotate-handle')
-            .draggable({
-                onstart: function (event) {
-                    const sticker = event.target.closest('.sticker-wrapper');
-                    const rect = sticker.getBoundingClientRect();
-                    sticker.setAttribute('data-center-x', rect.left + rect.width / 2);
-                    sticker.setAttribute('data-center-y', rect.top + rect.height / 2);
-                },
-                onmove: function (event) {
-                    const sticker = event.target.closest('.sticker-wrapper');
-                    const centerX = parseFloat(sticker.getAttribute('data-center-x'));
-                    const centerY = parseFloat(sticker.getAttribute('data-center-y'));
-                    const angle = Math.atan2(event.pageY - centerY, event.pageX - centerX);
-                    const degrees = angle * (180 / Math.PI);
-                    const currentRotation = degrees + 90;
-                    
-                    sticker.style.transform = `rotate(${currentRotation}deg)`;
-                    sticker.setAttribute('data-angle', currentRotation);
-                },
-                onend: function(event) {
-                    const sticker = event.target.closest('.sticker-wrapper');
-                    const blockWrapper = sticker.closest('.block-wrapper');
-                    if (!blockWrapper) return;
-                    const newProps = { rotation: parseFloat(sticker.getAttribute('data-angle')) };
-                    window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockWrapper.dataset.blockId, stickerId: sticker.dataset.stickerId, newProps } }, '*');
-                }
-            });
+        interact('.sticker-wrapper').draggable({listeners: {start(event) {document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected'));event.target.classList.add('selected');},move(event) {const target = event.target;const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;target.style.left = `${x}px`;target.style.top = `${y}px`;target.setAttribute('data-x', x);target.setAttribute('data-y', y);},end(event) {const target = event.target;const blockWrapper = target.closest('.block-wrapper');if (!blockWrapper) return;const newProps = { x: parseFloat(target.getAttribute('data-x')), y: parseFloat(target.getAttribute('data-y')) };window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockWrapper.dataset.blockId, stickerId: target.dataset.stickerId, newProps } }, '*');}}}).resizable({edges: { right: '.resize-handle.se', bottom: '.resize-handle.se' },listeners: {move(event) {let target = event.target;target.style.width = `${event.rect.width}px`;target.style.height = 'auto';},end(event) {const target = event.target;const blockWrapper = target.closest('.block-wrapper');if (!blockWrapper) return;const newProps = { width: event.rect.width };window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockWrapper.dataset.blockId, stickerId: target.dataset.stickerId, newProps } }, '*');}},modifiers: [ interact.modifiers.aspectRatio({ ratio: 'preserve' }) ]});
+        interact('.rotate-handle').draggable({onstart: function (event) {const sticker = event.target.closest('.sticker-wrapper');const rect = sticker.getBoundingClientRect();sticker.setAttribute('data-center-x', rect.left + rect.width / 2);sticker.setAttribute('data-center-y', rect.top + rect.height / 2);},onmove: function (event) {const sticker = event.target.closest('.sticker-wrapper');const centerX = parseFloat(sticker.getAttribute('data-center-x'));const centerY = parseFloat(sticker.getAttribute('data-center-y'));const angle = Math.atan2(event.pageY - centerY, event.pageX - centerX);const degrees = angle * (180 / Math.PI);const currentRotation = degrees + 90;sticker.style.transform = `rotate(${currentRotation}deg)`;sticker.setAttribute('data-angle', currentRotation);},onend: function(event) {const sticker = event.target.closest('.sticker-wrapper');const blockWrapper = sticker.closest('.block-wrapper');if (!blockWrapper) return;const newProps = { rotation: parseFloat(sticker.getAttribute('data-angle')) };window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockWrapper.dataset.blockId, stickerId: sticker.dataset.stickerId, newProps } }, '*');}});
     }
 
-    if (window.self !== window.top) {
+    // ДОБАВЛЕНО: Функция для анимации конверта
+    function setupIntroAnimation() {
+        const envelopeWrapper = document.getElementById('envelope-wrapper');
+        const modelViewer = document.getElementById('envelope-3d');
+        if (!envelopeWrapper || !modelViewer || typeof confetti !== 'function') { 
+            document.body.style.opacity = 1; 
+            if(envelopeWrapper) envelopeWrapper.style.display = 'none'; 
+            return; 
+        }
+        document.body.classList.add('intro-active');
+        document.body.style.opacity = 1; 
+        modelViewer.addEventListener('load', () => modelViewer.classList.add('loaded'));
+        const fireConfetti = () => { 
+            const defaults = { spread: 360, ticks: 150, gravity: 0, decay: 0.95, startVelocity: 35, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] }; 
+            confetti({ ...defaults, particleCount: 60, scalar: 1.2, shapes: ['star'] }); 
+            confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] }); 
+        };
+        envelopeWrapper.addEventListener('click', () => { 
+            fireConfetti(); 
+            modelViewer.style.transform = 'scale(0)'; 
+            modelViewer.style.opacity = '0'; 
+            setTimeout(() => { 
+                document.body.classList.remove('intro-active'); 
+                envelopeWrapper.classList.add('hidden'); 
+            }, 500); 
+        }, { once: true });
+    }
+
+    // ИЗМЕНЕНО: Логика инициализации страницы
+    if (window.self === window.top) { // Если страница открыта напрямую (не в редакторе)
+        document.body.style.opacity = 1; // Показываем тело документа
+        setupIntroAnimation(); // Запускаем анимацию конверта
+        // Примечание: так как в этом файле нет логики загрузки данных, страница после конверта будет пустой.
+        // Для отображения контента его нужно передать в функцию renderPage.
+    } else { // Если страница открыта в редакторе (iframe)
         window.renderPage = renderPage;
+        const envelope = document.getElementById('envelope-wrapper');
+        if (envelope) envelope.style.display = 'none'; // Прячем конверт в редакторе
+        document.body.style.opacity = 1; // Сразу показываем тело, чтобы редактор видел контент
     }
     </script>
 </body>
