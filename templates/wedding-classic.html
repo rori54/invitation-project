@@ -35,7 +35,6 @@
         .time-block{background:#f4f4f4;padding:20px;border-radius:5px;min-width:80px}
         .time-block .number{font-size:2.5rem;font-weight:700;color:var(--accent-color)}
         
-        /* ИСПРАВЛЕНО: Добавлены стили для кнопки */
         .rsvp-button{display:inline-block; padding:15px 30px; text-decoration:none; border-radius:50px; transition:transform .2s ease; margin: 10px; background-color: var(--accent-color); color: #fff;}
         .rsvp-button:hover{transform:scale(1.05)}
 
@@ -81,13 +80,8 @@
     const createTextBlockHTML = (block, s) => { const c = block.content; const titleHTML = c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : ''; const textHTML = c.text ? `<p style="${getStyleString(c.textStyle)}">${processText(c.text)}</p>` : ''; return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};">${titleHTML}${textHTML}${renderStickers(c.stickers)}</section></div>`; };
     const createImageHTML = (block, s) => { const c = block.content; const titleHTML = c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : ''; const descriptionHTML = c.description ? `<div style="${getStyleString(c.descriptionStyle)}">${processText(c.description)}</div>` : ''; return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};">${titleHTML}${descriptionHTML}<figure style="margin:0;"><img src="${c.imageUrl}" alt="${c.caption}" style="width:100%;opacity:${c.opacity};"><figcaption>${c.caption}</figcaption></figure>${renderStickers(c.stickers)}</section></div>`; };
     const createScheduleHTML = (block, s) => { const c = block.content; return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><ul style="list-style:none;padding:0;">${(c.items || []).map(i => `<li style="display:flex;gap:20px;padding:15px 0;border-bottom:1px solid #eee;"><div style="${getStyleString(i.timeStyle)}">${i.time}</div><div><h3 style="${getStyleString(i.titleStyle)};margin:0;">${i.title}</h3><p style="${getStyleString(i.descStyle)};margin:5px 0 0;">${processText(i.desc)}</p></div></li>`).join('')}</ul>${renderStickers(c.stickers)}</section></div>`; };
-    
-    // ИСПРАВЛЕНО: Добавлен class="rsvp-button"
     const createLocationHTML = (block, s) => { const c = block.content; const imageHTML = c.imageUrl ? `<img src="${c.imageUrl}" alt="Venue" style="width:100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-bottom: 20px; opacity:${c.opacity};">` : ''; return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><p>${processText(c.address)}</p>${imageHTML}<a href="${c.mapLink}" class="rsvp-button" target="_blank">View on Map</a>${renderStickers(c.stickers)}</section></div>`; };
-    
-    // ИСПРАВЛЕНО: Добавлен class="rsvp-button"
     const createRsvpHTML = (block, s, rsvpLink) => { const c = block.content; return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><p>${processText(c.subtitle)}</p><div><a href="${rsvpLink}" class="rsvp-button" style="${getStyleString(c.buttonStyle)}">I'll Be There!</a></div>${renderStickers(c.stickers)}</section></div>`; };
-    
     const createCountdownHTML = (block, s) => { const c = block.content; const inner = `<div id="countdown"><div class="time-block"><div id="days" class="number">00</div><div>Days</div></div><div class="time-block"><div id="hours" class="number">00</div><div>Hours</div></div><div class="time-block"><div id="minutes" class="number">00</div><div>Minutes</div></div><div class="time-block"><div id="seconds" class="number">00</div><div>Seconds</div></div></div>`; return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>${inner}${renderStickers(c.stickers)}</section></div>`; };
 
     function startCountdown(targetDate) { if (!targetDate) return; if (countdownInterval) clearInterval(countdownInterval); const targetTime = new Date(targetDate).getTime(); countdownInterval = setInterval(() => { const now = new Date().getTime(), distance = targetTime - now; if (distance < 0) { clearInterval(countdownInterval); const e = document.getElementById("countdown"); if (e) e.innerHTML = "<h3 style='text-align:center'>The event has already happened!</h3>"; return; } const D = document.getElementById("days"), H = document.getElementById("hours"), M = document.getElementById("minutes"), S = document.getElementById("seconds"); if(D) D.innerText = Math.floor(distance / 864e5).toString().padStart(2, '0'); if(H) H.innerText = Math.floor(distance % 864e5 / 36e5).toString().padStart(2, '0'); if(M) M.innerText = Math.floor(distance % 36e5 / 6e4).toString().padStart(2, '0'); if(S) S.innerText = Math.floor(distance % 6e4 / 1e3).toString().padStart(2, '0'); }, 1000); }
@@ -142,8 +136,96 @@
              document.getElementById('page-content').innerHTML = `<h1>Invitation not found</h1><p>Please check the link or provide a valid invitation ID.</p>`;
         }
     }
+    
+    // ИСПРАВЛЕНО: Восстановлена полная функция для взаимодействия со стикерами
+    function initStickerInteraction(blocks) {
+        if (typeof interact === 'undefined') return;
 
-    function initStickerInteraction(blocks) { /* ...Ваша функция initStickerInteraction без изменений... */ }
+        blocks.forEach(block => {
+            if (block.content.stickers) {
+                block.content.stickers.forEach(stickerData => {
+                    const stickerElement = document.querySelector(`.sticker-wrapper[data-sticker-id="${stickerData.id}"]`);
+                    if (stickerElement) {
+                        stickerElement.setAttribute('data-angle', stickerData.rotation || 0);
+                        stickerElement.setAttribute('data-x', stickerData.x || 0);
+                        stickerElement.setAttribute('data-y', stickerData.y || 0);
+                    }
+                });
+            }
+        });
+        
+        interact('.sticker-wrapper')
+            .draggable({
+                listeners: {
+                    start(event) {
+                        document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected'));
+                        event.target.classList.add('selected');
+                    },
+                    move(event) {
+                        const target = event.target;
+                        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                        target.style.left = `${x}px`;
+                        target.style.top = `${y}px`;
+                        target.setAttribute('data-x', x);
+                        target.setAttribute('data-y', y);
+                    },
+                    end(event) {
+                        const target = event.target;
+                        const blockWrapper = target.closest('.block-wrapper');
+                        if (!blockWrapper) return;
+                        const newProps = { x: parseFloat(target.getAttribute('data-x')), y: parseFloat(target.getAttribute('data-y')) };
+                        window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockWrapper.dataset.blockId, stickerId: target.dataset.stickerId, newProps } }, '*');
+                    }
+                }
+            })
+            .resizable({
+                edges: { right: '.resize-handle.se', bottom: '.resize-handle.se' },
+                listeners: {
+                    move(event) {
+                        let target = event.target;
+                        target.style.width = `${event.rect.width}px`;
+                        target.style.height = 'auto';
+                    },
+                    end(event) {
+                        const target = event.target;
+                        const blockWrapper = target.closest('.block-wrapper');
+                        if (!blockWrapper) return;
+                        const newProps = { width: event.rect.width };
+                        window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockWrapper.dataset.blockId, stickerId: target.dataset.stickerId, newProps } }, '*');
+                    }
+                },
+                modifiers: [ interact.modifiers.aspectRatio({ ratio: 'preserve' }) ]
+            });
+
+        interact('.rotate-handle')
+            .draggable({
+                onstart: function (event) {
+                    const sticker = event.target.closest('.sticker-wrapper');
+                    const rect = sticker.getBoundingClientRect();
+                    sticker.setAttribute('data-center-x', rect.left + rect.width / 2);
+                    sticker.setAttribute('data-center-y', rect.top + rect.height / 2);
+                },
+                onmove: function (event) {
+                    const sticker = event.target.closest('.sticker-wrapper');
+                    const centerX = parseFloat(sticker.getAttribute('data-center-x'));
+                    const centerY = parseFloat(sticker.getAttribute('data-center-y'));
+                    const angle = Math.atan2(event.pageY - centerY, event.pageX - centerX);
+                    const degrees = angle * (180 / Math.PI);
+                    const currentRotation = degrees + 90;
+                    
+                    sticker.style.transform = `rotate(${currentRotation}deg)`;
+                    sticker.setAttribute('data-angle', currentRotation);
+                },
+                onend: function(event) {
+                    const sticker = event.target.closest('.sticker-wrapper');
+                    const blockWrapper = sticker.closest('.block-wrapper');
+                    if (!blockWrapper) return;
+                    const newProps = { rotation: parseFloat(sticker.getAttribute('data-angle')) };
+                    window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockWrapper.dataset.blockId, stickerId: sticker.dataset.stickerId, newProps } }, '*');
+                }
+            });
+    }
 
     function setupIntroAnimation() {
         const envelopeWrapper = document.getElementById('envelope-wrapper');
