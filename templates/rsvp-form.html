@@ -152,7 +152,41 @@
             });
         });
     }
+    
+    function handleFormSubmit(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
 
+        // Получаем ID клиента из URL
+        const params = new URLSearchParams(window.location.search);
+        const clientId = params.get('id'); 
+        
+        // Добавляем ID клиента в данные формы
+        if (clientId) {
+            formData.append('clientId', clientId);
+        }
+
+        // URL вашего вебхука из Make.com
+        const MAKE_WEBHOOK_URL = 'https://hook.eu2.make.com/1pm620j986zbgm1hflf0q9i5l0432lpb';
+
+        fetch(MAKE_WEBHOOK_URL, {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (response.ok) {
+                form.innerHTML = '<h2>Thank you for your response!</h2>';
+            } else {
+                alert('Something went wrong!');
+            }
+        }).catch(error => {
+            alert('An error occurred!');
+        });
+    }
+
+    // Код для привязки этого обработчика к форме после ее рендеринга
+    // ... (используем MutationObserver, как в прошлых примерах) ...
+    
     function renderPage(blocks, settings) {
         if (!blocks || !settings) return;
 
