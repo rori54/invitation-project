@@ -47,45 +47,15 @@
                     </div>`;
         }).join('');
     };
-
-    const createHeroHTML = (block, s) => {
-        const c = block.content;
-        return `<div class="block-wrapper" data-block-id="${block.id}"><header class="hero-block ${!c.fullWidth ? 'limited-width' : ''}" style="aspect-ratio: ${c.aspectRatio}; max-width: ${!c.fullWidth ? s.maxWidth : 'none'};"> ${c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'}; opacity: ${c.opacity};" alt="">` : ''} <div class="hero-content">${(c.subtitle && c.subtitle.enabled) ? `<p style="${getStyleString(c.subtitle.style)}">${c.subtitle.text}</p>` : ''}${(c.names && c.names.enabled) ? `<h1 style="${getStyleString(c.names.style)}">${c.names.text}</h1>` : ''}${(c.date && c.date.enabled) ? `<p style="${getStyleString(c.date.style)}">${c.date.text}</p>` : ''}</div> ${renderStickers(c.stickers)} </header></div>`;
-    };
     
-    const createTextBlockHTML = (block, s) => { 
-        const c = block.content;
-        const titleHTML = c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : '';
-        const textHTML = c.text ? `<p style="${getStyleString(c.textStyle)}">${processText(c.text)}</p>` : '';
-        return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};">${titleHTML}${textHTML}${renderStickers(c.stickers)}</section></div>`; 
-    };
-    
-    const createImageHTML = (block, s) => {
-        const c = block.content;
-        const titleHTML = c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : '';
-        const descriptionHTML = c.description ? `<div style="${getStyleString(c.descriptionStyle)}">${processText(c.description)}</div>` : '';
-        return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};">${titleHTML}${descriptionHTML}<figure style="margin:0;"><img src="${c.imageUrl}" alt="${c.caption}" style="width:100%;opacity:${c.opacity};"><figcaption>${c.caption}</figcaption></figure>${renderStickers(c.stickers)}</section></div>`;
-    };
-
-    const createCountdownHTML = (block, s) => {
-        const c = block.content;
-        return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><div id="countdown">...</div>${renderStickers(c.stickers)}</section></div>`;
-    };
-
-    const createScheduleHTML = (block, s) => {
-        const c = block.content;
-        return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><ul class="schedule-list">${(c.items || []).map(i => `...`).join('')}</ul>${renderStickers(c.stickers)}</section></div>`;
-    };
-
-    const createLocationHTML = (block, s) => {
-        const c = block.content;
-        return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><p>${processText(c.address)}</p>${c.imageUrl ? `<img src="${c.imageUrl}" alt="Venue" style="width:100%;opacity:${c.opacity};">` : ''}<a href="${c.mapLink}" class="rsvp-button" target="_blank">View on Map</a>${renderStickers(c.stickers)}</section></div>`;
-    };
-
-    const createRsvpHTML = (block, s, rsvpLink) => {
-        const c = block.content;
-        return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><p>${processText(c.subtitle)}</p><a href="${rsvpLink}" class="rsvp-button" style="${getStyleString(c.buttonStyle)}">I'll Be There!</a>${renderStickers(c.stickers)}</section></div>`;
-    };
+    // Все функции create...HTML остаются без изменений
+    const createHeroHTML = (block, s) => { const c = block.content; return `<div class="block-wrapper" data-block-id="${block.id}"><header class="hero-block ${!c.fullWidth ? 'limited-width' : ''}" style="aspect-ratio: ${c.aspectRatio}; max-width: ${!c.fullWidth ? s.maxWidth : 'none'};"> ${c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'}; opacity: ${c.opacity};" alt="">` : ''} <div class="hero-content">${(c.subtitle && c.subtitle.enabled) ? `<p style="${getStyleString(c.subtitle.style)}">${c.subtitle.text}</p>` : ''}${(c.names && c.names.enabled) ? `<h1 style="${getStyleString(c.names.style)}">${c.names.text}</h1>` : ''}${(c.date && c.date.enabled) ? `<p style="${getStyleString(c.date.style)}">${c.date.text}</p>` : ''}</div> ${renderStickers(c.stickers)} </header></div>`; };
+    const createTextBlockHTML = (block, s) => { const c = block.content; const titleHTML = c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : ''; const textHTML = c.text ? `<p style="${getStyleString(c.textStyle)}">${processText(c.text)}</p>` : ''; return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};">${titleHTML}${textHTML}${renderStickers(c.stickers)}</section></div>`; };
+    const createImageHTML = (block, s) => { const c = block.content; const titleHTML = c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : ''; const descriptionHTML = c.description ? `<div style="${getStyleString(c.descriptionStyle)}">${processText(c.description)}</div>` : ''; return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};">${titleHTML}${descriptionHTML}<figure style="margin:0;"><img src="${c.imageUrl}" alt="${c.caption}" style="width:100%;opacity:${c.opacity};"><figcaption>${c.caption}</figcaption></figure>${renderStickers(c.stickers)}</section></div>`; };
+    const createCountdownHTML = (block, s) => { const c = block.content; return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><div id="countdown"></div>${renderStickers(c.stickers)}</section></div>`; };
+    const createScheduleHTML = (block, s) => { const c = block.content; return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><ul style="list-style:none;padding:0;">${(c.items || []).map(i => `<li style="display:flex;gap:20px;padding:15px 0;border-bottom:1px solid #eee;"><div style="${getStyleString(i.timeStyle)}">${i.time}</div><div><h3 style="${getStyleString(i.titleStyle)};margin:0;">${i.title}</h3><p style="${getStyleString(i.descStyle)};margin:5px 0 0;">${processText(i.desc)}</p></div></li>`).join('')}</ul>${renderStickers(c.stickers)}</section></div>`; };
+    const createLocationHTML = (block, s) => { const c = block.content; return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><p>${processText(c.address)}</p>${c.imageUrl ? `<img src="${c.imageUrl}" alt="Venue" style="width:100%;opacity:${c.opacity};">` : ''}<a href="${c.mapLink}" style="display:inline-block;padding:10px 20px;background:#555;color:white;text-decoration:none;border-radius:5px;margin-top:15px;" target="_blank">View on Map</a>${renderStickers(c.stickers)}</section></div>`; };
+    const createRsvpHTML = (block, s, rsvpLink) => { const c = block.content; return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};"><h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2><p>${processText(c.subtitle)}</p><a href="${rsvpLink}" style="${getStyleString(c.buttonStyle)}">I'll Be There!</a>${renderStickers(c.stickers)}</section></div>`; };
 
     function renderPage(blocks, settings, rsvpLink = '#') {
         document.body.className = '';
@@ -107,12 +77,25 @@
         }).join('');
         
         if (window.self !== window.top) {
-             setTimeout(() => initStickerInteraction(), 150);
+             setTimeout(() => initStickerInteraction(blocks), 150);
         }
     }
 
-    function initStickerInteraction() {
+    function initStickerInteraction(blocks) {
         if (typeof interact === 'undefined') return;
+
+        // --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
+        // Этот блок кода "напоминает" каждому стикеру о его текущем угле поворота
+        blocks.forEach(block => {
+            if (block.content.stickers) {
+                block.content.stickers.forEach(stickerData => {
+                    const stickerElement = document.querySelector(`.sticker-wrapper[data-sticker-id="${stickerData.id}"]`);
+                    if (stickerElement) {
+                        stickerElement.setAttribute('data-angle', stickerData.rotation || 0);
+                    }
+                });
+            }
+        });
         
         interact('.sticker-wrapper')
             .draggable({
@@ -183,7 +166,7 @@
     if (window.self !== window.top) {
         window.renderPage = renderPage;
     } else {
-        // Здесь будет логика для загрузки данных на финальной, нередактируемой странице
+        // Логика для загрузки данных на финальной, нередактируемой странице
     }
     </script>
 </body>
