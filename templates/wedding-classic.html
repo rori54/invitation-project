@@ -12,25 +12,11 @@
         body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.7;background-color:var(--background-color);color:#333; background-size: cover; background-position: center; background-attachment: fixed;}
         .block-wrapper { position: relative; }
         .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; position: relative; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); box-sizing: border-box;}
-        
-        .hero-block { 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            color: white; 
-            text-align: center; 
-            position: relative; 
-            width: 100%; 
-            user-select: none; 
-            /* overflow: hidden; */ /* <-- ИСПРАВЛЕНИЕ ЗДЕСЬ: Эта строка была удалена, чтобы ручка вращения была видна */
-        }
-
+        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; width: 100%; user-select: none; }
         .hero-block.limited-width { margin: 30px auto; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); }
         .hero-background-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; }
         .hero-block::before{ content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); z-index: 1; pointer-events: none;}
         .hero-content{ position:relative; z-index: 2; width: 90%; max-width: 1000px; padding: 40px 0; pointer-events: none;}
-        
         .sticker-wrapper { position: absolute; box-sizing: border-box; z-index: 5; cursor: grab; touch-action: none; }
         .sticker-wrapper img { width: 100%; height: 100%; display: block; pointer-events: none; }
         .sticker-wrapper.selected { outline: 2px solid #007bff; }
@@ -47,8 +33,6 @@
     <main id="page-content"></main>
 
     <script>
-    // Весь JavaScript код остается таким же, как в предыдущем ответе.
-    // Он уже содержит правильную логику для обработки вращения.
     const processText = (text) => (text || '').replace(/\n/g, '<br>');
     const getStyleString = (style) => { if (!style) return ''; let str = ''; if (style.fontFamily) str += `font-family: '${style.fontFamily}', sans-serif; `; if (style.fontSize) str += `font-size: ${style.fontSize}; `; if (style.color) str += `color: ${style.color}; `; if (style.fontWeight) str += `font-weight: ${style.fontWeight}; `; if (style.textAlign) str += `text-align: ${style.textAlign}; `; return str; };
 
@@ -98,13 +82,15 @@
 
     function initStickerInteraction(blocks) {
         if (typeof interact === 'undefined') return;
-        
+
         blocks.forEach(block => {
             if (block.content.stickers) {
                 block.content.stickers.forEach(stickerData => {
                     const stickerElement = document.querySelector(`.sticker-wrapper[data-sticker-id="${stickerData.id}"]`);
                     if (stickerElement) {
                         stickerElement.setAttribute('data-angle', stickerData.rotation || 0);
+                        stickerElement.setAttribute('data-x', stickerData.x || 0);
+                        stickerElement.setAttribute('data-y', stickerData.y || 0);
                     }
                 });
             }
@@ -114,16 +100,13 @@
             .draggable({
                 listeners: {
                     start(event) {
-                        const target = event.target;
                         document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected'));
-                        target.classList.add('selected');
-                        target.setAttribute('data-x', target.offsetLeft);
-                        target.setAttribute('data-y', target.offsetTop);
+                        event.target.classList.add('selected');
                     },
                     move(event) {
                         const target = event.target;
-                        let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-                        let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
                         target.style.left = `${x}px`;
                         target.style.top = `${y}px`;
                         target.setAttribute('data-x', x);
@@ -136,8 +119,7 @@
                         const newProps = { x: parseFloat(target.getAttribute('data-x')), y: parseFloat(target.getAttribute('data-y')) };
                         window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockWrapper.dataset.blockId, stickerId: target.dataset.stickerId, newProps } }, '*');
                     }
-                },
-                modifiers: [ interact.modifiers.restrictRect({ restriction: 'parent' }) ]
+                }
             })
             .resizable({
                 edges: { right: '.resize-handle.se', bottom: '.resize-handle.se' },
@@ -156,22 +138,33 @@
                     }
                 },
                 modifiers: [ interact.modifiers.aspectRatio({ ratio: 'preserve' }) ]
-            })
-            .gesturable({
-                listeners: {
-                    move (event) {
-                        const target = event.target;
-                        let angle = (parseFloat(target.getAttribute('data-angle')) || 0) + event.da;
-                        target.style.transform = `rotate(${angle}deg)`;
-                        target.setAttribute('data-angle', angle);
-                    },
-                    end(event) {
-                        const target = event.target;
-                        const blockWrapper = target.closest('.block-wrapper');
-                        if (!blockWrapper) return;
-                        const newProps = { rotation: parseFloat(target.getAttribute('data-angle')) };
-                        window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockWrapper.dataset.blockId, stickerId: target.dataset.stickerId, newProps } }, '*');
-                    }
+            });
+
+        interact('.rotate-handle')
+            .draggable({
+                onstart: function (event) {
+                    const sticker = event.target.closest('.sticker-wrapper');
+                    const rect = sticker.getBoundingClientRect();
+                    sticker.setAttribute('data-center-x', rect.left + rect.width / 2);
+                    sticker.setAttribute('data-center-y', rect.top + rect.height / 2);
+                },
+                onmove: function (event) {
+                    const sticker = event.target.closest('.sticker-wrapper');
+                    const centerX = parseFloat(sticker.getAttribute('data-center-x'));
+                    const centerY = parseFloat(sticker.getAttribute('data-center-y'));
+                    const angle = Math.atan2(event.pageY - centerY, event.pageX - centerX);
+                    const degrees = angle * (180 / Math.PI);
+                    const currentRotation = degrees + 90;
+                    
+                    sticker.style.transform = `rotate(${currentRotation}deg)`;
+                    sticker.setAttribute('data-angle', currentRotation);
+                },
+                onend: function(event) {
+                    const sticker = event.target.closest('.sticker-wrapper');
+                    const blockWrapper = sticker.closest('.block-wrapper');
+                    if (!blockWrapper) return;
+                    const newProps = { rotation: parseFloat(sticker.getAttribute('data-angle')) };
+                    window.parent.postMessage({ type: 'UPDATE_STICKER', payload: { blockId: blockWrapper.dataset.blockId, stickerId: sticker.dataset.stickerId, newProps } }, '*');
                 }
             });
     }

@@ -136,17 +136,25 @@
         if (currentElementBlock) {
             const blockIndex = pageBlocks.findIndex(b => b.id === currentElementBlock);
             if (blockIndex !== -1) {
+                const blockContent = pageBlocks[blockIndex].content;
+                if (!blockContent.stickers) {
+                    blockContent.stickers = [];
+                }
+
+                // Вычисляем смещение, чтобы стикеры не накладывались
+                const offset = blockContent.stickers.length * 15;
+
                 const newSticker = {
                     id: `sticker-${Date.now()}`,
                     src: elementUrl,
-                    x: 20,
-                    y: 20,
+                    x: 20 + offset, // Смещаем по X
+                    y: 20 + offset, // Смещаем по Y
                     width: 150,
                     rotation: 0,
                     opacity: 1
                 };
-                if (!pageBlocks[blockIndex].content.stickers) pageBlocks[blockIndex].content.stickers = [];
-                pageBlocks[blockIndex].content.stickers.push(newSticker);
+                
+                blockContent.stickers.push(newSticker);
                 renderEditor();
                 renderPreview();
             }
