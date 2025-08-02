@@ -53,7 +53,7 @@
 </head>
 <body>
     <main id="page-content"></main>
-    <script>
+        <script>
     const processText = (text) => (text || '').replace(/\n/g, '<br>');
     const getStyleString = (style) => { if (!style) return ''; let str = ''; if (style.fontFamily) str += `font-family: '${style.fontFamily}', sans-serif; `; if (style.fontSize) str += `font-size: ${style.fontSize}; `; if (style.color) str += `color: ${style.color}; `; if (style.fontWeight) str += `font-weight: ${style.fontWeight}; `; if (style.textAlign) str += `text-align: ${style.textAlign}; `; if (style.backgroundColor) str += `background-color: ${style.backgroundColor}; `; return str; };
 
@@ -153,9 +153,12 @@
         });
     }
     
+    // ИСПРАВЛЕНО: Эта функция теперь будет использоваться
     function handleFormSubmit(event) {
-        event.preventDefault();
+        event.preventDefault(); // Останавливаем стандартную отправку
         const form = event.target;
+        const submitButton = form.querySelector('.submit-button');
+        const originalButtonText = submitButton.textContent;
         const formData = new FormData(form);
 
         // Получаем ID клиента из URL
@@ -169,6 +172,9 @@
 
         // URL вашего вебхука из Make.com
         const MAKE_WEBHOOK_URL = 'https://hook.eu2.make.com/1pm620j986zbgm1hflf0q9i5l0432lpb';
+        
+        submitButton.disabled = true;
+        submitButton.textContent = 'Sending...';
 
         fetch(MAKE_WEBHOOK_URL, {
             method: 'POST',
@@ -177,16 +183,18 @@
             if (response.ok) {
                 form.innerHTML = '<h2>Thank you for your response!</h2>';
             } else {
+                // Если произошла ошибка, возвращаем кнопку в исходное состояние
                 alert('Something went wrong!');
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
             }
         }).catch(error => {
             alert('An error occurred!');
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
         });
     }
 
-    // Код для привязки этого обработчика к форме после ее рендеринга
-    // ... (используем MutationObserver, как в прошлых примерах) ...
-    
     function renderPage(blocks, settings) {
         if (!blocks || !settings) return;
 
@@ -195,8 +203,10 @@
         document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? `url('${settings.backgroundImage}')` : 'none';
 
         const container = document.getElementById('page-content');
-        // ВАЖНО: Замените 'your_form_id' на ваш реальный ID из сервиса Formspree.io, чтобы получать ответы на почту.
-        container.innerHTML = `<div class="content-section"><form action="https://formspree.io/f/your_form_id" method="POST"></form></div>`;
+        
+        // ИСПРАВЛЕНО: Убрана привязка к Formspree, добавлен ID для формы
+        container.innerHTML = `<div class="content-section"><form id="rsvp-form"></form></div>`;
+        
         const form = container.querySelector('form');
         
         let formHTML = '';
@@ -216,7 +226,6 @@
                 case 'textarea-question': blockHTML = createTextareaQuestionHTML(block.content, settings); break;
                 case 'radio-question': blockHTML = createRadioQuestionHTML(block.content, settings); break;
             }
-            // Add data-block-id for sticker interaction
             if (blockHTML && (block.content.stickers || block.type === 'form-header' || block.type === 'form-footer')) {
                 blockHTML = blockHTML.replace('<div class="form-block"', `<div class="form-block" data-block-id="${block.id}"`);
                 blockHTML = blockHTML.replace('<div class="form-header-block"', `<div class="form-header-block" data-block-id="${block.id}"`);
@@ -229,7 +238,6 @@
         if (hasFooter) { formHTML += footerHTML; }
         form.innerHTML = formHTML;
 
-        // Initialize sticker interaction only if in an iframe (editor mode)
         if (window.self !== window.top) {
             setTimeout(() => initStickerInteraction(blocks), 50);
         }
@@ -253,9 +261,19 @@
         }
     }
     
-    if (window.self !== window.top) { // Если открыто в iframe (превью)
+    // ДОБАВЛЕНО: Код, который "оживляет" форму после ее отрисовки
+    const observer = new MutationObserver((mutationsList, obs) => {
+        const formElement = document.getElementById('rsvp-form');
+        if (formElement) {
+            formElement.addEventListener('submit', handleFormSubmit);
+            obs.disconnect(); 
+        }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    if (window.self !== window.top) {
         document.body.style.opacity = 1;
-    } else { // Если открыто как самостоятельная страница
+    } else {
         window.addEventListener('load', loadInvitationData);
     }
     </script>
