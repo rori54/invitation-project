@@ -12,11 +12,25 @@
         body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.7;background-color:var(--background-color);color:#333; background-size: cover; background-position: center; background-attachment: fixed;}
         .block-wrapper { position: relative; }
         .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; position: relative; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); box-sizing: border-box;}
-        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; overflow: hidden; width: 100%; user-select: none; }
+        
+        .hero-block { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            color: white; 
+            text-align: center; 
+            position: relative; 
+            width: 100%; 
+            user-select: none; 
+            /* overflow: hidden; */ /* <-- ИСПРАВЛЕНИЕ ЗДЕСЬ: Эта строка была удалена, чтобы ручка вращения была видна */
+        }
+
         .hero-block.limited-width { margin: 30px auto; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); }
         .hero-background-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; }
         .hero-block::before{ content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); z-index: 1; pointer-events: none;}
         .hero-content{ position:relative; z-index: 2; width: 90%; max-width: 1000px; padding: 40px 0; pointer-events: none;}
+        
         .sticker-wrapper { position: absolute; box-sizing: border-box; z-index: 5; cursor: grab; touch-action: none; }
         .sticker-wrapper img { width: 100%; height: 100%; display: block; pointer-events: none; }
         .sticker-wrapper.selected { outline: 2px solid #007bff; }
@@ -33,6 +47,8 @@
     <main id="page-content"></main>
 
     <script>
+    // Весь JavaScript код остается таким же, как в предыдущем ответе.
+    // Он уже содержит правильную логику для обработки вращения.
     const processText = (text) => (text || '').replace(/\n/g, '<br>');
     const getStyleString = (style) => { if (!style) return ''; let str = ''; if (style.fontFamily) str += `font-family: '${style.fontFamily}', sans-serif; `; if (style.fontSize) str += `font-size: ${style.fontSize}; `; if (style.color) str += `color: ${style.color}; `; if (style.fontWeight) str += `font-weight: ${style.fontWeight}; `; if (style.textAlign) str += `text-align: ${style.textAlign}; `; return str; };
 
@@ -47,8 +63,7 @@
                     </div>`;
         }).join('');
     };
-    
-    // Все функции create...HTML остаются без изменений
+
     const createHeroHTML = (block, s) => { const c = block.content; return `<div class="block-wrapper" data-block-id="${block.id}"><header class="hero-block ${!c.fullWidth ? 'limited-width' : ''}" style="aspect-ratio: ${c.aspectRatio}; max-width: ${!c.fullWidth ? s.maxWidth : 'none'};"> ${c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'}; opacity: ${c.opacity};" alt="">` : ''} <div class="hero-content">${(c.subtitle && c.subtitle.enabled) ? `<p style="${getStyleString(c.subtitle.style)}">${c.subtitle.text}</p>` : ''}${(c.names && c.names.enabled) ? `<h1 style="${getStyleString(c.names.style)}">${c.names.text}</h1>` : ''}${(c.date && c.date.enabled) ? `<p style="${getStyleString(c.date.style)}">${c.date.text}</p>` : ''}</div> ${renderStickers(c.stickers)} </header></div>`; };
     const createTextBlockHTML = (block, s) => { const c = block.content; const titleHTML = c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : ''; const textHTML = c.text ? `<p style="${getStyleString(c.textStyle)}">${processText(c.text)}</p>` : ''; return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};">${titleHTML}${textHTML}${renderStickers(c.stickers)}</section></div>`; };
     const createImageHTML = (block, s) => { const c = block.content; const titleHTML = c.title ? `<h2 style="${getStyleString(c.titleStyle)}">${c.title}</h2>` : ''; const descriptionHTML = c.description ? `<div style="${getStyleString(c.descriptionStyle)}">${processText(c.description)}</div>` : ''; return `<div class="block-wrapper" data-block-id="${block.id}"><section class="content-section" style="max-width: ${s.maxWidth || '800px'};">${titleHTML}${descriptionHTML}<figure style="margin:0;"><img src="${c.imageUrl}" alt="${c.caption}" style="width:100%;opacity:${c.opacity};"><figcaption>${c.caption}</figcaption></figure>${renderStickers(c.stickers)}</section></div>`; };
@@ -83,9 +98,7 @@
 
     function initStickerInteraction(blocks) {
         if (typeof interact === 'undefined') return;
-
-        // --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-        // Этот блок кода "напоминает" каждому стикеру о его текущем угле поворота
+        
         blocks.forEach(block => {
             if (block.content.stickers) {
                 block.content.stickers.forEach(stickerData => {
@@ -165,8 +178,6 @@
 
     if (window.self !== window.top) {
         window.renderPage = renderPage;
-    } else {
-        // Логика для загрузки данных на финальной, нередактируемой странице
     }
     </script>
 </body>
