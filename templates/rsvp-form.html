@@ -153,7 +153,6 @@
         });
     }
     
-    // ИСПРАВЛЕНО: Эта функция теперь будет использоваться
     function handleFormSubmit(event) {
         event.preventDefault(); // Останавливаем стандартную отправку
         const form = event.target;
@@ -161,24 +160,37 @@
         const originalButtonText = submitButton.textContent;
         const formData = new FormData(form);
 
-        // Получаем ID клиента из URL
+        // --- НАЧАЛО ИЗМЕНЕНИЙ ---
+
+        // 1. Превращаем FormData в обычный JavaScript-объект
+        const dataObject = {};
+        formData.forEach((value, key) => {
+            dataObject[key] = value;
+        });
+
+        // 2. Получаем ID клиента из URL
         const params = new URLSearchParams(window.location.search);
         const clientId = params.get('id'); 
         
-        // Добавляем ID клиента в данные формы
+        // 3. Добавляем ID клиента в наш объект
         if (clientId) {
-            formData.append('clientId', clientId);
+            dataObject['clientId'] = clientId;
         }
 
         // URL вашего вебхука из Make.com
-        const MAKE_WEBHOOK_URL = 'https://hook.eu2.make.com/411a6l3y5knbs24yy6du5mgxhcwyw5r4';
+        const MAKE_WEBHOOK_URL = 'https://hook.eu2.make.com/411a6l3y5knbs24yy6du5mgxhcwyw5r4'; // <-- Убедитесь, что здесь ваш URL
         
         submitButton.disabled = true;
         submitButton.textContent = 'Sending...';
 
         fetch(MAKE_WEBHOOK_URL, {
             method: 'POST',
-            body: formData
+            // 4. Указываем, что отправляем JSON
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            // 5. Превращаем наш объект в JSON-строку
+            body: JSON.stringify(dataObject) 
         }).then(response => {
             if (response.ok) {
                 form.innerHTML = '<h2>Thank you for your response!</h2>';
@@ -193,6 +205,7 @@
             submitButton.disabled = false;
             submitButton.textContent = originalButtonText;
         });
+        // --- КОНЕЦ ИЗМЕНЕНИЙ ---
     }
 
     function renderPage(blocks, settings) {
