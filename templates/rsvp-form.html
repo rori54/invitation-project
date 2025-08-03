@@ -172,11 +172,6 @@
         const params = new URLSearchParams(window.location.search);
         const clientId = params.get('id'); 
         
-        // 3. Добавляем ID клиента в наш объект
-        if (clientId) {
-            dataObject['clientId'] = clientId;
-        }
-
         // URL вашего вебхука из Make.com
         const MAKE_WEBHOOK_URL = 'https://sheetdb.io/api/v1/h6ag2h5ny45kt'; // <-- Убедитесь, что здесь ваш URL
         
