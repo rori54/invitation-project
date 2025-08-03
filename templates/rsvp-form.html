@@ -76,7 +76,7 @@
     
     const createInputQuestionHTML = (c, s) => `<div class="block-wrapper"><div class="form-block" style="${getBlockStyles(c, s)}"><label for="${c.id}" class="${c.required ? 'required' : ''}">${c.title}</label><input type="text" id="${c.id}" name="${c.title}" ${c.required ? 'required' : ''}></div></div>`;
     const createTextareaQuestionHTML = (c, s) => `<div class="block-wrapper"><div class="form-block" style="${getBlockStyles(c, s)}"><label for="${c.id}" class="${c.required ? 'required' : ''}">${c.title}</label><textarea id="${c.id}" name="${c.title}" ${c.required ? 'required' : ''}></textarea></div></div>`;
-    const createRadioQuestionHTML = (c, s) => `<div class="block-wrapper"><div class="form-block" style="${getBlockStyles(c, s)}"><label class="${c.required ? 'required' : ''}">${c.title}</label><ul class="radio-options-list">${c.options.map(opt => `<li><label><input type="radio" name="${c.id}" value="${opt.text}" ${c.required ? 'required' : ''}><span>${opt.text}</span></label></li>`).join('')}</ul></div></div>`;
+    const createRadioQuestionHTML = (c, s) => `<div class="block-wrapper"><div class="form-block" style="${getBlockStyles(c, s)}"><label class="${c.required ? 'required' : ''}">${c.title}</label><ul class="radio-options-list">${c.options.map(opt => `<li><label><input type="radio" name="${c.title}" value="${opt.text}" ${c.required ? 'required' : ''}><span>${opt.text}</span></label></li>`).join('')}</ul></div></div>`;
     const createFormFooterHTML = (c, s) => {
         const stickersHTML = renderStickers(c.stickers);
         return `<div class="block-wrapper"><div class="form-footer-block" style="${getBlockStyles(c, s)}"><h2>${c.text}</h2>${stickersHTML}</div></div>`;
