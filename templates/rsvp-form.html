@@ -178,7 +178,7 @@
         }
 
         // URL вашего вебхука из Make.com
-        const MAKE_WEBHOOK_URL = 'https://sheetdb.io/api/v1/2gvn5vslpa9fd'; // <-- Убедитесь, что здесь ваш URL
+        const MAKE_WEBHOOK_URL = 'https://sheetdb.io/api/v1/h6ag2h5ny45kt'; // <-- Убедитесь, что здесь ваш URL
         
         submitButton.disabled = true;
         submitButton.textContent = 'Sending...';
@@ -190,7 +190,7 @@
                 'Content-Type': 'application/json'
             },
             // 5. Превращаем наш объект в JSON-строку
-            body: JSON.stringify({ data: dataObject }) 
+            body: JSON.stringify(dataObject) 
         }).then(response => {
             if (response.ok) {
                 form.innerHTML = '<h2>Thank you for your response!</h2>';
