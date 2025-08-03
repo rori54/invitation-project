@@ -190,7 +190,7 @@
                 'Content-Type': 'application/json'
             },
             // 5. Превращаем наш объект в JSON-строку
-            body: JSON.stringify(dataObject) 
+            body: JSON.stringify({ data: dataObject }) 
         }).then(response => {
             if (response.ok) {
                 form.innerHTML = '<h2>Thank you for your response!</h2>';
