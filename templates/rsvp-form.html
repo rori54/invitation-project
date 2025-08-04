@@ -75,7 +75,8 @@
     };
     
     const createInputQuestionHTML = (c, s) => `<div class="block-wrapper"><div class="form-block" style="${getBlockStyles(c, s)}"><label for="${c.id}" class="${c.required ? 'required' : ''}">${c.title}</label><input type="text" id="${c.id}" name="${c.title}" ${c.required ? 'required' : ''}></div></div>`;
-    const createTextareaQuestionHTML = (c, s) => `<div class="block-wrapper"><div class="form-block" style="${getBlockStyles(c, s)}"><label for="${c.id}" class="${c.required ? 'required' : ''}">${c.title}</label><textarea id="${c.id}" name="${c.title}" ${c.required ? 'required' : ''}></textarea></div></div>`;
+    const createInputQuestionHTML = (c, s) => `<div class="block-wrapper"><div class="form-block" style="${getBlockStyles(c, s)}"><label class="${c.required ? 'required' : ''}">${c.title}</label><input type="text" name="${c.title}" ${c.required ? 'required' : ''}></div></div>`;
+    const createTextareaQuestionHTML = (c, s) => `<div class="block-wrapper"><div class="form-block" style="${getBlockStyles(c, s)}"><label class="${c.required ? 'required' : ''}">${c.title}</label><textarea name="${c.title}" ${c.required ? 'required' : ''}></textarea></div></div>`;
     const createRadioQuestionHTML = (c, s) => `<div class="block-wrapper"><div class="form-block" style="${getBlockStyles(c, s)}"><label class="${c.required ? 'required' : ''}">${c.title}</label><ul class="radio-options-list">${c.options.map(opt => `<li><label><input type="radio" name="${c.title}" value="${opt.text}" ${c.required ? 'required' : ''}><span>${opt.text}</span></label></li>`).join('')}</ul></div></div>`;
     const createFormFooterHTML = (c, s) => {
         const stickersHTML = renderStickers(c.stickers);
@@ -154,37 +155,39 @@
     }
     
     function handleFormSubmit(event) {
-        event.preventDefault(); // Останавливаем стандартную отправку
+        event.preventDefault(); 
         const form = event.target;
         const submitButton = form.querySelector('.submit-button');
         const originalButtonText = submitButton.textContent;
         const formData = new FormData(form);
 
-        // 1. Превращаем FormData в обычный JavaScript-объект
         const dataObject = {};
         formData.forEach((value, key) => {
             dataObject[key] = value;
         });
 
+        // Получаем API URL из адресной строки
+        const urlParams = new URLSearchParams(window.location.search);
+        const sheetDbUrlFromParams = urlParams.get('apiUrl');
 
-        // URL твоего SheetDB API
-        const SHEETDB_URL = 'https://sheetdb.io/api/v1/h6ag2h5ny45kt';
+        if (!sheetDbUrlFromParams) {
+            alert('Error: API URL is missing.');
+            return;
+        }
+
+        const SHEETDB_URL = decodeURIComponent(sheetDbUrlFromParams);
         
         submitButton.disabled = true;
         submitButton.textContent = 'Sending...';
 
         fetch(SHEETDB_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            // Отправляем простой объект, как в документации
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dataObject) 
         }).then(response => {
             if (response.ok) {
                 form.innerHTML = '<h2>Thank you for your response!</h2>';
             } else {
-                // Этот блок поможет нам увидеть ошибку, если она вернется в JSON
                 response.json().then(data => {
                     alert('Something went wrong: ' + (data.error || 'Unknown error'));
                 }).catch(() => {
@@ -199,6 +202,7 @@
             submitButton.textContent = originalButtonText;
         });
     }
+    
     function renderPage(blocks, settings) {
         if (!blocks || !settings) return;
 

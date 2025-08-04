@@ -20,7 +20,18 @@
     </style>
 </head>
 <body>
-    <div id="editor-panel"> <div id="editor-header"><h2>Editor</h2><div class="template-switcher"><button id="edit-main-btn" class="active">Invitation</button><button id="edit-rsvp-btn">RSVP Form</button></div><div class="global-settings"><div class="control-group"><label for="global-style-select">Page Style</label><select id="global-style-select"><option value="classic">Classic (Cards)</option><option value="modern">Modern (Shared Background)</option></select></div><div class="control-group" id="global-bg-image-group"><label for="global-bg-image-input">Background Image URL</label><div class="image-input-group"><input type="url" id="global-bg-image-input" placeholder="https://images.unsplash.com/photo-..."><button type="button" class="browse-image-btn" onclick="openImageLibrary('global-bg-image-input')">Browse...</button></div></div><div class="control-group"><label for="global-width-input">Global Block Width</label><input type="text" id="global-width-input" placeholder="e.g., 800px or 90%"></div></div></div> <div id="editor-content"></div> <div id="editor-footer"><button id="add-block-btn" class="action-button" style="margin-bottom: 15px; background-color: #28a745;">+ Add New Block</button><button id="share-button" class="action-button">Generate & Copy Link</button><p id="status-text" style="text-align:center; margin-top:10px;"></p></div> </div> <div id="preview-panel"><div id="preview-wrapper"><iframe id="preview-frame" scrolling="no"></iframe></div></div> <template id="editor-block-template"><div class="editor-block"><div class="editor-block-header"><span class="drag-handle">☰</span><span class="editor-block-title">Block Title</span><div class="editor-block-controls"><button class="toggle-btn">▼</button><button class="delete-block-btn" title="Delete Block">×</button></div></div><div class="editor-block-content"></div></div></template> <div id="add-block-modal" class="modal-overlay"><div class="modal-content"><span class="modal-close" id="modal-close-btn">×</span><h3>Choose a Block to Add</h3><div id="add-block-options"><button data-type="hero">Hero</button><button data-type="text-block">Text Block</button><button data-type="image">Image</button><hr><button data-type="schedule">Schedule</button><button data-type="location">Location</button><button data-type="countdown">Countdown</button><button data-type="rsvp">RSVP Button</button><hr><button data-type="form-header">Form: Header</button><button data-type="input-question">Form: Text Input</button><button data-type="textarea-question">Form: Text Area</button><button data-type="radio-question">Form: Radio Choice</button><button data-type="form-footer">Form: Footer</button></div></div></div>
+   
+        <!-- HTML для модального окна с инструкцией -->
+    <div id="instruction-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('is-visible')">×</span>
+            <div id="instruction-content">
+                <!-- Содержимое будет генерироваться через JS -->
+            </div>
+        </div>
+    </div>
+
+   <div id="editor-panel"> <div id="editor-header"><h2>Editor</h2><div class="template-switcher"><button id="edit-main-btn" class="active">Invitation</button><button id="edit-rsvp-btn">RSVP Form</button></div><div class="api-settings" style="margin-top: 15px;"><div class="control-group"><label for="sheetdb-api-input">SheetDB API URL</label><input type="url" id="sheetdb-api-input" placeholder="Paste your SheetDB API URL here..."></div></div><div class="global-settings"><div class="control-group"><label for="global-style-select">Page Style</label><select id="global-style-select"><option value="classic">Classic (Cards)</option><option value="modern">Modern (Shared Background)</option></select></div><div class="control-group" id="global-bg-image-group"><label for="global-bg-image-input">Background Image URL</label><div class="image-input-group"><input type="url" id="global-bg-image-input" placeholder="https://images.unsplash.com/photo-..."><button type="button" class="browse-image-btn" onclick="openImageLibrary('global-bg-image-input')">Browse...</button></div></div><div class="control-group"><label for="global-width-input">Global Block Width</label><input type="text" id="global-width-input" placeholder="e.g., 800px or 90%"></div></div></div> <div id="editor-content"></div> <div id="editor-footer"><button id="add-block-btn" class="action-button" style="margin-bottom: 15px; background-color: #28a745;">+ Add New Block</button><button id="share-button" class="action-button">Generate & Copy Link</button><p id="status-text" style="text-align:center; margin-top:10px;"></p></div> </div> <div id="preview-panel"><div id="preview-wrapper"><iframe id="preview-frame" scrolling="no"></iframe></div></div> <template id="editor-block-template"><div class="editor-block"><div class="editor-block-header"><span class="drag-handle">☰</span><span class="editor-block-title">Block Title</span><div class="editor-block-controls"><button class="toggle-btn">▼</button><button class="delete-block-btn" title="Delete Block">×</button></div></div><div class="editor-block-content"></div></div></template> <div id="add-block-modal" class="modal-overlay"><div class="modal-content"><span class="modal-close" id="modal-close-btn">×</span><h3>Choose a Block to Add</h3><div id="add-block-options"><button data-type="hero">Hero</button><button data-type="text-block">Text Block</button><button data-type="image">Image</button><hr><button data-type="schedule">Schedule</button><button data-type="location">Location</button><button data-type="countdown">Countdown</button><button data-type="rsvp">RSVP Button</button><hr><button data-type="form-header">Form: Header</button><button data-type="input-question">Form: Text Input</button><button data-type="textarea-question">Form: Text Area</button><button data-type="radio-question">Form: Radio Choice</button><button data-type="form-footer">Form: Footer</button></div></div></div>
 
     <div id="image-library-modal" class="modal-overlay">
         <div class="modal-content">
@@ -58,10 +69,18 @@
             </div>
         </div>
     </div>
-
+    
+    <div class="api-settings" style="margin-top: 15px;">
+        <div class="control-group">
+            <label for="sheetdb-api-input">SheetDB API URL</label>
+            <input type="url" id="sheetdb-api-input" placeholder="Paste your SheetDB API URL here...">
+        </div>
+    </div>
+    
     <script>
     const iframe = document.getElementById("preview-frame");
     let pageBlocks = []; let pageSettings = {}; let currentTemplate = '';
+    let sheetDbApiUrl = '';
     let apiKeys = {}; // For storing API keys from server
     let currentImageTarget = null; // For image library
     let currentElementBlock = null; // For element library
@@ -782,84 +801,74 @@
         }); 
     }
     
+        // ФИНАЛЬНЫЙ КОД ДЛЯ КНОПКИ
     document.getElementById('share-button').addEventListener('click', async function() {
         const statusText = document.getElementById('status-text');
         this.disabled = true;
-        statusText.innerText = 'Saving...';
+        statusText.innerText = 'Processing...';
         saveCurrentPageData();
-        const dataToSave = {
-            main: mainPageData,
-            rsvp: rsvpFormData
-        };
+
+        // Проверяем, что API URL для RSVP формы введен
+        if (!rsvpFormData.settings.sheetDbApiUrl) {
+            alert('Please enter your SheetDB API URL before generating the link.');
+            statusText.innerText = '';
+            this.disabled = false;
+            return;
+        }
+
+        const dataToSave = { main: mainPageData, rsvp: rsvpFormData };
 
         try {
+            statusText.innerText = 'Saving...';
             const response = await fetch('/.netlify/functions/create-bundle', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(dataToSave)
             });
 
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || `Server Error (${response.status})`);
 
-            const mainLink = result.link;
+            // Добавляем apiUrl как параметр к ссылке
+            const mainLink = `${result.link}&apiUrl=${encodeURIComponent(rsvpFormData.settings.sheetDbApiUrl)}`;
+            
             await navigator.clipboard.writeText(mainLink);
-
-            // --- НАЧАЛО НОВОГО КОДА ---
-
-            // 1. Генерируем заголовки из данных RSVP формы
+            
+            // Генерируем заголовки
             const headers = rsvpFormData.blocks
-                .filter(block =>
-                    block.type === 'input-question' ||
-                    block.type === 'textarea-question' ||
-                    block.type === 'radio-question'
-                )
-                .map(block => block.content.title);
-
-            // 2. Превращаем массив в строку, удобную для копирования
+                .filter(b => ['input-question', 'textarea-question', 'radio-question'].includes(b.type))
+                .map(b => b.content.title);
             const headersString = headers.join(', ');
 
-            // 3. Создаем HTML-код для инструкции
-            const instructionHTML = `
-                <h3>Invitation Link (copied to clipboard):</h3>
-                <p style="word-break: break-all;">${mainLink}</p>
-                <hr>
-                <h3>Next Step: Prepare Your Google Sheet</h3>
-                <p>To receive responses, open your Google Sheet and paste these headers into the first row:</p>
+            // Формируем и показываем инструкцию
+            const instructionContent = document.getElementById('instruction-content');
+            instructionContent.innerHTML = `
+                <h2>Success! Your links are ready.</h2>
+                <p><strong>Your Invitation Link (copied to clipboard):</strong></p>
+                <p style="word-break: break-all; background:#f0f2f5; padding:8px; border-radius:4px;">${mainLink}</p>
+                <hr style="margin: 20px 0;">
+                <h3><strong>Next Step:</strong> Prepare Your Google Sheet</h3>
+                <p>To receive guest responses, please do the following:</p>
+                <ol>
+                    <li>Open your Google Sheet.</li>
+                    <li>Copy the headers below and paste them into the <strong>first row</strong> of your sheet.</li>
+                </ol>
                 <pre id="headers-to-copy" style="background: #eee; padding: 10px; border-radius: 5px; cursor: pointer;">${headersString}</pre>
-                <button id="copy-headers-btn" class="action-button" style="background-color: #007bff;">Copy Headers</button>
-                <p style="margin-top: 15px;">After that, you need to create an API in <a href="https://sheetdb.io/" target="_blank">SheetDB</a> with this Google Sheet and paste the API URL into your RSVP form template.</p>
+                <button id="copy-headers-btn" class="action-button" style="background-color: #007bff; width:auto; padding: 10px 20px;">Copy Headers</button>
             `;
+            
+            document.getElementById('instruction-modal').classList.add('is-visible');
 
-            // 4. Показываем инструкцию в модальном окне
-            // Мы используем существующее модальное окно для простоты
-            const modal = document.getElementById('add-block-modal');
-            modal.querySelector('.modal-content').innerHTML = `
-                <span class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('is-visible')">×</span>
-                ${instructionHTML}
-            `;
-            modal.classList.add('is-visible');
-
-            // Добавляем обработчик для новой кнопки "Copy Headers"
             document.getElementById('copy-headers-btn').addEventListener('click', () => {
-                const textToCopy = document.getElementById('headers-to-copy').innerText;
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    alert('Headers copied!');
-                });
+                navigator.clipboard.writeText(headersString).then(() => alert('Headers copied!'));
             });
 
-            statusText.innerText = 'Success! Follow the next steps.';
-
-            // --- КОНЕЦ НОВОГО КОДА ---
+            statusText.innerText = 'Done! Follow the instructions.';
 
         } catch (err) {
             statusText.innerText = `Error: ${err.message}`;
         } finally {
             this.disabled = false;
-            // Убираем автоматическое скрытие текста статуса, чтобы инструкция осталась видна
-            // setTimeout(() => { statusText.innerText = ''; }, 5000); 
         }
     });
     
@@ -890,29 +899,52 @@
         renderPreview(); 
     }); 
     
-    function saveCurrentPageData() { 
-        const data = { 
-            settings: JSON.parse(JSON.stringify(pageSettings)), 
-            blocks: JSON.parse(JSON.stringify(pageBlocks)) 
-        }; 
-        if (currentTemplate === mainPageData.template) { 
-            mainPageData = {...mainPageData, ...data}; 
-        } else { 
-            rsvpFormData = {...rsvpFormData, ...data}; 
-        } 
+    function saveCurrentPageData() {
+        const data = {
+            settings: JSON.parse(JSON.stringify(pageSettings)),
+            blocks: JSON.parse(JSON.stringify(pageBlocks))
+        };
+        
+        if (currentTemplate === mainPageData.template) {
+            mainPageData = {...mainPageData, ...data};
+        } else {
+            rsvpFormData = {...rsvpFormData, ...data};
+            if (!rsvpFormData.settings) rsvpFormData.settings = {};
+            rsvpFormData.settings.sheetDbApiUrl = document.getElementById('sheetdb-api-input').value;
+        }
     }
     
-    function switchEditorMode(target) { 
-        currentTemplate = target.template; 
-        pageSettings = JSON.parse(JSON.stringify(target.settings)); 
-        pageBlocks = JSON.parse(JSON.stringify(target.blocks)); 
-        globalWidthInput.value = pageSettings.maxWidth; 
-        globalStyleSelect.value = pageSettings.style; 
-        globalBgImageInput.value = pageSettings.backgroundImage; 
-        toggleBgImageField(); 
-        iframe.src = `templates/${currentTemplate}?v=${Date.now()}`; 
-        editMainBtn.classList.toggle('active', currentTemplate === mainPageData.template); 
-        editRsvpBtn.classList.toggle('active', currentTemplate === rsvpFormData.template); 
+        function switchEditorMode(target) {
+        currentTemplate = target.template;
+        pageSettings = JSON.parse(JSON.stringify(target.settings));
+        pageBlocks = JSON.parse(JSON.stringify(target.blocks));
+        
+        globalWidthInput.value = pageSettings.maxWidth;
+        globalStyleSelect.value = pageSettings.style;
+        globalBgImageInput.value = pageSettings.backgroundImage;
+        toggleBgImageField();
+        
+        iframe.src = `templates/${currentTemplate}?v=${Date.now()}`;
+        
+        editMainBtn.classList.toggle('active', currentTemplate === mainPageData.template);
+        editRsvpBtn.classList.toggle('active', currentTemplate === rsvpFormData.template);
+
+        // --- НАЧАЛО ДОБАВЛЕННОГО КОДА ---
+
+        const apiSettingsDiv = document.querySelector('.api-settings');
+        const sheetDbApiInput = document.getElementById('sheetdb-api-input');
+
+        if (currentTemplate === rsvpFormData.template) {
+            // Если мы в редакторе RSVP-формы, показываем поле для API
+            apiSettingsDiv.style.display = 'block';
+            // И заполняем его сохраненным значением
+            sheetDbApiInput.value = target.settings.sheetDbApiUrl || '';
+        } else {
+            // Если мы в редакторе главного приглашения, скрываем поле для API
+            apiSettingsDiv.style.display = 'none';
+        }
+
+        // --- КОНЕЦ ДОБАВЛЕННОГО КОДА ---
     }
     
     editMainBtn.addEventListener('click', () => { 
