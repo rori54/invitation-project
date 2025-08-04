@@ -158,11 +158,22 @@
         const form = event.target;
         const submitButton = form.querySelector('.submit-button');
         const originalButtonText = submitButton.textContent;
-        
-        // Просто собираем данные формы
         const formData = new FormData(form);
 
-        // URL твоего SheetDB
+        // 1. Превращаем FormData в обычный JavaScript-объект
+        const dataObject = {};
+        formData.forEach((value, key) => {
+            dataObject[key] = value;
+        });
+
+        // 2. Получаем ID клиента из URL и ДОБАВЛЯЕМ ЕГО
+        const params = new URLSearchParams(window.location.search);
+        const clientId = params.get('id'); 
+        if (clientId) {
+            dataObject['clientId'] = clientId;
+        }
+
+        // URL твоего SheetDB API
         const SHEETDB_URL = 'https://sheetdb.io/api/v1/h6ag2h5ny45kt';
         
         submitButton.disabled = true;
@@ -170,14 +181,21 @@
 
         fetch(SHEETDB_URL, {
             method: 'POST',
-            // ВАЖНО: Мы больше не указываем headers и не используем JSON.stringify
-            body: formData 
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            // Отправляем простой объект, как в документации
+            body: JSON.stringify(dataObject) 
         }).then(response => {
-            // SheetDB при успехе может вернуть код 201 (Created)
-            if (response.ok || response.status === 201) {
+            if (response.ok) {
                 form.innerHTML = '<h2>Thank you for your response!</h2>';
             } else {
-                alert('Something went wrong!');
+                // Этот блок поможет нам увидеть ошибку, если она вернется в JSON
+                response.json().then(data => {
+                    alert('Something went wrong: ' + (data.error || 'Unknown error'));
+                }).catch(() => {
+                    alert('Something went wrong!');
+                });
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
             }
@@ -187,7 +205,6 @@
             submitButton.textContent = originalButtonText;
         });
     }
-
     function renderPage(blocks, settings) {
         if (!blocks || !settings) return;
 
