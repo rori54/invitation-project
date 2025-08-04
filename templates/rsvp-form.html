@@ -156,23 +156,38 @@
             .sticker-wrapper { max-width: 80px !important; }
         }
         
-        /* --- RIBBON MODE UNIVERSAL FIX --- */
-        body.style-ribbon .block-wrapper {
-            margin: 0 !important;
-            padding: 25px 20px !important; /* 25px сверху/снизу, 20px по бокам */
+        /* --- RIBBON MODE FIX --- */
+
+        /* 1. Создаем саму "ленту" */
+        body.style-ribbon #page-content {
+            background-color: #ffffff; /* Белый фон для всей ленты */
+            max-width: 800px; /* Ограничиваем ширину ленты */
+            margin: 0 auto;   /* Центрируем ленту */
+            padding: 20px 0;    /* Небольшой отступ сверху и снизу самой ленты */
+            box-shadow: 0 6px 25px rgba(0,0,0,0.08); /* Опционально: можно добавить тень для ленты */
         }
 
+        /* 2. Делаем все блоки внутри ленты прозрачными */
         body.style-ribbon .content-section,
         body.style-ribbon .hero-block,
         body.style-ribbon .form-block,
         body.style-ribbon .form-header-block,
         body.style-ribbon .form-footer-block {
-            margin: 0 !important;
-            padding: 0 !important; /* Убираем внутренние отступы с самих секций */
             background: none !important;
             box-shadow: none !important;
             border: none !important;
-            border-radius: 0 !important;
+            margin: 0 !important;
+        }
+
+        /* 3. Добавляем внутренние отступы к каждому блоку для "воздуха" */
+        body.style-ribbon .block-wrapper {
+            padding: 25px 40px; /* 25px сверху/снизу, 40px по бокам */
+        }
+
+        /* 4. Особое правило для Hero-блока в ленте */
+        body.style-ribbon .hero-block {
+            width: 100%; /* Заставляем его растягиваться на всю ширину ленты */
+            max-width: none;
         }
     </style>
 </head>
