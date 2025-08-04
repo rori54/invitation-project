@@ -73,8 +73,7 @@
         const stickersHTML = renderStickers(c.stickers);
         return `<div class="block-wrapper"><div class="form-header-block" style="${getBlockStyles(c, s)}">${imageHTML}<h1>${c.title}</h1><p>${processText(c.subtitle)}</p>${stickersHTML}</div></div>`;
     };
-    
-    const createInputQuestionHTML = (c, s) => `<div class="block-wrapper"><div class="form-block" style="${getBlockStyles(c, s)}"><label for="${c.id}" class="${c.required ? 'required' : ''}">${c.title}</label><input type="text" id="${c.id}" name="${c.title}" ${c.required ? 'required' : ''}></div></div>`;
+
     const createInputQuestionHTML = (c, s) => `<div class="block-wrapper"><div class="form-block" style="${getBlockStyles(c, s)}"><label class="${c.required ? 'required' : ''}">${c.title}</label><input type="text" name="${c.title}" ${c.required ? 'required' : ''}></div></div>`;
     const createTextareaQuestionHTML = (c, s) => `<div class="block-wrapper"><div class="form-block" style="${getBlockStyles(c, s)}"><label class="${c.required ? 'required' : ''}">${c.title}</label><textarea name="${c.title}" ${c.required ? 'required' : ''}></textarea></div></div>`;
     const createRadioQuestionHTML = (c, s) => `<div class="block-wrapper"><div class="form-block" style="${getBlockStyles(c, s)}"><label class="${c.required ? 'required' : ''}">${c.title}</label><ul class="radio-options-list">${c.options.map(opt => `<li><label><input type="radio" name="${c.title}" value="${opt.text}" ${c.required ? 'required' : ''}><span>${opt.text}</span></label></li>`).join('')}</ul></div></div>`;
