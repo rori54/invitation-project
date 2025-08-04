@@ -50,6 +50,15 @@
             padding: 20px !important;
         }
         
+        /* FIX: Убираем лишние отступы в режиме Ribbon */
+        body.style-ribbon .content-section,
+        body.style-ribbon .hero-block {
+            margin-top: 0;
+            margin-bottom: 0;
+            padding-top: 25px; /* Добавляем небольшой внутренний отступ для воздуха */
+            padding-bottom: 25px; /* Добавляем небольшой внутренний отступ для воздуха */
+        }
+        
         /* Block background styles */
         .block-background {
             position: absolute;
