@@ -801,7 +801,7 @@
         }); 
     }
     
-        // ФИНАЛЬНЫЙ КОД ДЛЯ КНОПКИ
+    // ФИНАЛЬНЫЙ КОД ДЛЯ КНОПКИ
     document.getElementById('share-button').addEventListener('click', async function() {
         const statusText = document.getElementById('status-text');
         this.disabled = true;
@@ -809,12 +809,16 @@
         saveCurrentPageData();
 
         // Проверяем, что API URL для RSVP формы введен
-        if (!rsvpFormData.settings.sheetDbApiUrl) {
+        const currentApiUrl = document.getElementById('sheetdb-api-input').value.trim();
+        if (!currentApiUrl) {
             alert('Please enter your SheetDB API URL before generating the link.');
             statusText.innerText = '';
             this.disabled = false;
             return;
         }
+
+        // Сохраняем API URL в настройки RSVP формы
+        rsvpFormData.settings.sheetDbApiUrl = currentApiUrl;
 
         const dataToSave = { main: mainPageData, rsvp: rsvpFormData };
 
@@ -830,7 +834,7 @@
             if (!response.ok) throw new Error(result.error || `Server Error (${response.status})`);
 
             // Добавляем apiUrl как параметр к ссылке
-            const mainLink = `${result.link}&apiUrl=${encodeURIComponent(rsvpFormData.settings.sheetDbApiUrl)}`;
+            const mainLink = `${result.link}&apiUrl=${encodeURIComponent(currentApiUrl)}`;
             
             await navigator.clipboard.writeText(mainLink);
             
@@ -898,6 +902,13 @@
         pageSettings.maxWidth = globalWidthInput.value; 
         renderPreview(); 
     }); 
+
+    // Добавляем обработчик для поля API URL
+    document.getElementById('sheetdb-api-input').addEventListener('input', (e) => {
+        if (currentTemplate === rsvpFormData.template) {
+            rsvpFormData.settings.sheetDbApiUrl = e.target.value;
+        }
+    });
     
     function saveCurrentPageData() {
         const data = {

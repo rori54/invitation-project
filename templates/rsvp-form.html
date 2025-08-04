@@ -170,7 +170,8 @@
         const sheetDbUrlFromParams = urlParams.get('apiUrl');
 
         if (!sheetDbUrlFromParams) {
-            alert('Error: API URL is missing.');
+            // Показываем более понятное сообщение об ошибке
+            alert('Configuration Error: This RSVP form needs to be properly configured with a Google Sheets connection. Please contact the event organizer.');
             return;
         }
 
