@@ -166,12 +166,6 @@
             dataObject[key] = value;
         });
 
-        // 2. Получаем ID клиента из URL и ДОБАВЛЯЕМ ЕГО
-        const params = new URLSearchParams(window.location.search);
-        const clientId = params.get('id'); 
-        if (clientId) {
-            dataObject['clientId'] = clientId;
-        }
 
         // URL твоего SheetDB API
         const SHEETDB_URL = 'https://sheetdb.io/api/v1/h6ag2h5ny45kt';

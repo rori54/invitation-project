@@ -782,30 +782,85 @@
         }); 
     }
     
-    document.getElementById('share-button').addEventListener('click', async function() { 
-        const statusText = document.getElementById('status-text'); 
-        this.disabled = true; 
-        statusText.innerText = 'Saving...'; 
-        saveCurrentPageData(); 
-        const dataToSave = { main: mainPageData, rsvp: rsvpFormData }; 
-        try { 
-            const response = await fetch('/.netlify/functions/create-bundle', { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify(dataToSave) 
-            }); 
-            const result = await response.json(); 
-            if (!response.ok) throw new Error(result.error || `Server Error (${response.status})`); 
-            const mainLink = result.link; 
-            await navigator.clipboard.writeText(mainLink); 
-            statusText.innerText = 'Invitation link copied!'; 
-            alert(`Invitation Link (copied to clipboard):\n${mainLink}`); 
-        } catch (err) { 
-            statusText.innerText = `Error: ${err.message}`; 
-        } finally { 
-            this.disabled = false; 
-            setTimeout(() => { statusText.innerText = ''; }, 5000); 
-        } 
+    document.getElementById('share-button').addEventListener('click', async function() {
+        const statusText = document.getElementById('status-text');
+        this.disabled = true;
+        statusText.innerText = 'Saving...';
+        saveCurrentPageData();
+        const dataToSave = {
+            main: mainPageData,
+            rsvp: rsvpFormData
+        };
+
+        try {
+            const response = await fetch('/.netlify/functions/create-bundle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dataToSave)
+            });
+
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || `Server Error (${response.status})`);
+
+            const mainLink = result.link;
+            await navigator.clipboard.writeText(mainLink);
+
+            // --- НАЧАЛО НОВОГО КОДА ---
+
+            // 1. Генерируем заголовки из данных RSVP формы
+            const headers = rsvpFormData.blocks
+                .filter(block =>
+                    block.type === 'input-question' ||
+                    block.type === 'textarea-question' ||
+                    block.type === 'radio-question'
+                )
+                .map(block => block.content.title);
+
+            // 2. Превращаем массив в строку, удобную для копирования
+            const headersString = headers.join(', ');
+
+            // 3. Создаем HTML-код для инструкции
+            const instructionHTML = `
+                <h3>Invitation Link (copied to clipboard):</h3>
+                <p style="word-break: break-all;">${mainLink}</p>
+                <hr>
+                <h3>Next Step: Prepare Your Google Sheet</h3>
+                <p>To receive responses, open your Google Sheet and paste these headers into the first row:</p>
+                <pre id="headers-to-copy" style="background: #eee; padding: 10px; border-radius: 5px; cursor: pointer;">${headersString}</pre>
+                <button id="copy-headers-btn" class="action-button" style="background-color: #007bff;">Copy Headers</button>
+                <p style="margin-top: 15px;">After that, you need to create an API in <a href="https://sheetdb.io/" target="_blank">SheetDB</a> with this Google Sheet and paste the API URL into your RSVP form template.</p>
+            `;
+
+            // 4. Показываем инструкцию в модальном окне
+            // Мы используем существующее модальное окно для простоты
+            const modal = document.getElementById('add-block-modal');
+            modal.querySelector('.modal-content').innerHTML = `
+                <span class="modal-close" onclick="this.closest('.modal-overlay').classList.remove('is-visible')">×</span>
+                ${instructionHTML}
+            `;
+            modal.classList.add('is-visible');
+
+            // Добавляем обработчик для новой кнопки "Copy Headers"
+            document.getElementById('copy-headers-btn').addEventListener('click', () => {
+                const textToCopy = document.getElementById('headers-to-copy').innerText;
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    alert('Headers copied!');
+                });
+            });
+
+            statusText.innerText = 'Success! Follow the next steps.';
+
+            // --- КОНЕЦ НОВОГО КОДА ---
+
+        } catch (err) {
+            statusText.innerText = `Error: ${err.message}`;
+        } finally {
+            this.disabled = false;
+            // Убираем автоматическое скрытие текста статуса, чтобы инструкция осталась видна
+            // setTimeout(() => { statusText.innerText = ''; }, 5000); 
+        }
     });
     
     const editMainBtn = document.getElementById('edit-main-btn'), 
