@@ -158,39 +158,25 @@
         const form = event.target;
         const submitButton = form.querySelector('.submit-button');
         const originalButtonText = submitButton.textContent;
+        
+        // Просто собираем данные формы
         const formData = new FormData(form);
 
-        // --- НАЧАЛО ИЗМЕНЕНИЙ ---
-
-        // 1. Превращаем FormData в обычный JavaScript-объект
-        const dataObject = {};
-        formData.forEach((value, key) => {
-            dataObject[key] = value;
-        });
-
-        // 2. Получаем ID клиента из URL
-        const params = new URLSearchParams(window.location.search);
-        const clientId = params.get('id'); 
-        
-        // URL вашего вебхука из Make.com
-        const MAKE_WEBHOOK_URL = 'https://sheetdb.io/api/v1/h6ag2h5ny45kt'; // <-- Убедитесь, что здесь ваш URL
+        // URL твоего SheetDB
+        const SHEETDB_URL = 'https://sheetdb.io/api/v1/h6ag2h5ny45kt';
         
         submitButton.disabled = true;
         submitButton.textContent = 'Sending...';
 
-        fetch(MAKE_WEBHOOK_URL, {
+        fetch(SHEETDB_URL, {
             method: 'POST',
-            // 4. Указываем, что отправляем JSON
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            // 5. Превращаем наш объект в JSON-строку
-            body: JSON.stringify(dataObject) 
+            // ВАЖНО: Мы больше не указываем headers и не используем JSON.stringify
+            body: formData 
         }).then(response => {
-            if (response.ok) {
+            // SheetDB при успехе может вернуть код 201 (Created)
+            if (response.ok || response.status === 201) {
                 form.innerHTML = '<h2>Thank you for your response!</h2>';
             } else {
-                // Если произошла ошибка, возвращаем кнопку в исходное состояние
                 alert('Something went wrong!');
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
@@ -200,7 +186,6 @@
             submitButton.disabled = false;
             submitButton.textContent = originalButtonText;
         });
-        // --- КОНЕЦ ИЗМЕНЕНИЙ ---
     }
 
     function renderPage(blocks, settings) {
