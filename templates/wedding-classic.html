@@ -63,22 +63,6 @@
             box-shadow: none !important;
         }
         
-        /* FIX: Убираем лишние отступы и стили карточек в режиме Ribbon */
-        body.style-ribbon .content-section,
-        body.style-ribbon .hero-block,
-        body.style-ribbon .form-block,
-        body.style-ribbon .form-header-block,
-        body.style-ribbon .form-footer-block {
-            margin-top: 0;
-            margin-bottom: 0;
-            padding-top: 25px;
-            padding-bottom: 25px;
-            background: none !important;      /* Убираем фон карточки */
-            box-shadow: none !important;      /* Убираем тень карточки */
-            border-radius: 0 !important;      /* Убираем скругление углов */
-            border: none !important;          /* Убираем возможные рамки */
-        }
-        
         /* Block background styles */
         .block-background {
             position: absolute;
@@ -164,6 +148,25 @@
                 font-size: 14px;
             }
         }
+        /* --- RIBBON MODE UNIVERSAL FIX --- */
+        body.style-ribbon .block-wrapper {
+            margin: 0 !important;
+            padding: 25px 20px !important; /* 25px сверху/снизу, 20px по бокам */
+        }
+
+        body.style-ribbon .content-section,
+        body.style-ribbon .hero-block,
+        body.style-ribbon .form-block,
+        body.style-ribbon .form-header-block,
+        body.style-ribbon .form-footer-block {
+            margin: 0 !important;
+            padding: 0 !important; /* Убираем внутренние отступы с самих секций */
+            background: none !important;
+            box-shadow: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+        }
+            
     </style>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 </head>
