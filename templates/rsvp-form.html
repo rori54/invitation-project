@@ -264,6 +264,14 @@
                 const data = (await r.json()).record;
                 const pageData = data[pageType];
                 if (!pageData) throw new Error(`Specified page data ('${pageType}') not found.`);
+                
+                // Добавляем API URL из настроек в URL параметры, если его там нет
+                if (pageData.settings && pageData.settings.sheetDbApiUrl && !params.get('apiUrl')) {
+                    const currentUrl = new URL(window.location);
+                    currentUrl.searchParams.set('apiUrl', encodeURIComponent(pageData.settings.sheetDbApiUrl));
+                    window.history.replaceState({}, '', currentUrl);
+                }
+                
                 renderPage(pageData.blocks, pageData.settings);
             } catch (e) { document.getElementById('page-content').innerHTML = `<h1>Error Loading Form</h1><p>${e.message}</p>`; }
         }

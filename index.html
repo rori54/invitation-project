@@ -833,8 +833,8 @@
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || `Server Error (${response.status})`);
 
-            // Добавляем apiUrl как параметр к ссылке
-            const mainLink = `${result.link}&apiUrl=${encodeURIComponent(currentApiUrl)}`;
+            // Теперь не нужно добавлять apiUrl как параметр, так как он сохранен в настройках
+            const mainLink = result.link;
             
             await navigator.clipboard.writeText(mainLink);
             
