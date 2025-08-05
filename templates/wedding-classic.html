@@ -239,6 +239,42 @@
         }).join('');
     };
     
+    // ИСПРАВЛЕНО: Добавлена недостающая функция для отрисовки Hero-блока
+    const createHeroHTML = (block, s) => {
+        const c = block.content;
+        const mirrorClass = getMirrorClass(c);
+
+        const isLimited = !c.fullWidth;
+        const headerClasses = `hero-block ${isLimited ? 'limited-width' : ''}`;
+        const headerStyle = `aspect-ratio: ${c.aspectRatio || '16/9'}; max-width: ${isLimited ? (s.maxWidth || '800px') : 'none'};`;
+
+        const imageHTML = c.imageUrl 
+            ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'}; opacity: ${c.opacity || 1};" alt="">` 
+            : '';
+
+        const subtitleHTML = (c.subtitle && c.subtitle.enabled) 
+            ? `<p>${makeTextEditable(c.subtitle.text, block.id, 'subtitle', c.subtitle.style)}</p>` 
+            : '';
+        const namesHTML = (c.names && c.names.enabled) 
+            ? `<h1>${makeTextEditable(c.names.text, block.id, 'names', c.names.style)}</h1>` 
+            : '';
+        const dateHTML = (c.date && c.date.enabled) 
+            ? `<p>${makeTextEditable(c.date.text, block.id, 'date', c.date.style)}</p>` 
+            : '';
+        
+        return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
+                    <header class="${headerClasses}" style="${headerStyle}">
+                        ${imageHTML}
+                        <div class="hero-content">
+                            ${subtitleHTML}
+                            ${namesHTML}
+                            ${dateHTML}
+                        </div>
+                        ${renderStickers(c.stickers)}
+                    </header>
+                </div>`;
+    };
+
     const createLocationHTML = (block, s) => { 
         const c = block.content; 
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? 
