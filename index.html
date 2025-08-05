@@ -463,7 +463,6 @@
                     text: 'We are excited to share this special day with our closest family and friends.', 
                     titleStyle: { ...defaultTitleStyle, fontSize: '2.5rem' }, 
                     textStyle: { ...defaultTextStyle, fontSize: '1.1rem', textAlign: 'center' }, 
-                    innerBlocks: [],
                     stickers: [],
                     backgroundColor: '',
                     backgroundImage: '',
@@ -480,9 +479,6 @@
                     title: 'Until Our Big Day', 
                     targetDate: '2025-09-15T16:00', 
                     titleStyle: { ...defaultTitleStyle }, 
-                    numberStyle: { ...defaultTitleStyle, fontSize: '2.5rem' },
-                    labelStyle: { ...defaultTextStyle, fontSize: '1rem' },
-                    innerBlocks: [],
                     stickers: [],
                     backgroundColor: '',
                     backgroundImage: '',
@@ -518,7 +514,6 @@
                         }
                     ], 
                     titleStyle: { ...defaultTitleStyle }, 
-                    innerBlocks: [],
                     stickers: [],
                     backgroundColor: '',
                     backgroundImage: '',
@@ -539,7 +534,7 @@
                     mapLink: 'https://maps.google.com', 
                     titleStyle: { ...defaultTitleStyle }, 
                     stickers: [],
-                    innerBlocks: [],
+                    innerBlocks: [], // ДОБАВЛЕНО
                     backgroundColor: '',
                     backgroundImage: '',
                     backgroundOpacity: 1,
@@ -555,9 +550,7 @@
                     title: 'Confirm Your Attendance', 
                     subtitle: 'Please reply by September 1st.', 
                     titleStyle: { ...defaultTitleStyle }, 
-                    subtitleStyle: { ...defaultTextStyle, textAlign: 'center' },
                     buttonStyle: { fontFamily: 'Montserrat', fontSize: '1.1rem', color: '#FFFFFF', fontWeight: '700', backgroundColor: '#c5a98b' }, 
-                    innerBlocks: [],
                     stickers: [],
                     backgroundColor: '',
                     backgroundImage: '',
@@ -653,15 +646,7 @@
         let current = pageBlocks[blockIndex].content;
         
         for (let i = 0; i < keys.length - 1; i++) {
-            if (!current[keys[i]]) { // Handle cases where nested objects don't exist
-                if (Array.isArray(current) && !isNaN(keys[i])) { // It's an array index
-                    current = current[parseInt(keys[i], 10)];
-                } else {
-                     current = current[keys[i]];
-                }
-            } else {
-                current = current[keys[i]];
-            }
+            current = current[keys[i]];
         }
         
         const styleKey = keys[keys.length - 1];
@@ -1208,6 +1193,7 @@
             return `<div class="control-group"> <div class="optional-element-header"> <label>${label}</label> <label><input type="checkbox" data-key="${key}.enabled" ${element.enabled ? 'checked' : ''}> Show</label> </div> <input type="text" data-key="${key}.text" value="${element.text}"> ${createStyleControlsHTML(`${key}.style`, element.style)} </div>`; 
         };
         
+        
         switch(block.type) { 
             case 'hero': 
                 fieldsHTML = `${createImageInputHTML('imageUrl', c.imageUrl, 'Background Image URL')}
@@ -1226,49 +1212,39 @@
                     ${createOptionalElementEditor('date', 'Date')} 
                     <hr class="style-separator"> 
                     ${aspectRatioField}${bgPosField} 
-                    ${createStickerEditor(block)}
                     ${createInnerBlocksEditor(block)} 
+                    ${createStickerEditor(block)}
                     ${createBackgroundControlsHTML(block)}
                     ${createMirrorControlsHTML(block)}`; 
                 break; 
             case 'text-block': 
-                fieldsHTML = `<div class="control-group"><label>Title (optional)</label><input type="text" data-key="title" value="${c.title || ''}"></div>${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Paragraph Text</label><textarea data-key="text">${c.text}</textarea></div>${createStyleControlsHTML('textStyle', c.textStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}${createStickerEditor(block)}${createInnerBlocksEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`; 
+                fieldsHTML = `<div class="control-group"><label>Title (optional)</label><input type="text" data-key="title" value="${c.title || ''}"></div>${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Paragraph Text</label><textarea data-key="text">${c.text}</textarea></div>${createStyleControlsHTML('textStyle', c.textStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`; 
                 break; 
             case 'rsvp': 
-                fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${c.subtitle}</textarea>${createStyleControlsHTML('subtitleStyle', c.subtitleStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}</div><hr class="style-separator"><label>Button Style</label><div class="style-controls"><div class="style-controls-grid"><div class="control-group"><label>Background Color</label><input type="color" data-key="buttonStyle.backgroundColor" value="${c.buttonStyle.backgroundColor || '#c5a98b'}"></div><div class="control-group"><label>Text Color</label><input type="color" data-key="buttonStyle.color" value="${c.buttonStyle.color || '#FFFFFF'}"></div></div><div style="margin-top: 10px;">${createStyleControlsHTML('buttonStyle', c.buttonStyle, {color: false, size: true, weight: true, family: true})}</div></div>${createStickerEditor(block)}${createInnerBlocksEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
+                fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${c.subtitle}</textarea>${createStyleControlsHTML('subtitleStyle', c.subtitleStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}</div><hr class="style-separator"><label>Button Style</label><div class="style-controls"><div class="style-controls-grid"><div class="control-group"><label>Background Color</label><input type="color" data-key="buttonStyle.backgroundColor" value="${c.buttonStyle.backgroundColor || '#c5a98b'}"></div><div class="control-group"><label>Text Color</label><input type="color" data-key="buttonStyle.color" value="${c.buttonStyle.color || '#FFFFFF'}"></div></div><div style="margin-top: 10px;">${createStyleControlsHTML('buttonStyle', c.buttonStyle, {color: false, size: true, weight: true, family: true})}</div></div>${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
                 break; 
             case 'countdown': 
-                fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Target Date & Time</label><input type="datetime-local" data-key="targetDate" value="${c.targetDate}"></div>
+            case 'location': 
+                fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}`; 
+                
+                if(block.type === 'countdown') {
+                    fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Target Date & Time</label><input type="datetime-local" data-key="targetDate" value="${c.targetDate}"></div>
                     <hr class="style-separator">
                     <label>Numbers Style (e.g., 40)</label>
                     ${createStyleControlsHTML('numberStyle', c.numberStyle, { color: true, size: true, weight: true, family: true })}
                     <hr class="style-separator">
                     <label>Labels Style (e.g., Days)</label>
-                    ${createStyleControlsHTML('labelStyle', c.labelStyle, { color: true, size: true, weight: true, family: true })}
-                    ${createStickerEditor(block)}${createInnerBlocksEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
-                break;  
-            case 'location': 
-                 fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}
-                    <hr class="style-separator">
-                    <div class="control-group">
-                        <label>Smart Location Search</label>
-                        <input type="text" class="smart-location-search" placeholder="e.g., Per Se, New York">
-                    </div>
-                    <div class="control-group">
-                        <label>Address</label>
-                        <textarea data-key="address.text">${c.address.text || ''}</textarea>
-                        ${createStyleControlsHTML('address.style', c.address.style, { textAlign: true, color: true, size: true, weight: true, family: true })}
-                    </div>
-                    ${createImageInputHTML('imageUrl', c.imageUrl, 'Photo URL')}
-                    ${createOpacityControl('opacity', c.opacity, 'Photo Opacity')}
-                    <div class="control-group">
-                        <label>Google Maps Link</label>
-                        <input type="url" data-key="mapLink" value="${c.mapLink || ''}">
-                    </div>
-                    ${createStickerEditor(block)}${createInnerBlocksEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`; 
+                    ${createStyleControlsHTML('labelStyle', c.labelStyle, { color: true, size: true, weight: true, family: true })}`;
+                } 
+                
+                if(block.type === 'location') { 
+                    fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Smart Location Search</label><input type="text" class="smart-location-search" placeholder="e.g., Per Se, New York"></div><div class="control-group"><label>Address</label><textarea data-key="address">${c.address || ''}</textarea></div>${createImageInputHTML('imageUrl', c.imageUrl, 'Photo URL')}${createOpacityControl('opacity', c.opacity, 'Photo Opacity')}<div class="control-group"><label>Google Maps Link</label><input type="url" data-key="mapLink" value="${c.mapLink || ''}"></div>`; 
+                } 
+                
+                fieldsHTML += createStickerEditor(block) + createBackgroundControlsHTML(block) + createMirrorControlsHTML(block);
                 break;  
             case 'schedule':
-                fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator">${createScheduleItemsEditor(block)}${createStickerEditor(block)}${createInnerBlocksEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
+                fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator">${createScheduleItemsEditor(block)}${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
                 break;
             case 'image':
                 fieldsHTML = `${createImageInputHTML('imageUrl', c.imageUrl, 'Image URL')}
@@ -1280,7 +1256,7 @@
                     ${createStyleControlsHTML('descriptionStyle', c.descriptionStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}
                     <hr class="style-separator">
                     <div class="control-group"><label>Caption (optional)</label><input type="text" data-key="caption" value="${c.caption || ''}"></div>
-                    ${createStickerEditor(block)}${createInnerBlocksEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
+                    ${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
                 break;
             case 'form-header':
                 fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${c.subtitle}</textarea></div>${createImageInputHTML('imageUrl', c.imageUrl, 'Background Image URL')}${createOpacityControl('opacity', c.opacity, 'Background Opacity')}${aspectRatioField}${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
@@ -1353,8 +1329,7 @@
             }); 
             const block = pageBlocks[blockIndex]; 
             block.content.title = place.name || ''; 
-            if(!block.content.address) block.content.address = {};
-            block.content.address.text = place.formatted_address || ''; 
+            block.content.address = place.formatted_address || ''; 
             block.content.mapLink = place.url || trimmedUrl; 
             if (place.photos && place.photos.length > 0) { 
                 block.content.imageUrl = place.photos[0].getUrl({ 'maxWidth': 1600 }); 
@@ -1390,8 +1365,7 @@
                 if (blockIndex === -1) return; 
                 const content = pageBlocks[blockIndex].content; 
                 content.title = place.name || ''; 
-                if(!content.address) content.address = {};
-                content.address.text = place.formatted_address || ''; 
+                content.address = place.formatted_address || ''; 
                 content.mapLink = place.url || ''; 
                 if (place.photos && place.photos.length > 0) { 
                     content.imageUrl = place.photos[0].getUrl({ 'maxWidth': 1600 }); 
@@ -1418,9 +1392,7 @@
                 const subItemKey = input.dataset.itemKey; 
                 const listKey = pageBlocks[blockIndex].content.items ? 'items' : 'options'; 
                 const subItemIndex = pageBlocks[blockIndex].content[listKey].findIndex(i => i.id === subItemId); 
-                if (subItemIndex > -1) {
-                    pageBlocks[blockIndex].content[listKey][subItemIndex][subItemKey] = input.value; 
-                }
+                if (subItemIndex > -1) pageBlocks[blockIndex].content[listKey][subItemIndex][subItemKey] = input.value; 
             } else if (key) { 
                 let value = input.type === 'checkbox' ? input.checked : input.value; 
                 if (input.type === 'number') value = parseFloat(value) || 0; 
@@ -1429,12 +1401,7 @@
                 const keys = key.split('.'); 
                 let current = pageBlocks[blockIndex].content; 
                 for (let i = 0; i < keys.length - 1; i++) { 
-                    const currentKey = keys[i];
-                    if (Array.isArray(current) && !isNaN(currentKey)) {
-                        current = current[parseInt(currentKey, 10)];
-                    } else {
-                        current = current[currentKey] = current[currentKey] || {}; 
-                    }
+                    current = current[keys[i]] = current[keys[i]] || {}; 
                 } 
                 current[keys[keys.length - 1]] = value; 
                 
