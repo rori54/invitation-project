@@ -528,12 +528,13 @@
                 id: `block-${Date.now()}-5`, 
                 content: { 
                     title: 'Venue', 
-                    address: 'The Grand Hall, 123 Celebration Ave, New York', 
+                    address: { text: 'The Grand Hall, 123 Celebration Ave, New York', style: { fontFamily: 'Montserrat', fontSize: '1rem', color: '#666666', fontWeight: '400', textAlign: 'center' } },
                     imageUrl: 'https://images.unsplash.com/photo-1511795408833-2a1e94992e7a?q=80&w=2070&auto=format&fit=crop', 
                     opacity: 1, 
                     mapLink: 'https://maps.google.com', 
                     titleStyle: { ...defaultTitleStyle }, 
                     stickers: [],
+                    innerBlocks: [], // ДОБАВЛЕНО
                     backgroundColor: '',
                     backgroundImage: '',
                     backgroundOpacity: 1,
@@ -541,7 +542,7 @@
                     mirrorHorizontal: false,
                     mirrorVertical: false
                 }
-            }, 
+            },   
             { 
                 type: 'rsvp', 
                 id: `block-${Date.now()}-6`, 
@@ -926,10 +927,27 @@
     
     function createInnerBlocksEditor(block) { 
         let innerBlocksHTML = (block.content.innerBlocks || []).map((innerBlock, index) => { 
-            const textContentField = innerBlock.type === 'heading' ? `<input type="text" data-key="innerBlocks.${index}.text" value="${innerBlock.text || ''}">` : `<textarea data-key="innerBlocks.${index}.text">${innerBlock.text || ''}</textarea>`; 
-            return `<div class="inner-block-editor" data-index="${index}"> <button class="delete-inner-block-btn" title="Delete this element">×</button> <label style="text-transform: capitalize;">${innerBlock.type} Text</label> ${textContentField} ${createStyleControlsHTML(`innerBlocks.${index}.style`, innerBlock.style, { textAlign: true, color: true, size: true, weight: true, family: true })} </div>`; 
+            return `<div class="inner-block-editor" data-index="${index}">
+                <button class="delete-inner-block-btn" title="Delete this element">×</button>
+                <label>Floating Text</label>
+                <textarea data-key="innerBlocks.${index}.text">${innerBlock.text || ''}</textarea>
+                <div class="style-controls-grid">
+                    <div class="control-group"><label>X</label><input type="number" data-key="innerBlocks.${index}.x" value="${Math.round(innerBlock.x || 0)}"></div>
+                    <div class="control-group"><label>Y</label><input type="number" data-key="innerBlocks.${index}.y" value="${Math.round(innerBlock.y || 0)}"></div>
+                </div>
+                 <div class="control-group" style="margin-top:10px;"><label>Width</label><input type="number" data-key="innerBlocks.${index}.width" value="${Math.round(innerBlock.width || 200)}"></div>
+                ${createStyleControlsHTML(`innerBlocks.${index}.style`, innerBlock.style, { textAlign: true, color: true, size: true, weight: true, family: true })}
+            </div>`; 
         }).join(''); 
-        return `<div class="inner-blocks-container"> <label style="font-weight: bold; color: #333;">Additional Elements</label> <div class="inner-blocks-list">${innerBlocksHTML}</div> <div class="add-inner-block-controls"> <button class="add-inner-block-btn" data-inner-type="heading">+ Add Heading</button> <button class="add-inner-block-btn" data-inner-type="paragraph">+ Add Paragraph</button> </div> </div>`; 
+
+        return `<hr class="style-separator">
+                <div class="inner-blocks-container">
+                    <label style="font-weight: bold; color: #333;">Floating Text Elements</label>
+                    <div class="inner-blocks-list">${innerBlocksHTML}</div>
+                    <div class="add-inner-block-controls" style="margin-top:10px;">
+                        <button class="add-inner-block-btn" data-inner-type="text" style="width: 100%; background-color: #007bff; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">+ Add Floating Text</button>
+                    </div>
+                </div>`; 
     }
 
     function createScheduleItemsEditor(block) {
@@ -967,10 +985,21 @@
     }
     
     function getNewBlockData(type) { 
-        const newBlock = { type: type, id: `block-${Date.now()}`, content: {} }; 
+        const newBlock = { type: type, id: `block-${Date.now()}`, content: { innerBlocks: [], stickers: [] } }; 
+        const defaultContent = {
+            backgroundColor: '',
+            backgroundImage: '',
+            backgroundOpacity: 1,
+            backgroundSize: 'cover',
+            mirrorHorizontal: false,
+            mirrorVertical: false
+        };
+        Object.assign(newBlock.content, defaultContent);
+
         switch(type) { 
             case 'hero': 
                 newBlock.content = { 
+                    ...newBlock.content,
                     subtitle: { text: 'WE ARE GETTING MARRIED', enabled: true, style: { ...defaultTextStyle, color: '#FFFFFF' } }, 
                     names: { text: 'John & Jane', enabled: true, style: { ...defaultTitleStyle, fontFamily: 'Great Vibes', fontSize: '4rem', color: '#FFFFFF'} }, 
                     date: { text: 'September 15, 2025', enabled: true, style: { ...defaultTextStyle, color: '#FFFFFF' } }, 
@@ -978,50 +1007,31 @@
                     backgroundPosition: 'center center', 
                     aspectRatio: '16/9', 
                     opacity: 1,
-                    innerBlocks: [], 
-                    stickers: [],
-                    fullWidth: true,
-                    backgroundColor: '',
-                    backgroundImage: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover',
-                    mirrorHorizontal: false,
-                    mirrorVertical: false
+                    fullWidth: true
                 }; 
                 break; 
             case 'text-block': 
                 newBlock.content = { 
+                    ...newBlock.content,
                     title: 'New Title', 
                     text: 'New paragraph text.', 
                     titleStyle: { ...defaultTitleStyle }, 
-                    textStyle: { ...defaultTextStyle }, 
-                    stickers: [],
-                    backgroundColor: '',
-                    backgroundImage: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover',
-                    mirrorHorizontal: false,
-                    mirrorVertical: false
+                    textStyle: { ...defaultTextStyle, textAlign: 'center' }
                 }; 
                 break; 
             case 'countdown': 
                 newBlock.content = { 
+                    ...newBlock.content,
                     title: 'New Countdown', 
                     targetDate: '', 
                     titleStyle: { ...defaultTitleStyle }, 
-                    numberStyle: { ...defaultTitleStyle, fontSize: '2.5rem' }, // Стиль для цифр (ДОБАВЛЕНО)
-                    labelStyle: { ...defaultTextStyle, fontSize: '1rem' }, // Стиль для подписей (ДОБАВЛЕНО)
-                    stickers: [],
-                    backgroundColor: '',
-                    backgroundImage: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover',
-                    mirrorHorizontal: false,
-                    mirrorVertical: false
+                    numberStyle: { ...defaultTitleStyle, fontSize: '2.5rem' },
+                    labelStyle: { ...defaultTextStyle, fontSize: '1rem' }
                 }; 
                 break;  
             case 'schedule': 
                 newBlock.content = { 
+                    ...newBlock.content,
                     title: 'New Schedule', 
                     items: [{ 
                         id: `item-${Date.now()}`, 
@@ -1032,127 +1042,81 @@
                         titleStyle: { fontFamily: 'Playfair Display', fontSize: '1.4rem', color: '#333333', fontWeight: '700' }, 
                         descStyle: { fontFamily: 'Montserrat', fontSize: '1rem', color: '#666666', fontWeight: '400' } 
                     }], 
-                    titleStyle: { ...defaultTitleStyle }, 
-                    stickers: [],
-                    backgroundColor: '',
-                    backgroundImage: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover',
-                    mirrorHorizontal: false,
-                    mirrorVertical: false
+                    titleStyle: { ...defaultTitleStyle }
                 }; 
                 break; 
             case 'location': 
                 newBlock.content = { 
+                    ...newBlock.content,
                     title: 'New Location', 
-                    address: '', 
+                    address: { text: '123 Main Street, Anytown, USA', style: { ...defaultTextStyle, textAlign: 'center' } },
                     imageUrl: '', 
                     opacity: 1, 
                     mapLink: '#', 
-                    titleStyle: { ...defaultTitleStyle }, 
-                    stickers: [],
-                    backgroundColor: '',
-                    backgroundImage: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover',
-                    mirrorHorizontal: false,
-                    mirrorVertical: false
+                    titleStyle: { ...defaultTitleStyle }
                 }; 
                 break; 
             case 'rsvp': 
                 newBlock.content = { 
+                    ...newBlock.content,
                     title: 'New RSVP Block', 
                     subtitle: 'New subtitle text', 
                     titleStyle: { ...defaultTitleStyle }, 
-                    subtitleStyle: { ...defaultTextStyle }, // Стиль для подзаголовка
-                    buttonStyle: { fontFamily: 'Montserrat', fontSize: '1.1rem', color: '#FFFFFF', fontWeight: '700', backgroundColor: '#c5a98b' }, 
-                    stickers: [],
-                    backgroundColor: '',
-                    backgroundImage: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover',
-                    mirrorHorizontal: false,
-                    mirrorVertical: false
+                    subtitleStyle: { ...defaultTextStyle },
+                    buttonStyle: { fontFamily: 'Montserrat', fontSize: '1.1rem', color: '#FFFFFF', fontWeight: '700', backgroundColor: '#c5a98b' }
                 }; 
                 break; 
             case 'image': 
                 newBlock.content = { 
+                    ...newBlock.content,
                     imageUrl: 'https://via.placeholder.com/800x400', 
                     opacity: 1, 
                     caption: '', 
                     title: '', 
                     description: '', 
                     titleStyle: { ...defaultTitleStyle }, 
-                    descriptionStyle: { ...defaultTextStyle }, 
-                    stickers: [],
-                    backgroundColor: '',
-                    backgroundImage: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover',
-                    mirrorHorizontal: false,
-                    mirrorVertical: false
+                    descriptionStyle: { ...defaultTextStyle }
                 }; 
                 break; 
             case 'form-header': 
                 newBlock.content = { 
+                    ...newBlock.content,
                     title: 'RSVP', 
                     subtitle: 'Please fill out the form below', 
                     imageUrl: '', 
                     opacity: 1, 
-                    aspectRatio: '16/9', 
-                    stickers: [],
-                    backgroundColor: '',
-                    backgroundImage: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover',
-                    mirrorHorizontal: false,
-                    mirrorVertical: false
+                    aspectRatio: '16/9'
                 }; 
                 break; 
             case 'input-question': 
                 newBlock.content = { 
+                    ...newBlock.content,
                     id: `input-${Date.now()}`, 
                     title: 'Your Name', 
-                    required: true,
-                    backgroundColor: '',
-                    backgroundImage: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover'
+                    required: true
                 }; 
                 break; 
             case 'textarea-question': 
                 newBlock.content = { 
+                    ...newBlock.content,
                     id: `textarea-${Date.now()}`, 
                     title: 'Any comments?', 
-                    required: false,
-                    backgroundColor: '',
-                    backgroundImage: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover'
+                    required: false
                 }; 
                 break; 
             case 'radio-question': 
                 newBlock.content = { 
+                    ...newBlock.content,
                     id: `radio-${Date.now()}`, 
                     title: 'Will you attend?', 
                     required: true, 
-                    options: [{ id: `opt-${Date.now()}`, text: 'New Option' }],
-                    backgroundColor: '',
-                    backgroundImage: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover'
+                    options: [{ id: `opt-${Date.now()}`, text: 'New Option' }]
                 }; 
                 break; 
             case 'form-footer': 
                 newBlock.content = { 
-                    text: 'Thanks for your response!',
-                    stickers: [],
-                    backgroundColor: '',
-                    backgroundImage: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover',
-                    mirrorHorizontal: false,
-                    mirrorVertical: false
+                    ...newBlock.content,
+                    text: 'Thanks for your response!'
                 }; 
                 break; 
         } 
@@ -1221,13 +1185,94 @@
         const c = block.content; 
         const bgPosField = `<div class="control-group"><label>Background Focus Point</label><input type="text" data-key="backgroundPosition" value="${c.backgroundPosition || 'center center'}" placeholder="e.g., center 30%"></div>`; 
         const aspectRatioField = `<div class="control-group"><label>Block Shape (Height)</label><select data-key="aspectRatio"> <option value="21/9" ${c.aspectRatio === '21/9' ? 'selected' : ''}>Cinematic</option> <option value="16/9" ${c.aspectRatio === '16/9' ? 'selected' : ''}>Widescreen</option> <option value="8/5" ${c.aspectRatio === '8/5' ? 'selected' : ''}>Landscape (Wide)</option> <option value="3/2"  ${c.aspectRatio === '3/2' ? 'selected' : ''}>Landscape (Classic)</option> <option value="4/3"  ${c.aspectRatio === '4/3' ? 'selected' : ''}>Standard (4:3)</option> <option value="1/1"  ${c.aspectRatio === '1/1' ? 'selected' : ''}>Square</option> <option value="9/12" ${c.aspectRatio === '9/12' ? 'selected' : ''}>Portrait (Standard)</option> <option value="9/16" ${c.aspectRatio === '9/16' ? 'selected' : ''}>Portrait (Tall)</option> </select></div>`; 
-        const titleStyleField = (styleObj) => `<label>Title Style</label>${createStyleControlsHTML('titleStyle', styleObj, { textAlign: true, color: true, size: true, weight: true, family: true })}`; 
-        const sectionTitleField = (title) => `<div class="control-group"><label>Section Title</label><input type="text" data-key="title" value="${title}"></div>`; 
+        const titleStyleField = (styleObj, key = 'titleStyle') => `<label>Title Style</label>${createStyleControlsHTML(key, styleObj, { textAlign: true, color: true, size: true, weight: true, family: true })}`; 
+        const sectionTitleField = (title, key = 'title') => `<div class="control-group"><label>Section Title</label><input type="text" data-key="${key}" value="${title}"></div>`; 
         const createOptionalElementEditor = (key, label) => { 
             const element = c[key]; 
             if (!element) return ''; 
             return `<div class="control-group"> <div class="optional-element-header"> <label>${label}</label> <label><input type="checkbox" data-key="${key}.enabled" ${element.enabled ? 'checked' : ''}> Show</label> </div> <input type="text" data-key="${key}.text" value="${element.text}"> ${createStyleControlsHTML(`${key}.style`, element.style)} </div>`; 
         };
+        
+        switch(block.type) { 
+            case 'hero': 
+                fieldsHTML = `${createImageInputHTML('imageUrl', c.imageUrl, 'Background Image URL')}
+                    ${createOpacityControl('opacity', c.opacity, 'Background Opacity')}
+                    <div class="control-group">
+                        <label>Block Width</label>
+                        <select data-key="fullWidth">
+                            <option value="true" ${c.fullWidth ? 'selected' : ''}>Full Width</option>
+                            <option value="false" ${!c.fullWidth ? 'selected' : ''}>Limited (use global width)</option>
+                        </select>
+                    </div>
+                    ${createOptionalElementEditor('names', 'Names')} 
+                    <hr class="style-separator"> 
+                    ${createOptionalElementEditor('subtitle', 'Subtitle')} 
+                    <hr class="style-separator"> 
+                    ${createOptionalElementEditor('date', 'Date')} 
+                    <hr class="style-separator"> 
+                    ${aspectRatioField}${bgPosField} 
+                    ${createStickerEditor(block)}
+                    ${createInnerBlocksEditor(block)} 
+                    ${createBackgroundControlsHTML(block)}
+                    ${createMirrorControlsHTML(block)}`; 
+                break; 
+            case 'text-block': 
+                fieldsHTML = `<div class="control-group"><label>Title (optional)</label><input type="text" data-key="title" value="${c.title || ''}"></div>${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Paragraph Text</label><textarea data-key="text">${c.text}</textarea></div>${createStyleControlsHTML('textStyle', c.textStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}${createStickerEditor(block)}${createInnerBlocksEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`; 
+                break; 
+            case 'rsvp': 
+                fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${c.subtitle}</textarea>${createStyleControlsHTML('subtitleStyle', c.subtitleStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}</div><hr class="style-separator"><label>Button Style</label><div class="style-controls"><div class="style-controls-grid"><div class="control-group"><label>Background Color</label><input type="color" data-key="buttonStyle.backgroundColor" value="${c.buttonStyle.backgroundColor || '#c5a98b'}"></div><div class="control-group"><label>Text Color</label><input type="color" data-key="buttonStyle.color" value="${c.buttonStyle.color || '#FFFFFF'}"></div></div><div style="margin-top: 10px;">${createStyleControlsHTML('buttonStyle', c.buttonStyle, {color: false, size: true, weight: true, family: true})}</div></div>${createStickerEditor(block)}${createInnerBlocksEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
+                break; 
+            case 'countdown': 
+                fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Target Date & Time</label><input type="datetime-local" data-key="targetDate" value="${c.targetDate}"></div>
+                    <hr class="style-separator">
+                    <label>Numbers Style (e.g., 40)</label>
+                    ${createStyleControlsHTML('numberStyle', c.numberStyle, { color: true, size: true, weight: true, family: true })}
+                    <hr class="style-separator">
+                    <label>Labels Style (e.g., Days)</label>
+                    ${createStyleControlsHTML('labelStyle', c.labelStyle, { color: true, size: true, weight: true, family: true })}
+                    ${createStickerEditor(block)}${createInnerBlocksEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
+                break;  
+            case 'location': 
+                 fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}
+                    <hr class="style-separator">
+                    <div class="control-group">
+                        <label>Smart Location Search</label>
+                        <input type="text" class="smart-location-search" placeholder="e.g., Per Se, New York">
+                    </div>
+                    <div class="control-group">
+                        <label>Address</label>
+                        <textarea data-key="address.text">${c.address.text || ''}</textarea>
+                        ${createStyleControlsHTML('address.style', c.address.style, { textAlign: true, color: true, size: true, weight: true, family: true })}
+                    </div>
+                    ${createImageInputHTML('imageUrl', c.imageUrl, 'Photo URL')}
+                    ${createOpacityControl('opacity', c.opacity, 'Photo Opacity')}
+                    <div class="control-group">
+                        <label>Google Maps Link</label>
+                        <input type="url" data-key="mapLink" value="${c.mapLink || ''}">
+                    </div>
+                    ${createStickerEditor(block)}${createInnerBlocksEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`; 
+                break;  
+            case 'schedule':
+                fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator">${createScheduleItemsEditor(block)}${createStickerEditor(block)}${createInnerBlocksEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
+                break;
+            case 'image':
+                fieldsHTML = `${createImageInputHTML('imageUrl', c.imageUrl, 'Image URL')}
+                    ${createOpacityControl('opacity', c.opacity, 'Image Opacity')}
+                    <div class="control-group"><label>Title (optional)</label><input type="text" data-key="title" value="${c.title || ''}"></div>
+                    ${createStyleControlsHTML('titleStyle', c.titleStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}
+                    <hr class="style-separator">
+                    <div class="control-group"><label>Description (optional)</label><textarea data-key="description">${c.description || ''}</textarea></div>
+                    ${createStyleControlsHTML('descriptionStyle', c.descriptionStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}
+                    <hr class="style-separator">
+                    <div class="control-group"><label>Caption (optional)</label><input type="text" data-key="caption" value="${c.caption || ''}"></div>
+                    ${createStickerEditor(block)}${createInnerBlocksEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
+                break;
+            // ... (остальные form-блоки без изменений)
+            default: 
+                fieldsHTML = 'No editor available for this block type.'; 
+        } 
+        return fieldsHTML; 
+    }
         
         switch(block.type) { 
             case 'hero': 
@@ -1459,7 +1504,7 @@
             } 
         }, true);
         
-        editorContent.addEventListener('click', (e) => { 
+    editorContent.addEventListener('click', (e) => { 
             const target = e.target; 
             const blockDiv = target.closest('.editor-block'); 
             if (!blockDiv) return; 
@@ -1540,7 +1585,7 @@
                 } 
             } 
         }); 
-    }
+    
     
     const addBlockModal = document.getElementById('add-block-modal'); 
     document.getElementById('add-block-btn').addEventListener('click', () => addBlockModal.classList.add('is-visible')); 
@@ -1844,19 +1889,24 @@
         }
 
         // Set up iframe communication for text editing toolbar
-        window.addEventListener('message', (event) => {
+    window.addEventListener('message', (event) => {
             if (event.source !== iframe.contentWindow) return;
             const { type, payload } = event.data;
             
-            if (type === 'UPDATE_STICKER') {
-                const { blockId, stickerId, newProps } = payload;
+            if (type === 'UPDATE_STICKER' || type === 'UPDATE_INNER_BLOCK') {
+                const { blockId, elementId, newProps } = payload;
                 const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
                 if (blockIndex === -1) return;
-                const stickerIndex = pageBlocks[blockIndex].content.stickers.findIndex(s => s.id === stickerId);
-                if (stickerIndex === -1) return;
+
+                const listKey = type === 'UPDATE_STICKER' ? 'stickers' : 'innerBlocks';
+                if (!pageBlocks[blockIndex].content[listKey]) return;
+
+                const elementIndex = pageBlocks[blockIndex].content[listKey].findIndex(s => s.id === elementId);
+                if (elementIndex === -1) return;
                 
-                Object.assign(pageBlocks[blockIndex].content.stickers[stickerIndex], newProps);
-                renderEditor();
+                Object.assign(pageBlocks[blockIndex].content[listKey][elementIndex], newProps);
+                renderEditor(); // Re-render editor to show updated values (e.g., X/Y)
+                // No need to renderPreview() here as the preview is already visually updated
             } else if (type === 'TEXT_ELEMENT_CLICKED') {
                 showTextEditingToolbar(payload.blockId, payload.elementKey, payload.currentStyle);
             } else if (type === 'HIDE_TEXT_TOOLBAR') {
