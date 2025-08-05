@@ -31,10 +31,34 @@
         .hero-block::before{ content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); z-index: 1; pointer-events: none;}
         .hero-content{ position:relative; z-index: 2; width: 90%; max-width: 1000px; padding: 40px 0; pointer-events: none;}
         
-        #countdown { display: flex; justify-content: center; gap: 2vw; text-align: center; margin-top: 20px; flex-wrap: wrap; }
-        .time-block { background: #f4f4f4; padding: 2.5vw; border-radius: 5px; min-width: 0; flex: 1; max-width: 120px; }
-        .time-block .number { font-size: clamp(1.5rem, 6vw, 2.5rem); line-height: 1; }
-        .time-block div:last-child { font-size: clamp(0.7rem, 2.5vw, 1rem); margin-top: 5px; }
+        /* --- АДАПТИВНЫЙ И СТИЛИЗУЕМЫЙ ТАЙМЕР --- */
+        #countdown {
+            display: flex;
+            justify-content: center;
+            gap: 2vw; 
+            text-align: center;
+            margin-top: 20px;
+            flex-wrap: wrap; 
+        }
+
+        .time-block {
+            background: #f4f4f4;
+            padding: 2.5vw; 
+            border-radius: 5px;
+            min-width: 0; 
+            flex: 1; 
+            max-width: 120px; 
+        }
+
+        .time-block .number {
+            font-size: clamp(1.5rem, 6vw, 2.5rem); 
+            line-height: 1;
+        }
+
+        .time-block div:last-child {
+            font-size: clamp(0.7rem, 2.5vw, 1rem); 
+            margin-top: 5px;
+        }
         
         .rsvp-button{display:inline-block; padding:15px 30px; text-decoration:none; border-radius:50px; transition:transform .2s ease; margin: 10px; background-color: var(--accent-color); color: #fff;}
         .rsvp-button:hover{transform:scale(1.05)}
@@ -49,128 +73,31 @@
         .sticker-wrapper.selected .rotate-handle { display: block; }
         .sticker-wrapper .rotate-handle::before { content: ''; position: absolute; top: -15px; left: 50%; width: 1px; height: 15px; background: #007bff; transform: translateX(-50%); }
 
-        /* Ribbon mode styles */
-        .style-ribbon .content-section,
-        .style-ribbon .hero-block.limited-width {
-            background: none !important;
-            box-shadow: none !important;
-            border-radius: 0 !important;
-            margin: 0 !important;
-            padding: 20px !important;
-        }
+        .block-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; border-radius: inherit; }
+        .editable-text { cursor: text; position: relative; display: inline-block; }
+        .editable-text:hover { outline: 1px dashed rgba(0, 123, 255, 0.5); }
+        .mirror-horizontal { transform: scaleX(-1); }
+        .mirror-vertical { transform: scaleY(-1); }
+        .mirror-both { transform: scale(-1, -1); }
         
-        .style-ribbon .hero-block {
-            border-radius: 0 !important;
-            box-shadow: none !important;
-        }
-        
-        /* Block background styles */
-        .block-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            border-radius: inherit;
-        }
-
-        /* Text elements for editing */
-        .editable-text {
-            cursor: text;
-            position: relative;
-            display: inline-block;
-        }
-
-        .editable-text:hover {
-            outline: 1px dashed rgba(0, 123, 255, 0.5);
-        }
-
-        /* Mirror transforms */
-        .mirror-horizontal {
-            transform: scaleX(-1);
-        }
-
-        .mirror-vertical {
-            transform: scaleY(-1);
-        }
-
-        .mirror-both {
-            transform: scale(-1, -1);
-        }
-
-        /* Mobile responsiveness */
         @media (max-width: 768px) {
-            .content-section {
-                margin: 15px;
-                padding: 30px 15px;
-            }
-            
-            .hero-content {
-                padding: 20px 0;
-            }
-            
-            /* Стили для #countdown, .time-block и .time-block .number были удалены, 
-               так как новый адаптивный таймер в них не нуждается */
-            
-            .sticker-wrapper {
-                max-width: 80px !important;
-            }
+            .content-section { margin: 15px; padding: 30px 15px; }
+            .hero-content { padding: 20px 0; }
+            .sticker-wrapper { max-width: 80px !important; }
         }
 
         @media (max-width: 480px) {
-            .content-section {
-                margin: 10px;
-                padding: 20px 10px;
-            }
-            
-            .hero-content {
-                width: 95%;
-                padding: 15px 0;
-            }
-            
-            .time-block .number {
-                font-size: 1.5rem;
-            }
-            
-            .rsvp-button {
-                padding: 12px 24px;
-                font-size: 14px;
-            }
+            .content-section { margin: 10px; padding: 20px 10px; }
+            .hero-content { width: 95%; padding: 15px 0; }
+            .time-block .number { font-size: 1.5rem; }
+            .rsvp-button { padding: 12px 24px; font-size: 14px; }
         }
+        
         /* --- RIBBON MODE FIX --- */
-
-        /* 1. Создаем саму "ленту" */
-        body.style-ribbon #page-content {
-            background-color: #ffffff; /* Белый фон для всей ленты */
-            max-width: 800px; /* Ограничиваем ширину ленты */
-            margin: 0 auto;   /* Центрируем ленту */
-            padding: 20px 0;    /* Небольшой отступ сверху и снизу самой ленты */
-            box-shadow: 0 6px 25px rgba(0,0,0,0.08); /* Опционально: можно добавить тень для ленты */
-        }
-
-        /* 2. Делаем все блоки внутри ленты прозрачными */
-        body.style-ribbon .content-section,
-        body.style-ribbon .hero-block,
-        body.style-ribbon .form-block,
-        body.style-ribbon .form-header-block,
-        body.style-ribbon .form-footer-block {
-            background: none !important;
-            box-shadow: none !important;
-            border: none !important;
-            margin: 0 !important;
-        }
-
-        /* 3. Добавляем внутренние отступы к каждому блоку для "воздуха" */
-        body.style-ribbon .block-wrapper {
-            padding: 25px 40px; /* 25px сверху/снизу, 40px по бокам */
-        }
-
-        /* 4. Особое правило для Hero-блока в ленте */
-        body.style-ribbon .hero-block {
-            width: 100%; /* Заставляем его растягиваться на всю ширину ленты */
-            max-width: none;
-        }
+        body.style-ribbon #page-content { background-color: #ffffff; max-width: 800px; margin: 0 auto; padding: 20px 0; box-shadow: 0 6px 25px rgba(0,0,0,0.08); }
+        body.style-ribbon .content-section, body.style-ribbon .hero-block, body.style-ribbon .form-block, body.style-ribbon .form-header-block, body.style-ribbon .form-footer-block { background: none !important; box-shadow: none !important; border: none !important; margin: 0 !important; }
+        body.style-ribbon .block-wrapper { padding: 25px 40px; }
+        body.style-ribbon .hero-block { width: 100%; max-width: none; }
             
     </style>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
@@ -251,9 +178,9 @@
                 ${backgroundDiv}
                 ${c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'}; opacity: ${c.opacity};" alt="">` : ''} 
                 <div class="hero-content">
-                    ${(c.subtitle && c.subtitle.enabled) ? `<p>${makeTextEditable(c.subtitle.text, block.id, 'subtitle.text', c.subtitle.style)}</p>` : ''}
-                    ${(c.names && c.names.enabled) ? `<h1>${makeTextEditable(c.names.text, block.id, 'names.text', c.names.style)}</h1>` : ''}
-                    ${(c.date && c.date.enabled) ? `<p>${makeTextEditable(c.date.text, block.id, 'date.text', c.date.style)}</p>` : ''}
+                    ${(c.subtitle && c.subtitle.enabled) ? `<p>${makeTextEditable(c.subtitle.text, block.id, 'subtitle.style', c.subtitle.style)}</p>` : ''}
+                    ${(c.names && c.names.enabled) ? `<h1>${makeTextEditable(c.names.text, block.id, 'names.style', c.names.style)}</h1>` : ''}
+                    ${(c.date && c.date.enabled) ? `<p>${makeTextEditable(c.date.text, block.id, 'date.style', c.date.style)}</p>` : ''}
                 </div> 
                 ${renderStickers(c.stickers)} 
             </header>
@@ -265,9 +192,9 @@
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? 
             `<div class="block-background" style="${getBlockBackgroundStyle(c)}"></div>` : '';
         const titleHTML = c.title ? 
-            `<h2>${makeTextEditable(c.title, block.id, 'title', c.titleStyle)}</h2>` : ''; 
+            `<h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>` : ''; 
         const textHTML = c.text ? 
-            `<p>${makeTextEditable(processText(c.text), block.id, 'text', c.textStyle)}</p>` : ''; 
+            `<p>${makeTextEditable(processText(c.text), block.id, 'textStyle', c.textStyle)}</p>` : ''; 
         const mirrorClass = getMirrorClass(c);
         
         return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
@@ -283,9 +210,9 @@
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? 
             `<div class="block-background" style="${getBlockBackgroundStyle(c)}"></div>` : '';
         const titleHTML = c.title ? 
-            `<h2>${makeTextEditable(c.title, block.id, 'title', c.titleStyle)}</h2>` : ''; 
+            `<h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>` : ''; 
         const descriptionHTML = c.description ? 
-            `<div>${makeTextEditable(processText(c.description), block.id, 'description', c.descriptionStyle)}</div>` : ''; 
+            `<div>${makeTextEditable(processText(c.description), block.id, 'descriptionStyle', c.descriptionStyle)}</div>` : ''; 
         const mirrorClass = getMirrorClass(c);
         
         return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
@@ -310,7 +237,7 @@
         return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
             <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
                 ${backgroundDiv}
-                <h2>${makeTextEditable(c.title, block.id, 'title', c.titleStyle)}</h2>
+                <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <ul style="list-style:none;padding:0;">
                     ${(c.items || []).map(i => `
                         <li style="display:flex;gap:20px;padding:15px 0;border-bottom:1px solid #eee;">
@@ -345,12 +272,13 @@
         return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
             <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
                 ${backgroundDiv}
-                <h2>${makeTextEditable(c.title, block.id, 'title', c.titleStyle)}</h2>
+                <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 ${inner}
                 ${renderStickers(c.stickers)}
             </section>
         </div>`; 
     };
+
     const createRsvpHTML = (block, s, rsvpLink) => { 
         const c = block.content; 
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? 
@@ -360,7 +288,7 @@
         return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
             <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
                 ${backgroundDiv}
-                <h2>${makeTextEditable(c.title, block.id, 'title', c.titleStyle)}</h2>
+                <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <p>${processText(c.subtitle)}</p>
                 <div>
                     <a href="${rsvpLink}" class="rsvp-button" style="${getStyleString(c.buttonStyle)}">I'll Be There!</a>
@@ -369,8 +297,6 @@
             </section>
         </div>`; 
     };
-    
-        const createCountdownHTML = (block, s) => { 
 
     function startCountdown(targetDate) { 
         if (!targetDate) return; 
@@ -406,7 +332,7 @@
                 
                 const blockId = editableElement.dataset.blockId;
                 const elementKey = editableElement.dataset.elementKey;
-                const computedStyle = window.getComputedStyle(editableElement);
+                const computedStyle = window.getComputedStyle(editableElement.parentElement); // Get parent style for alignment
                 
                 const currentStyle = {
                     fontFamily: computedStyle.fontFamily.replace(/["']/g, '').split(',')[0],
@@ -427,10 +353,10 @@
     }
 
     function rgbToHex(rgb) {
-        if (rgb.startsWith('#')) return rgb;
+        if (!rgb || rgb.startsWith('#')) return rgb;
         const match = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
         if (!match) return '#000000';
-        return "#" + ((1 << 24) + (parseInt(match[1]) << 16) + (parseInt(match[2]) << 8) + parseInt(match[3])).toString(16).slice(1);
+        return "#" + ((1 << 24) + (parseInt(match[1]) << 16) + (parseInt(match[2]) << 8) + parseInt(match[3])).toString(16).slice(1).toUpperCase();
     }
 
     function renderPage(blocks, settings, rsvpLink = '#') {
@@ -439,7 +365,6 @@
         if (settings.style) document.body.classList.add(`style-${settings.style}`);
         if (settings.displayMode) document.body.classList.add(`style-${settings.displayMode}`);
         
-        // Set page background
         document.body.style.backgroundColor = settings.backgroundColor || '#f8f7f5';
         document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? 
             `url('${settings.backgroundImage}')` : 'none';
