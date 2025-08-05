@@ -1296,101 +1296,101 @@
         case 'form-footer':
                 fieldsHTML = `<div class="control-group"><label>Footer Text</label><input type="text" data-key="text" value="${c.text}"></div>${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
                 break;
-            default: 
-                fieldsHTML = 'No editor available for this block type.'; 
+    default: 
+                    fieldsHTML = 'No editor available for this block type.'; 
             }
-        return fieldsHTML; 
-    }
-    
-    function renderEditor() {  
-        const container = document.getElementById('editor-content'); 
-        const currentlyOpen = [...container.querySelectorAll('.editor-block-content.is-open')].map(el => el.closest('.editor-block').dataset.id); 
-        container.innerHTML = ''; 
-        pageBlocks.forEach(block => { 
-            const tpl = document.getElementById('editor-block-template').content.cloneNode(true); 
-            const editorBlock = tpl.querySelector('.editor-block'); 
-            editorBlock.dataset.id = block.id; 
-            const title = block.type.charAt(0).toUpperCase() + block.type.slice(1).replace(/-/g, ' '); 
-            editorBlock.querySelector('.editor-block-title').textContent = title; 
-            const contentDiv = editorBlock.querySelector('.editor-block-content'); 
-            contentDiv.innerHTML = createEditorFieldsForBlock(block); 
-            if (currentlyOpen.includes(block.id)) { 
-                contentDiv.classList.add('is-open'); 
-                editorBlock.querySelector('.toggle-btn').textContent = '▲'; 
-            } 
-            container.appendChild(tpl); 
-        }); 
-        initializeMapsForEditor(); 
-    }
-    
-    async function handleMapLinkBlur(url, blockIndex) { 
-        const trimmedUrl = url.trim(); 
-        if (!trimmedUrl.startsWith('http') || !trimmedUrl.includes('goo.gl')) return; 
-        const statusText = document.getElementById('status-text'); 
-        try { 
-            statusText.innerText = 'Analyzing shortened link...'; 
-            const response = await fetch(`/.netlify/functions/unshorten-url?url=${encodeURIComponent(trimmedUrl)}`); 
-            const data = await response.json(); 
-            if (!response.ok || data.error) throw new Error(data.error || 'Could not get data from link.'); 
-            statusText.innerText = 'Searching for place details...'; 
-            const service = new google.maps.places.PlacesService(document.createElement('div')); 
-            const place = await new Promise((resolve, reject) => { 
-                service.textSearch({ query: data.placeName, fields: ['name', 'formatted_address', 'photos', 'url'] }, (results, status) => { 
-                    if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) { 
-                        resolve(results[0]); 
-                    } else { 
-                        reject(new Error('Place details not found.')); 
-                    } 
-                }); 
-            }); 
-            const block = pageBlocks[blockIndex]; 
-            block.content.title = place.name || ''; 
-            block.content.address = place.formatted_address || ''; 
-            block.content.mapLink = place.url || trimmedUrl; 
-            if (place.photos && place.photos.length > 0) { 
-                block.content.imageUrl = place.photos[0].getUrl({ 'maxWidth': 1600 }); 
-            } 
-            statusText.innerText = 'Location data updated!'; 
-            renderEditor(); 
-            renderPreview(); 
-        } catch (error) { 
-            console.error('Error fetching place data from URL:', error); 
-            statusText.innerText = `Error: ${error.message}`; 
-        } finally { 
-            setTimeout(() => { statusText.innerText = ''; }, 4000); 
-        } 
-    }
-    
-    function initializeMapsForEditor() { 
-        if (typeof google === 'undefined' || typeof google.maps === 'undefined' || typeof google.maps.places === 'undefined') { 
-            return; 
-        } 
-        document.querySelectorAll('.smart-location-search').forEach(input => { 
-            if (input.dataset.mapsInitialized) return; 
-            input.dataset.mapsInitialized = 'true'; 
-            const autocomplete = new google.maps.places.Autocomplete(input, { 
-                fields: ["name", "formatted_address", "photos", "url"], 
-                types: ["establishment"] 
-            }); 
-            autocomplete.addListener('place_changed', () => { 
-                const place = autocomplete.getPlace(); 
-                if (!place) return; 
-                const blockDiv = input.closest('.editor-block'); 
-                const blockId = blockDiv.dataset.id; 
-                const blockIndex = pageBlocks.findIndex(b => b.id === blockId); 
-                if (blockIndex === -1) return; 
-                const content = pageBlocks[blockIndex].content; 
-                content.title = place.name || ''; 
-                content.address = place.formatted_address || ''; 
-                content.mapLink = place.url || ''; 
-                if (place.photos && place.photos.length > 0) { 
-                    content.imageUrl = place.photos[0].getUrl({ 'maxWidth': 1600 }); 
+            return fieldsHTML; 
+        }
+        
+        function renderEditor() { 
+            const container = document.getElementById('editor-content'); 
+            const currentlyOpen = [...container.querySelectorAll('.editor-block-content.is-open')].map(el => el.closest('.editor-block').dataset.id); 
+            container.innerHTML = ''; 
+            pageBlocks.forEach(block => { 
+                const tpl = document.getElementById('editor-block-template').content.cloneNode(true); 
+                const editorBlock = tpl.querySelector('.editor-block'); 
+                editorBlock.dataset.id = block.id; 
+                const title = block.type.charAt(0).toUpperCase() + block.type.slice(1).replace(/-/g, ' '); 
+                editorBlock.querySelector('.editor-block-title').textContent = title; 
+                const contentDiv = editorBlock.querySelector('.editor-block-content'); 
+                contentDiv.innerHTML = createEditorFieldsForBlock(block); 
+                if (currentlyOpen.includes(block.id)) { 
+                    contentDiv.classList.add('is-open'); 
+                    editorBlock.querySelector('.toggle-btn').textContent = '▲'; 
                 } 
+                container.appendChild(tpl); 
+            }); 
+            initializeMapsForEditor(); 
+        }
+        
+        async function handleMapLinkBlur(url, blockIndex) { 
+            const trimmedUrl = url.trim(); 
+            if (!trimmedUrl.startsWith('http') || !trimmedUrl.includes('goo.gl')) return; 
+            const statusText = document.getElementById('status-text'); 
+            try { 
+                statusText.innerText = 'Analyzing shortened link...'; 
+                const response = await fetch(`/.netlify/functions/unshorten-url?url=${encodeURIComponent(trimmedUrl)}`); 
+                const data = await response.json(); 
+                if (!response.ok || data.error) throw new Error(data.error || 'Could not get data from link.'); 
+                statusText.innerText = 'Searching for place details...'; 
+                const service = new google.maps.places.PlacesService(document.createElement('div')); 
+                const place = await new Promise((resolve, reject) => { 
+                    service.textSearch({ query: data.placeName, fields: ['name', 'formatted_address', 'photos', 'url'] }, (results, status) => { 
+                        if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) { 
+                            resolve(results[0]); 
+                        } else { 
+                            reject(new Error('Place details not found.')); 
+                        } 
+                    }); 
+                }); 
+                const block = pageBlocks[blockIndex]; 
+                block.content.title = place.name || ''; 
+                block.content.address.text = place.formatted_address || ''; // <<< ИСПРАВЛЕНО
+                block.content.mapLink = place.url || trimmedUrl; 
+                if (place.photos && place.photos.length > 0) { 
+                    block.content.imageUrl = place.photos[0].getUrl({ 'maxWidth': 1600 }); 
+                } 
+                statusText.innerText = 'Location data updated!'; 
                 renderEditor(); 
                 renderPreview(); 
+            } catch (error) { 
+                console.error('Error fetching place data from URL:', error); 
+                statusText.innerText = `Error: ${error.message}`; 
+            } finally { 
+                setTimeout(() => { statusText.innerText = ''; }, 4000); 
+            } 
+        }
+        
+        function initializeMapsForEditor() { 
+            if (typeof google === 'undefined' || typeof google.maps === 'undefined' || typeof google.maps.places === 'undefined') { 
+                return; 
+            } 
+            document.querySelectorAll('.smart-location-search').forEach(input => { 
+                if (input.dataset.mapsInitialized) return; 
+                input.dataset.mapsInitialized = 'true'; 
+                const autocomplete = new google.maps.places.Autocomplete(input, { 
+                    fields: ["name", "formatted_address", "photos", "url"], 
+                    types: ["establishment"] 
+                }); 
+                autocomplete.addListener('place_changed', () => { 
+                    const place = autocomplete.getPlace(); 
+                    if (!place) return; 
+                    const blockDiv = input.closest('.editor-block'); 
+                    const blockId = blockDiv.dataset.id; 
+                    const blockIndex = pageBlocks.findIndex(b => b.id === blockId); 
+                    if (blockIndex === -1) return; 
+                    const content = pageBlocks[blockIndex].content; 
+                    content.title = place.name || ''; 
+                    content.address.text = place.formatted_address || ''; // <<< ИСПРАВЛЕНО
+                    content.mapLink = place.url || ''; 
+                    if (place.photos && place.photos.length > 0) { 
+                        content.imageUrl = place.photos[0].getUrl({ 'maxWidth': 1600 }); 
+                    } 
+                    renderEditor(); 
+                    renderPreview(); 
+                }); 
             }); 
-        }); 
-    }
+        }
     
     function setupEventListeners() { 
         const editorContent = document.getElementById('editor-content'); 
