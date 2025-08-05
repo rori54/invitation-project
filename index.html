@@ -1009,6 +1009,8 @@
                     title: 'New Countdown', 
                     targetDate: '', 
                     titleStyle: { ...defaultTitleStyle }, 
+                    numberStyle: { ...defaultTitleStyle, fontSize: '2.5rem' }, // Стиль для цифр (ДОБАВЛЕНО)
+                    labelStyle: { ...defaultTextStyle, fontSize: '1rem' }, // Стиль для подписей (ДОБАВЛЕНО)
                     stickers: [],
                     backgroundColor: '',
                     backgroundImage: '',
@@ -1017,7 +1019,7 @@
                     mirrorHorizontal: false,
                     mirrorVertical: false
                 }; 
-                break; 
+                break;  
             case 'schedule': 
                 newBlock.content = { 
                     title: 'New Schedule', 
@@ -1062,6 +1064,7 @@
                     title: 'New RSVP Block', 
                     subtitle: 'New subtitle text', 
                     titleStyle: { ...defaultTitleStyle }, 
+                    subtitleStyle: { ...defaultTextStyle }, // Стиль для подзаголовка
                     buttonStyle: { fontFamily: 'Montserrat', fontSize: '1.1rem', color: '#FFFFFF', fontWeight: '700', backgroundColor: '#c5a98b' }, 
                     stickers: [],
                     backgroundColor: '',
@@ -1253,17 +1256,28 @@
                 fieldsHTML = `<div class="control-group"><label>Title (optional)</label><input type="text" data-key="title" value="${c.title || ''}"></div>${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Paragraph Text</label><textarea data-key="text">${c.text}</textarea></div>${createStyleControlsHTML('textStyle', c.textStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`; 
                 break; 
             case 'rsvp': 
-                fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${c.subtitle}</textarea></div><hr class="style-separator"><label>Button Style</label><div class="style-controls"><div class="style-controls-grid"><div class="control-group"><label>Background Color</label><input type="color" data-key="buttonStyle.backgroundColor" value="${c.buttonStyle.backgroundColor || '#c5a98b'}"></div><div class="control-group"><label>Text Color</label><input type="color" data-key="buttonStyle.color" value="${c.buttonStyle.color || '#FFFFFF'}"></div></div><div style="margin-top: 10px;">${createStyleControlsHTML('buttonStyle', c.buttonStyle, {color: false, size: true, weight: true, family: true})}</div></div>${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`; 
+                fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${c.subtitle}</textarea>${createStyleControlsHTML('subtitleStyle', c.subtitleStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}</div><hr class="style-separator"><label>Button Style</label><div class="style-controls"><div class="style-controls-grid"><div class="control-group"><label>Background Color</label><input type="color" data-key="buttonStyle.backgroundColor" value="${c.buttonStyle.backgroundColor || '#c5a98b'}"></div><div class="control-group"><label>Text Color</label><input type="color" data-key="buttonStyle.color" value="${c.buttonStyle.color || '#FFFFFF'}"></div></div><div style="margin-top: 10px;">${createStyleControlsHTML('buttonStyle', c.buttonStyle, {color: false, size: true, weight: true, family: true})}</div></div>${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
                 break; 
             case 'countdown': 
             case 'location': 
                 fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}`; 
-                if(block.type === 'countdown') fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Target Date & Time</label><input type="datetime-local" data-key="targetDate" value="${c.targetDate}"></div>`; 
+                
+                if(block.type === 'countdown') {
+                    fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Target Date & Time</label><input type="datetime-local" data-key="targetDate" value="${c.targetDate}"></div>
+                    <hr class="style-separator">
+                    <label>Numbers Style (e.g., 40)</label>
+                    ${createStyleControlsHTML('numberStyle', c.numberStyle, { color: true, size: true, weight: true, family: true })}
+                    <hr class="style-separator">
+                    <label>Labels Style (e.g., Days)</label>
+                    ${createStyleControlsHTML('labelStyle', c.labelStyle, { color: true, size: true, weight: true, family: true })}`;
+                } 
+                
                 if(block.type === 'location') { 
                     fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Smart Location Search</label><input type="text" class="smart-location-search" placeholder="e.g., Per Se, New York"></div><div class="control-group"><label>Address</label><textarea data-key="address">${c.address || ''}</textarea></div>${createImageInputHTML('imageUrl', c.imageUrl, 'Photo URL')}${createOpacityControl('opacity', c.opacity, 'Photo Opacity')}<div class="control-group"><label>Google Maps Link</label><input type="url" data-key="mapLink" value="${c.mapLink || ''}"></div>`; 
                 } 
+                
                 fieldsHTML += createStickerEditor(block) + createBackgroundControlsHTML(block) + createMirrorControlsHTML(block);
-                break; 
+                break;  
             case 'schedule':
                 fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator">${createScheduleItemsEditor(block)}${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
                 break;

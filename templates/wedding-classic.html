@@ -299,7 +299,7 @@
         const titleHTML = c.title ? 
             `<h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>` : ''; 
         const textHTML = c.text ? 
-            `<p>${makeTextEditable(processText(c.text), block.id, 'textStyle', c.textStyle)}</p>` : ''; 
+            `<p>${makeTextEditable(processText(c.text), block.id, 'textStyle', c.textStyle)}</p>` : '';
         const mirrorClass = getMirrorClass(c);
         
         return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
@@ -323,16 +323,25 @@
         return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
             <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
                 ${backgroundDiv}
-                ${titleHTML}${descriptionHTML}
-                <figure style="margin:0;">
-                    <img src="${c.imageUrl}" alt="${c.caption}" style="width:100%;opacity:${c.opacity};">
-                    <figcaption>${c.caption}</figcaption>
-                </figure>
+                <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
+                <ul style="list-style:none;padding:0;">
+                    ${(c.items || []).map((i, index) => `
+                        <li style="display:flex;gap:20px;padding:15px 0;border-bottom:1px solid #eee;">
+                            <div>${makeTextEditable(i.time, block.id, `items.${index}.timeStyle`, i.timeStyle)}</div>
+                            <div>
+                                <h3 style="margin:0;">${makeTextEditable(i.title, block.id, `items.${index}.titleStyle`, i.titleStyle)}</h3>
+                                <p style="margin:5px 0 0;">${makeTextEditable(processText(i.desc), block.id, `items.${index}.descStyle`, i.descStyle)}</p>
+                            </div>
+                        </li>
+                    `).join('')}
+                </ul>
                 ${renderStickers(c.stickers)}
             </section>
         </div>`; 
     };
     
+    // --- ЗАМЕНИТЕ ЕГО НА ЭТОТ БЛОК ---
+
     const createScheduleHTML = (block, s) => { 
         const c = block.content; 
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? 
@@ -344,12 +353,12 @@
                 ${backgroundDiv}
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <ul style="list-style:none;padding:0;">
-                    ${(c.items || []).map(i => `
+                    ${(c.items || []).map((i, index) => `
                         <li style="display:flex;gap:20px;padding:15px 0;border-bottom:1px solid #eee;">
-                            <div style="${getStyleString(i.timeStyle)}">${i.time}</div>
+                            <div>${makeTextEditable(i.time, block.id, `items.${index}.timeStyle`, i.timeStyle)}</div>
                             <div>
-                                <h3 style="${getStyleString(i.titleStyle)};margin:0;">${i.title}</h3>
-                                <p style="${getStyleString(i.descStyle)};margin:5px 0 0;">${processText(i.desc)}</p>
+                                <h3 style="margin:0;">${makeTextEditable(i.title, block.id, `items.${index}.titleStyle`, i.titleStyle)}</h3>
+                                <p style="margin:5px 0 0;">${makeTextEditable(processText(i.desc), block.id, `items.${index}.descStyle`, i.descStyle)}</p>
                             </div>
                         </li>
                     `).join('')}
@@ -367,10 +376,10 @@
         const labelStyle = getStyleString(c.labelStyle);
         
         const inner = `<div id="countdown">
-            <div class="time-block"><div id="days" class="number" style="${numberStyle}">00</div><div style="${labelStyle}">Days</div></div>
-            <div class="time-block"><div id="hours" class="number" style="${numberStyle}">00</div><div style="${labelStyle}">Hours</div></div>
-            <div class="time-block"><div id="minutes" class="number" style="${numberStyle}">00</div><div style="${labelStyle}">Minutes</div></div>
-            <div class="time-block"><div id="seconds" class="number" style="${numberStyle}">00</div><div style="${labelStyle}">Seconds</div></div>
+            <div class="time-block"><div id="days" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div>${makeTextEditable('Days', block.id, 'labelStyle', c.labelStyle)}</div></div>
+            <div class="time-block"><div id="hours" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div>${makeTextEditable('Hours', block.id, 'labelStyle', c.labelStyle)}</div></div>
+            <div class="time-block"><div id="minutes" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div>${makeTextEditable('Minutes', block.id, 'labelStyle', c.labelStyle)}</div></div>
+            <div class="time-block"><div id="seconds" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div>${makeTextEditable('Seconds', block.id, 'labelStyle', c.labelStyle)}</div></div>
         </div>`; 
         const mirrorClass = getMirrorClass(c);
         
@@ -393,7 +402,7 @@
             <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
                 ${backgroundDiv}
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
-                <p>${processText(c.subtitle)}</p>
+                <p>${makeTextEditable(processText(c.subtitle), block.id, 'subtitleStyle', c.subtitleStyle)}</p>
                 <div>
                     <a href="${rsvpLink}" class="rsvp-button" style="${getStyleString(c.buttonStyle)}">I'll Be There!</a>
                 </div>
