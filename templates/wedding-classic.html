@@ -447,29 +447,28 @@
         container.innerHTML = '';
         let countdownBlockContent = null;
 
-        blocks.forEach(block => {
-            let blockHTML = '';
-            switch(block.type) {
-                case 'hero': blockHTML = createHeroHTML(block, settings); break;
-                case 'text-block': blockHTML = createTextBlockHTML(block, settings); break;
-                case 'image': blockHTML = createImageHTML(block, settings); break;
-                case 'countdown': blockHTML = createCountdownHTML(block, settings); countdownBlockContent = block.content; break;
-                case 'schedule': blockHTML = createScheduleHTML(block, settings); break;
-                case 'location': blockHTML = createLocationHTML(block, settings); break;
-                case 'rsvp': blockHTML = createRsvpHTML(block, settings, rsvpLink); break;
-                default: blockHTML = `<!-- Unsupported block type: ${block.type} -->`;
-            }
-            container.innerHTML += blockHTML;
-        });
-
-        if (countdownBlockContent) startCountdown(countdownBlockContent.targetDate);
-        
-        if (window.self !== window.top) {
-            setTimeout(() => {
-                initStickerInteraction(blocks);
-                setupTextEditing();
-            }, 150);
+    blocks.forEach(block => {
+        let blockHTML = '';
+        switch(block.type) {
+            case 'hero': blockHTML = createHeroHTML(block, settings); break;
+            case 'text-block': blockHTML = createTextBlockHTML(block, settings); break;
+            case 'image': blockHTML = createImageHTML(block, settings); break;
+            case 'countdown': blockHTML = createCountdownHTML(block, settings); countdownBlockContent = block.content; break;
+            case 'schedule': blockHTML = createScheduleHTML(block, settings); break;
+            case 'location': blockHTML = createLocationHTML(block, settings); break;
+            case 'rsvp': blockHTML = createRsvpHTML(block, settings, rsvpLink); break;
+            default: blockHTML = `<!-- Unsupported block type: ${block.type} -->`;
         }
+        container.innerHTML += blockHTML;
+    });
+
+    if (countdownBlockContent) startCountdown(countdownBlockContent.targetDate);
+
+    if (window.self !== window.top) {
+        setTimeout(() => {
+            initStickerInteraction(blocks);
+            setupTextEditing();
+        }, 150);
     }
 
     async function loadInvitationData() {
