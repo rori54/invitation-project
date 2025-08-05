@@ -1293,17 +1293,16 @@
                 }).join('');
                 fieldsHTML = `<div class="control-group"><label>Question Text</label><input type="text" data-key="title" value="${c.title}"></div><div class="control-group"><label><input type="checkbox" data-key="required" ${c.required ? 'checked' : ''}> Required</label></div><div class="control-group"><label>Options</label><div class="schedule-items-list">${optionsHTML}</div><button class="add-sub-item-btn action-button" data-list-key="options" style="font-size: 12px; padding: 5px; margin-top: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px;">+ Add Option</button></div>${createBackgroundControlsHTML(block)}`;
                 break;
-            case 'form-footer':
+        case 'form-footer':
                 fieldsHTML = `<div class="control-group"><label>Footer Text</label><input type="text" data-key="text" value="${c.text}"></div>${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
                 break;
-    default: 
+            default: 
                 fieldsHTML = 'No editor available for this block type.'; 
             }
-            return fieldsHTML; 
-        }
-        
+        return fieldsHTML; 
+    }
     
-    function renderEditor() { 
+    function renderEditor() {  
         const container = document.getElementById('editor-content'); 
         const currentlyOpen = [...container.querySelectorAll('.editor-block-content.is-open')].map(el => el.closest('.editor-block').dataset.id); 
         container.innerHTML = ''; 
