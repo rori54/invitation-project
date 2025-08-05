@@ -11,1341 +11,491 @@
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     
+    <style>
+        :root{--accent-color:#c5a98b;--background-color:#f8f7f5}
+        body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.7;background-color:var(--background-color);color:#333; background-size: cover; background-position: center; background-attachment: fixed; opacity:0; transition:opacity .5s ease-in-out;}
+        
+        main { transition: opacity 1s ease-in-out; } 
+        body.intro-active main { opacity: 0; }
+        #envelope-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; z-index: 1000; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 1.5s ease-in-out; } 
+        #envelope-3d { width: 80%; max-width: 500px; height: 80%; max-height: 500px; transition: transform 0.5s, opacity 0.5s; opacity: 0; } 
+        #envelope-3d.loaded { opacity: 1; animation: floatAnimation 4s ease-in-out infinite; } 
+        #envelope-wrapper.hidden { opacity: 0; pointer-events: none; } 
+        @keyframes floatAnimation { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { translateY(0); } }
+
+        .block-wrapper { position: relative; }
+        .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; position: relative; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); box-sizing: border-box;}
+        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; width: 100%; user-select: none; }
+        .hero-block.limited-width { margin: 30px auto; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); overflow: hidden; }
+        .hero-background-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; }
+        .hero-block::before{ content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); z-index: 1; pointer-events: none;}
+        .hero-content{ position:relative; z-index: 2; width: 90%; max-width: 1000px; padding: 40px 0; pointer-events: none;}
+        .hero-content > * { pointer-events: auto; }
+        
+        #countdown { display: flex; justify-content: center; gap: 2vw; text-align: center; margin-top: 20px; flex-wrap: wrap; }
+        .time-block { background: rgba(244,244,244,0.8); padding: 2.5vw; border-radius: 5px; min-width: 0; flex: 1; max-width: 120px; }
+        .time-block .number { font-size: clamp(1.5rem, 6vw, 2.5rem); line-height: 1; }
+        .time-block div:last-child { font-size: clamp(0.7rem, 2.5vw, 1rem); margin-top: 5px; }
+        
+        .rsvp-button{display:inline-block; padding:15px 30px; text-decoration:none; border-radius:50px; transition:transform .2s ease; margin: 10px; background-color: var(--accent-color); color: #fff;}
+        .rsvp-button:hover{transform:scale(1.05)}
+
+        /* --- Element Styles --- */
+        .sticker-wrapper, .inner-block-wrapper { position: absolute; box-sizing: border-box; z-index: 5; cursor: grab; touch-action: none; border: 1px dashed transparent; }
+        .sticker-wrapper.selected, .inner-block-wrapper.selected { border-color: #007bff; }
+        .sticker-wrapper img { width: 100%; height: 100%; display: block; pointer-events: none; }
+        .resize-handle { position: absolute; width: 12px; height: 12px; background: #fff; border: 1px solid #007bff; border-radius: 50%; display: none; }
+        .sticker-wrapper.selected .resize-handle, .inner-block-wrapper.selected .resize-handle { display: block; }
+        .resize-handle.se { bottom: -6px; right: -6px; cursor: se-resize; }
+        .rotate-handle { position: absolute; top: -30px; left: calc(50% - 8px); width: 16px; height: 16px; background: #fff; border: 1px solid #007bff; border-radius: 50%; cursor: grab; display: none; }
+        .sticker-wrapper.selected .rotate-handle, .inner-block-wrapper.selected .rotate-handle { display: block; }
+        .rotate-handle::before { content: ''; position: absolute; top: -15px; left: 50%; width: 1px; height: 15px; background: #007bff; transform: translateX(-50%); }
+        .inner-block-wrapper > div { height: 100%; overflow: hidden; }
+
+        /* Ribbon mode styles */
+        .style-ribbon .content-section,
+        .style-ribbon .hero-block.limited-width { background: none !important; box-shadow: none !important; border-radius: 0 !important; margin: 0 !important; padding: 20px !important; }
+        .style-ribbon .hero-block { border-radius: 0 !important; box-shadow: none !important; }
+        
+        /* Block background styles */
+        .block-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; border-radius: inherit; }
+
+        /* Text elements for editing */
+        .editable-text { cursor: text; position: relative; }
+        .editable-text:hover { outline: 1px dashed rgba(0, 123, 255, 0.5); }
+
+        /* Mirror transforms */
+        .mirror-horizontal { transform: scaleX(-1); }
+        .mirror-vertical { transform: scaleY(-1); }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .content-section { margin: 15px; padding: 30px 15px; }
+            .hero-content { padding: 20px 0; }
+        }
+
+        body.style-ribbon #page-content { background-color: #ffffff; max-width: 800px; margin: 0 auto; padding: 20px 0; box-shadow: 0 6px 25px rgba(0,0,0,0.08); }
+        body.style-ribbon .content-section, body.style-ribbon .hero-block { background: none !important; box-shadow: none !important; border: none !important; margin: 0 !important; }
+        body.style-ribbon .block-wrapper { padding: 25px 40px; }
+        body.style-ribbon .hero-block { width: 100%; max-width: none; }
+            
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+</head>
+<body>
+    <div id="envelope-wrapper">
+        <model-viewer id="envelope-3d" src="/templates/envelope.glb" alt="An interactive 3D envelope" camera-controls disable-zoom interaction-prompt="none" camera-orbit="0deg 75deg 105%" style="width: 100%; height: 100%; background: none;"></model-viewer>
+    </div>
+
+    <main id="page-content"></main>
+
     <script>
-    const iframe = document.getElementById("preview-frame");
-    let pageBlocks = []; 
-    let pageSettings = {}; 
-    let currentTemplate = '';
-    let sheetDbApiUrl = '';
-    let apiKeys = {}; 
-    let currentImageTarget = null; 
-    let currentElementBlock = null; 
-    let currentEditingElement = null;
-    let isCustomerMode = false;
-    
-    const defaultTextStyle = { fontFamily: 'Montserrat', fontSize: '1rem', color: '#333333', fontWeight: '400' };
-    const defaultTitleStyle = { fontFamily: 'Playfair Display', fontSize: '2.2rem', color: '#111111', fontWeight: '700' };
+    let countdownInterval;
 
-    let mainPageData = { 
-        template: 'wedding-classic.html', 
-        settings: { 
-            maxWidth: '800px', 
-            style: 'classic', 
-            backgroundImage: '', 
-            backgroundColor: '#f8f7f5',
-            displayMode: 'blocks'
-        }, 
-        blocks: [ 
-            { 
-                type: 'hero', 
-                id: `block-${Date.now()}-1`, 
-                content: { 
-                    subtitle: { text: 'WE ARE GETTING MARRIED', enabled: true, style: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#FFFFFF', fontWeight: '400' } }, 
-                    names: { text: 'John & Jane', enabled: true, style: { fontFamily: 'Great Vibes', fontSize: '4rem', color: '#FFFFFF', fontWeight: '400' } }, 
-                    date: { text: 'September 15, 2025', enabled: true, style: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#FFFFFF', fontWeight: '400' } }, 
-                    imageUrl: 'https://cdn.pixabay.com/photo/2018/03/01/01/07/blossom-3189810_1280.jpg', 
-                    backgroundPosition: 'center 30%', 
-                    aspectRatio: '9/16', 
-                    opacity: 1, 
-                    innerBlocks: [], 
-                    stickers: [], 
-                    fullWidth: true,
-                    backgroundColor: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover',
-                    mirrorHorizontal: false,
-                    mirrorVertical: false
-                }
-            }, 
-            { 
-                type: 'text-block', 
-                id: `block-${Date.now()}-3`, 
-                content: { 
-                    title: 'A few words', 
-                    text: 'We are excited to share this special day with our closest family and friends.', 
-                    titleStyle: { ...defaultTitleStyle, fontSize: '2.5rem' }, 
-                    textStyle: { ...defaultTextStyle, fontSize: '1.1rem', textAlign: 'center' }, 
-                    stickers: [],
-                    innerBlocks: [],
-                    backgroundColor: '',
-                    backgroundImage: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover',
-                    mirrorHorizontal: false,
-                    mirrorVertical: false
-                }
-            }, 
-            { 
-                type: 'countdown', 
-                id: `block-${Date.now()}-2`, 
-                content: { 
-                    title: 'Until Our Big Day', 
-                    targetDate: '2025-09-15T16:00', 
-                    titleStyle: { ...defaultTitleStyle }, 
-                    numberStyle: { ...defaultTitleStyle, fontSize: '2.5rem' },
-                    labelStyle: { ...defaultTextStyle, fontSize: '1rem' },
-                    stickers: [],
-                    innerBlocks: [],
-                    backgroundColor: '',
-                    backgroundImage: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover',
-                    mirrorHorizontal: false,
-                    mirrorVertical: false
-                }
-            }, 
-            { 
-                type: 'schedule', 
-                id: `block-${Date.now()}-4`, 
-                content: { 
-                    title: "The Day's Schedule", 
-                    items: [
-                        { 
-                            id: `item-${Date.now()}-1`, 
-                            time: '3:00 PM', 
-                            title: 'Ceremony', 
-                            desc: 'Join us for the wedding ceremony at the Grand Hall.', 
-                            timeStyle: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#c5a98b', fontWeight: '700' }, 
-                            titleStyle: { fontFamily: 'Playfair Display', fontSize: '1.4rem', color: '#333333', fontWeight: '700' }, 
-                            descStyle: { fontFamily: 'Montserrat', fontSize: '1rem', color: '#666666', fontWeight: '400' } 
-                        }, 
-                        { 
-                            id: `item-${Date.now()}-2`, 
-                            time: '5:00 PM', 
-                            title: 'Reception', 
-                            desc: 'Dinner, dancing, and celebration!', 
-                            timeStyle: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#c5a98b', fontWeight: '700' }, 
-                            titleStyle: { fontFamily: 'Playfair Display', fontSize: '1.4rem', color: '#333333', fontWeight: '700' }, 
-                            descStyle: { fontFamily: 'Montserrat', fontSize: '1rem', color: '#666666', fontWeight: '400' } 
-                        }
-                    ], 
-                    titleStyle: { ...defaultTitleStyle }, 
-                    stickers: [],
-                    innerBlocks: [],
-                    backgroundColor: '',
-                    backgroundImage: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover',
-                    mirrorHorizontal: false,
-                    mirrorVertical: false
-                }
-            }, 
-            { 
-                type: 'location', 
-                id: `block-${Date.now()}-5`, 
-                content: { 
-                    title: 'Venue', 
-                    address: { text: 'The Grand Hall, 123 Celebration Ave, New York', style: { fontFamily: 'Montserrat', fontSize: '1rem', color: '#666666', fontWeight: '400', textAlign: 'center' } },
-                    imageUrl: 'https://images.unsplash.com/photo-1511795408833-2a1e94992e7a?q=80&w=2070&auto=format&fit=crop', 
-                    opacity: 1, 
-                    mapLink: 'https://maps.google.com', 
-                    titleStyle: { ...defaultTitleStyle }, 
-                    stickers: [],
-                    innerBlocks: [],
-                    backgroundColor: '',
-                    backgroundImage: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover',
-                    mirrorHorizontal: false,
-                    mirrorVertical: false
-                }
-            },   
-            { 
-                type: 'rsvp', 
-                id: `block-${Date.now()}-6`, 
-                content: { 
-                    title: 'Confirm Your Attendance', 
-                    subtitle: 'Please reply by September 1st.', 
-                    titleStyle: { ...defaultTitleStyle }, 
-                    subtitleStyle: { ...defaultTextStyle, textAlign: 'center' },
-                    buttonStyle: { fontFamily: 'Montserrat', fontSize: '1.1rem', color: '#FFFFFF', fontWeight: '700', backgroundColor: '#c5a98b' }, 
-                    stickers: [],
-                    innerBlocks: [],
-                    backgroundColor: '',
-                    backgroundImage: '',
-                    backgroundOpacity: 1,
-                    backgroundSize: 'cover',
-                    mirrorHorizontal: false,
-                    mirrorVertical: false
-                }
-            } 
-        ] 
+    const processText = (text) => (text || '').replace(/\n/g, '<br>');
+    const getStyleString = (style) => { 
+        if (!style) return ''; 
+        let str = ''; 
+        if (style.fontFamily) str += `font-family: '${style.fontFamily}', sans-serif; `; 
+        if (style.fontSize) str += `font-size: ${style.fontSize}; `; 
+        if (style.color) str += `color: ${style.color}; `; 
+        if (style.fontWeight) str += `font-weight: ${style.fontWeight}; `; 
+        if (style.textAlign) str += `text-align: ${style.textAlign}; `; 
+        return str; 
+    };
+
+    const getBlockBackgroundStyle = (content) => {
+        let style = '';
+        if (content.backgroundColor) style += `background-color: ${content.backgroundColor}; `;
+        if (content.backgroundImage) {
+            style += `background-image: url('${content.backgroundImage}'); `;
+            style += `background-size: ${content.backgroundSize || 'cover'}; `;
+            style += `background-position: center; `;
+            style += `background-repeat: no-repeat; `;
+            if (content.backgroundOpacity !== undefined) style += `opacity: ${content.backgroundOpacity}; `;
+        }
+        return style;
+    };
+
+    const getMirrorClass = (content) => (content.mirrorHorizontal ? 'mirror-horizontal' : '') + ' ' + (content.mirrorVertical ? 'mirror-vertical' : '');
+    
+    const makeTextEditable = (text, blockId, elementKey, styleObject) => {
+        if (window.self === window.top) return `<div style="${getStyleString(styleObject)}">${processText(text)}</div>`;
+        return `<div class="editable-text" data-block-id="${blockId}" data-element-key="${elementKey}" style="${getStyleString(styleObject)}">${processText(text)}</div>`;
     };
     
-    let rsvpFormData = { 
-        template: 'rsvp-form.html', 
-        settings: { 
-            maxWidth: '800px', 
-            style: 'classic', 
-            backgroundImage: '', 
-            backgroundColor: '#f8f7f5',
-            displayMode: 'blocks'
-        }, 
-        blocks: [] 
-    };
-    
-    const fontOptionsHTML = `<optgroup label="Script/Handwritten"> <option value="Great Vibes">Great Vibes</option> <option value="Dancing Script">Dancing Script</option> <option value="Allura">Allura</option> <option value="Sacramento">Sacramento</option> <option value="Alex Brush">Alex Brush</option> <option value="Satisfy">Satisfy</option> <option value="Kaushan Script">Kaushan Script</option> <option value="Pacifico">Pacifico</option> <option value="Caveat">Caveat</option> <option value="Cookie">Cookie</option> </optgroup> <optgroup label="Elegant Serif"> <option value="Playfair Display">Playfair Display</option> <option value="Crimson Text">Crimson Text</option> <option value="Cormorant Garamond">Cormorant Garamond</option> <option value="EB Garamond">EB Garamond</option> <option value="Libre Baskerville">Libre Baskerville</option> <option value="Lora">Lora</option> <option value="Merriweather">Merriweather</option> <option value="Vollkorn">Vollkorn</option> </optgroup> <optgroup label="Decorative"> <option value="Cinzel">Cinzel</option> <option value="Abril Fatface">Abril Fatface</option> <option value="Amatic SC">Amatic SC</option> <option value="Fredoka One">Fredoka One</option> <option value="Lobster">Lobster</option> </optgroup> <optgroup label="Modern Sans-Serif"> <option value="Montserrat">Montserrat</option> <option value="Raleway">Raleway</option> <option value="Lato">Lato</option> <option value="Open Sans">Open Sans</option> <option value="Poppins">Poppins</option> </optgroup>`;
-    
-    const predefinedImages = [
-        'https://images.unsplash.com/photo-1522158637959-30385a09e0da?q=80&w=2070&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1511795408833-2a1e94992e7a?q=80&w=2070&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2070&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1465495976277-4387d4b0e4a6?q=80&w=2069&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=2070&auto=format&fit=crop',
-        'https://cdn.pixabay.com/photo/2018/03/01/01/07/blossom-3189810_1280.jpg',
-        'https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=2071&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1606800052052-a08af7148866?q=80&w=2070&auto=format&fit=crop'
-    ];
-
-    const predefinedElements = [
-        'https://www.pngkey.com/png/full/15-154942_wedding-rings-png-image-background-gold-wedding-rings.png',
-        'https://static.vecteezy.com/system/resources/previews/009/341/365/original/heart-shape-outline-love-symbol-icon-free-png.png',
-        'https://pngimg.com/uploads/rose/rose_PNG11018.png',
-        'https://www.pngplay.com/wp-content/uploads/12/Wedding-Dove-PNG-Clipart-Background.png'
-    ];
-
-    // Mobile responsive functions
-    function toggleMobileEditor() {
-        const editorContent = document.getElementById('editor-content');
-        const editorFooter = document.getElementById('editor-footer');
-        editorContent.classList.toggle('mobile-hidden');
-        editorFooter.classList.toggle('mobile-hidden');
-    }
-
-    // Text editing toolbar functions
-    function showTextEditingToolbar(blockId, elementKey, currentStyle) {
-        const toolbar = document.getElementById('text-editing-toolbar');
-        currentEditingElement = { blockId, elementKey };
-        
-        // Populate toolbar with current values
-        document.getElementById('toolbar-font-family').value = currentStyle.fontFamily || 'Montserrat';
-        document.getElementById('toolbar-font-size').value = currentStyle.fontSize || '1rem';
-        document.getElementById('toolbar-color').value = currentStyle.color || '#333333';
-        document.getElementById('toolbar-font-weight').value = currentStyle.fontWeight || '400';
-        document.getElementById('toolbar-text-align').value = currentStyle.textAlign || 'center';
-        
-        toolbar.classList.add('visible');
-        
-        // Set up event listeners
-        setupToolbarEventListeners();
-    }
-
-    function hideTextEditingToolbar() {
-        document.getElementById('text-editing-toolbar').classList.remove('visible');
-        currentEditingElement = null;
-    }
-
-    function setupToolbarEventListeners() {
-        const toolbar = document.getElementById('text-editing-toolbar');
-        const inputs = toolbar.querySelectorAll('select, input');
-        
-        inputs.forEach(input => {
-            input.addEventListener('change', updateTextStyle);
-            input.addEventListener('input', updateTextStyle);
-        });
-    }
-
-    function updateTextStyle() {
-        if (!currentEditingElement) return;
-        
-        const blockIndex = pageBlocks.findIndex(b => b.id === currentEditingElement.blockId);
-        if (blockIndex === -1) return;
-        
-        const keys = currentEditingElement.elementKey.split('.');
-        let current = pageBlocks[blockIndex].content;
-        
-        for (let i = 0; i < keys.length - 1; i++) {
-            current = current[keys[i]];
-        }
-        
-        const styleKey = keys[keys.length - 1];
-        if (!current[styleKey]) current[styleKey] = {};
-        
-        // Update style object
-        current[styleKey].fontFamily = document.getElementById('toolbar-font-family').value;
-        current[styleKey].fontSize = document.getElementById('toolbar-font-size').value;
-        current[styleKey].color = document.getElementById('toolbar-color').value;
-        current[styleKey].fontWeight = document.getElementById('toolbar-font-weight').value;
-        current[styleKey].textAlign = document.getElementById('toolbar-text-align').value;
-        
-        renderPreview();
-        renderEditor();
-    }
-
-    function openImageLibrary(targetInputId) {
-        currentImageTarget = targetInputId;
-        const modal = document.getElementById('image-library-modal');
-        const grid = document.getElementById('image-library-grid');
-        
-        // Populate predefined images
-        grid.innerHTML = predefinedImages.map(url => 
-            `<div class="image-library-item" onclick="selectImage('${url}')">
-                <img src="${url}" alt="Image option" loading="lazy">
-            </div>`
-        ).join('');
-        
-        modal.classList.add('is-visible');
-    }
-
-    function closeImageLibrary() {
-        document.getElementById('image-library-modal').classList.remove('is-visible');
-        currentImageTarget = null;
-    }
-
-    function openElementLibrary(blockId) {
-        currentElementBlock = blockId;
-        const modal = document.getElementById('element-library-modal');
-        const grid = document.getElementById('element-library-grid');
-        
-        // Populate predefined elements
-        grid.innerHTML = predefinedElements.map(url => 
-            `<div class="image-library-item" onclick="selectElement('${url}')">
-                <img src="${url}" alt="Element option" loading="lazy">
-            </div>`
-        ).join('');
-        
-        modal.classList.add('is-visible');
-    }
-
-    function closeElementLibrary() {
-        document.getElementById('element-library-modal').classList.remove('is-visible');
-        currentElementBlock = null;
-    }
-
-    function selectElement(elementUrl) {
-        if (currentElementBlock) {
-            const blockIndex = pageBlocks.findIndex(b => b.id === currentElementBlock);
-            if (blockIndex !== -1) {
-                const newSticker = {
-                    id: `sticker-${Date.now()}`,
-                    src: elementUrl,
-                    x: 20,
-                    y: 20,
-                    width: 150,
-                    rotation: 0,
-                    opacity: 1
-                };
-                if (!pageBlocks[blockIndex].content.stickers) pageBlocks[blockIndex].content.stickers = [];
-                pageBlocks[blockIndex].content.stickers.push(newSticker);
-                renderEditor();
-                renderPreview();
-            }
-        }
-        closeElementLibrary();
-    }
-
-    function selectImage(imageUrl) {
-        if (currentImageTarget) {
-            const input = document.getElementById(currentImageTarget) || document.querySelector(`input[data-key="${currentImageTarget}"]`);
-            if (input) {
-                input.value = imageUrl;
-                // Trigger change event to update the block
-                const event = new Event('input', { bubbles: true });
-                input.dispatchEvent(event);
-            }
-        }
-        closeImageLibrary();
-    }
-
-    async function uploadToImgBB(file) {
-        if (!apiKeys.imgbb) {
-            throw new Error('ImgBB API key not available');
-        }
-        
-        const formData = new FormData();
-        formData.append('image', file);
-        
-        const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKeys.imgbb}`, {
-            method: 'POST',
-            body: formData
-        });
-        
-        const result = await response.json();
-        if (!result.success) {
-            throw new Error(result.error?.message || 'Upload failed');
-        }
-        
-        return result.data.url;
-    }
-
-    // Setup file upload for images
-    document.getElementById('file-input').addEventListener('change', async (e) => { 
-        if (e.target.files.length === 0) return;
-        const file = e.target.files[0];
-        const statusText = document.getElementById('status-text');
-        try {
-            statusText.textContent = 'Uploading image...';
-            const imageUrl = await uploadToImgBB(file);
-            selectImage(imageUrl);
-            statusText.textContent = 'Image uploaded successfully!';
-            setTimeout(() => statusText.textContent = '', 3000);
-        } catch (error) {
-            statusText.textContent = `Upload failed: ${error.message}`;
-            setTimeout(() => statusText.textContent = '', 5000);
-        } finally {
-            e.target.value = '';
-        }
-    });
-
-    // Setup file upload for elements
-    document.getElementById('element-file-input').addEventListener('change', async (e) => {
-        if (e.target.files.length === 0) return;
-        const file = e.target.files[0];
-        const statusText = document.getElementById('status-text');
-        try {
-            statusText.textContent = 'Uploading element...';
-            const elementUrl = await uploadToImgBB(file);
-            selectElement(elementUrl);
-            statusText.textContent = 'Element uploaded successfully!';
-            setTimeout(() => statusText.textContent = '', 3000);
-        } catch (error) {
-            statusText.textContent = `Upload failed: ${error.message}`;
-            setTimeout(() => statusText.textContent = '', 5000);
-        } finally {
-            e.target.value = '';
-        }
-    });
-    
-    // ... (Drag and Drop functions are unchanged)
-
-    function createStyleControlsHTML(prefix, styleObject, options = { color: true, size: true, weight: true, family: true, textAlign: false }) { 
-        if (!styleObject) return ''; 
-        return `<div class="style-controls"> ${options.family ? `<div class="control-group"><label>Font Family</label><select data-key="${prefix}.fontFamily">${fontOptionsHTML.replace(`value="${styleObject.fontFamily}"`, `value="${styleObject.fontFamily}" selected`)}</select></div>` : ''} <div class="style-controls-grid"> ${options.size ? `<div class="control-group"><label>Font Size</label><input type="text" data-key="${prefix}.fontSize" value="${styleObject.fontSize || ''}" placeholder="e.g. 16px or 1.2rem"></div>` : ''} ${options.color ? `<div class="control-group"><label>Color</label><input type="color" data-key="${prefix}.color" value="${styleObject.color || '#000000'}"></div>` : ''} </div> <div class="style-controls-grid" style="margin-top: 10px;"> ${options.weight ? `<div class="control-group"><label>Font Weight</label><select data-key="${prefix}.fontWeight"><option value="400" ${styleObject.fontWeight == '400' ? 'selected' : ''}>Normal</option><option value="700" ${styleObject.fontWeight == '700' ? 'selected' : ''}>Bold</option></select></div>` : ''} ${options.textAlign ? `<div class="control-group"><label>Text Align</label><select data-key="${prefix}.textAlign"><option value="left" ${styleObject.textAlign == 'left' ? 'selected' : ''}>Left</option><option value="center" ${styleObject.textAlign == 'center' ? 'selected' : ''}>Center</option><option value="right" ${styleObject.textAlign == 'right' ? 'selected' : ''}>Right</option></select></div>` : ''} </div> </div>`; 
-    }
-    
-    function createBackgroundControlsHTML(block) {
-        const c = block.content;
-        return `<hr class="style-separator">
-                <div class="control-group">
-                    <label>Background Settings</label>
-                    <div class="background-controls">
-                        <div class="control-group">
-                            <label>Background Color</label>
-                            <input type="color" data-key="backgroundColor" value="${c.backgroundColor || '#ffffff'}">
-                        </div>
-                        <div class="control-group">
-                            <label>Background Image</label>
-                            <div class="image-input-group">
-                                <input type="url" data-key="backgroundImage" value="${c.backgroundImage || ''}" placeholder="https://images.unsplash.com/photo-...">
-                                <button type="button" class="browse-image-btn" onclick="openImageLibrary('backgroundImage')">Browse...</button>
-                            </div>
-                        </div>
-                        <div class="style-controls-grid">
-                            <div class="control-group">
-                                <label>Background Size</label>
-                                <select data-key="backgroundSize">
-                                    <option value="cover" ${c.backgroundSize === 'cover' ? 'selected' : ''}>Cover</option>
-                                    <option value="contain" ${c.backgroundSize === 'contain' ? 'selected' : ''}>Contain</option>
-                                    <option value="repeat" ${c.backgroundSize === 'repeat' ? 'selected' : ''}>Repeat</option>
-                                </select>
-                            </div>
-                            <div class="control-group">
-                                <label>Background Opacity</label>
-                                <input type="range" class="opacity-slider" min="0" max="1" step="0.1" data-key="backgroundOpacity" value="${c.backgroundOpacity || 1}">
-                                <span style="font-size: 12px; color: #666;">${Math.round((c.backgroundOpacity || 1) * 100)}%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-    }
-
-    function createMirrorControlsHTML(block) {
-        const c = block.content;
-        return `<hr class="style-separator">
-                <div class="control-group">
-                    <label>Mirror/Flip</label>
-                    <div class="mirror-controls">
-                        <button type="button" class="mirror-btn" data-mirror="horizontal" data-current="${c.mirrorHorizontal ? 'true' : 'false'}">
-                            ${c.mirrorHorizontal ? '↔️ Unflip H' : '↔️ Flip H'}
-                        </button>
-                        <button type="button" class="mirror-btn" data-mirror="vertical" data-current="${c.mirrorVertical ? 'true' : 'false'}">
-                            ${c.mirrorVertical ? '↕️ Unflip V' : '↕️ Flip V'}
-                        </button>
-                    </div>
-                </div>`;
-    }
-    
-    function createInnerBlocksEditor(block) { 
-        let innerBlocksHTML = (block.content.innerBlocks || []).map((innerBlock, index) => { 
-            return `<div class="inner-block-editor" data-index="${index}">
-                <button class="delete-inner-block-btn" title="Delete this element">×</button>
-                <label>Floating Text</label>
-                <textarea data-key="innerBlocks.${index}.text">${innerBlock.text || ''}</textarea>
-                <div class="style-controls-grid">
-                    <div class="control-group"><label>X</label><input type="number" data-key="innerBlocks.${index}.x" value="${Math.round(innerBlock.x || 0)}"></div>
-                    <div class="control-group"><label>Y</label><input type="number" data-key="innerBlocks.${index}.y" value="${Math.round(innerBlock.y || 0)}"></div>
-                </div>
-                 <div class="control-group" style="margin-top:10px;"><label>Width</label><input type="number" data-key="innerBlocks.${index}.width" value="${Math.round(innerBlock.width || 200)}"></div>
-                ${createStyleControlsHTML(`innerBlocks.${index}.style`, innerBlock.style, { textAlign: true, color: true, size: true, weight: true, family: true })}
-            </div>`; 
-        }).join(''); 
-
-        return `<hr class="style-separator">
-                <div class="inner-blocks-container">
-                    <label style="font-weight: bold; color: #333;">Floating Text Elements</label>
-                    <div class="inner-blocks-list">${innerBlocksHTML}</div>
-                    <div class="add-inner-block-controls" style="margin-top:10px;">
-                        <button class="add-inner-block-btn" data-inner-type="text" style="width: 100%; background-color: #007bff; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">+ Add Floating Text</button>
-                    </div>
-                </div>`; 
-    }
-
-    function createScheduleItemsEditor(block) {
-        let itemsHTML = (block.content.items || []).map((item, index) => {
-            return `<div class="schedule-item-editor" data-item-id="${item.id}">
-                <div class="schedule-item-editor-header">
-                    <h4>Schedule Item ${index + 1}</h4>
-                    <button class="delete-schedule-item-btn" title="Delete this item">Delete</button>
-                </div>
-                <div class="control-group">
-                    <label>Time</label>
-                    <input type="text" class="sub-item-input" data-item-key="time" value="${item.time || ''}" placeholder="e.g., 3:00 PM">
-                    ${createStyleControlsHTML(`items.${index}.timeStyle`, item.timeStyle, { color: true, size: true, weight: true, family: true })}
-                </div>
-                <hr class="style-separator">
-                <div class="control-group">
-                    <label>Title</label>
-                    <input type="text" class="sub-item-input" data-item-key="title" value="${item.title || ''}" placeholder="e.g., Ceremony">
-                    ${createStyleControlsHTML(`items.${index}.titleStyle`, item.titleStyle, { color: true, size: true, weight: true, family: true })}
-                </div>
-                <hr class="style-separator">
-                <div class="control-group">
-                    <label>Description</label>
-                    <textarea class="sub-item-input" data-item-key="desc" placeholder="Additional details...">${item.desc || ''}</textarea>
-                    ${createStyleControlsHTML(`items.${index}.descStyle`, item.descStyle, { color: true, size: true, weight: true, family: true })}
-                </div>
-            </div>`;
-        }).join('');
-        
-        return `<div class="control-group">
-            <label style="font-weight: bold; color: #333;">Schedule Items</label>
-            <div class="schedule-items-list">${itemsHTML}</div>
-            <button class="add-sub-item-btn action-button" data-list-key="items" style="font-size: 12px; padding: 5px; margin-top: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px;">+ Add Schedule Item</button>
-        </div>`;
-    }
-    
-    function getNewBlockData(type) { 
-        const newBlock = { type: type, id: `block-${Date.now()}`, content: { innerBlocks: [], stickers: [] } }; 
-        const defaultContent = {
-            backgroundColor: '',
-            backgroundImage: '',
-            backgroundOpacity: 1,
-            backgroundSize: 'cover',
-            mirrorHorizontal: false,
-            mirrorVertical: false
-        };
-        Object.assign(newBlock.content, defaultContent);
-
-        switch(type) { 
-            case 'hero': 
-                newBlock.content = { 
-                    ...newBlock.content,
-                    subtitle: { text: 'WE ARE GETTING MARRIED', enabled: true, style: { ...defaultTextStyle, color: '#FFFFFF' } }, 
-                    names: { text: 'John & Jane', enabled: true, style: { ...defaultTitleStyle, fontFamily: 'Great Vibes', fontSize: '4rem', color: '#FFFFFF'} }, 
-                    date: { text: 'September 15, 2025', enabled: true, style: { ...defaultTextStyle, color: '#FFFFFF' } }, 
-                    imageUrl: 'https://images.unsplash.com/photo-1522158637959-30385a09e0da?q=80&w=2070&auto=format&fit=crop', 
-                    backgroundPosition: 'center center', 
-                    aspectRatio: '16/9', 
-                    opacity: 1,
-                    fullWidth: true
-                }; 
-                break; 
-            case 'text-block': 
-                newBlock.content = { 
-                    ...newBlock.content,
-                    title: 'New Title', 
-                    text: 'New paragraph text.', 
-                    titleStyle: { ...defaultTitleStyle }, 
-                    textStyle: { ...defaultTextStyle, textAlign: 'center' }
-                }; 
-                break; 
-            case 'countdown': 
-                newBlock.content = { 
-                    ...newBlock.content,
-                    title: 'New Countdown', 
-                    targetDate: '', 
-                    titleStyle: { ...defaultTitleStyle }, 
-                    numberStyle: { ...defaultTitleStyle, fontSize: '2.5rem' },
-                    labelStyle: { ...defaultTextStyle, fontSize: '1rem' }
-                }; 
-                break;  
-            case 'schedule': 
-                newBlock.content = { 
-                    ...newBlock.content,
-                    title: 'New Schedule', 
-                    items: [{ 
-                        id: `item-${Date.now()}`, 
-                        time: '3:00 PM', 
-                        title: 'New Event', 
-                        desc: 'Event description', 
-                        timeStyle: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#c5a98b', fontWeight: '700' }, 
-                        titleStyle: { fontFamily: 'Playfair Display', fontSize: '1.4rem', color: '#333333', fontWeight: '700' }, 
-                        descStyle: { fontFamily: 'Montserrat', fontSize: '1rem', color: '#666666', fontWeight: '400' } 
-                    }], 
-                    titleStyle: { ...defaultTitleStyle }
-                }; 
-                break; 
-            case 'location': 
-                newBlock.content = { 
-                    ...newBlock.content,
-                    title: 'New Location', 
-                    address: { text: '123 Main Street, Anytown, USA', style: { ...defaultTextStyle, textAlign: 'center' } },
-                    imageUrl: '', 
-                    opacity: 1, 
-                    mapLink: '#', 
-                    titleStyle: { ...defaultTitleStyle }
-                }; 
-                break; 
-            case 'rsvp': 
-                newBlock.content = { 
-                    ...newBlock.content,
-                    title: 'New RSVP Block', 
-                    subtitle: 'New subtitle text', 
-                    titleStyle: { ...defaultTitleStyle }, 
-                    subtitleStyle: { ...defaultTextStyle },
-                    buttonStyle: { fontFamily: 'Montserrat', fontSize: '1.1rem', color: '#FFFFFF', fontWeight: '700', backgroundColor: '#c5a98b' }
-                }; 
-                break; 
-            case 'image': 
-                newBlock.content = { 
-                    ...newBlock.content,
-                    imageUrl: 'https://via.placeholder.com/800x400', 
-                    opacity: 1, 
-                    caption: '', 
-                    title: '', 
-                    description: '', 
-                    titleStyle: { ...defaultTitleStyle }, 
-                    descriptionStyle: { ...defaultTextStyle }
-                }; 
-                break; 
-            case 'form-header': 
-                newBlock.content = { 
-                    ...newBlock.content,
-                    title: 'RSVP', 
-                    subtitle: 'Please fill out the form below', 
-                    imageUrl: '', 
-                    opacity: 1, 
-                    aspectRatio: '16/9'
-                }; 
-                break; 
-            case 'input-question': 
-                newBlock.content = { ...newBlock.content, id: `input-${Date.now()}`, title: 'Your Name', required: true }; 
-                break; 
-            case 'textarea-question': 
-                newBlock.content = { ...newBlock.content, id: `textarea-${Date.now()}`, title: 'Any comments?', required: false }; 
-                break; 
-            case 'radio-question': 
-                newBlock.content = { ...newBlock.content, id: `radio-${Date.now()}`, title: 'Will you attend?', required: true, options: [{ id: `opt-${Date.now()}`, text: 'New Option' }] }; 
-                break; 
-            case 'form-footer': 
-                newBlock.content = { ...newBlock.content, text: 'Thanks for your response!' }; 
-                break; 
-        } 
-        return newBlock; 
-    }
-    
-    function createStickerEditor(block) {
-        const stickersHTML = (block.content.stickers || []).map((sticker, index) => {
-            return `<div class="sticker-editor" data-sticker-index="${index}">
-                <div class="sticker-editor-header">
-                    <img src="${sticker.src}" style="width: 30px; height: 30px; border-radius: 4px; object-fit: contain; background: #ddd;">
-                    <button class="delete-sticker-btn" title="Delete Sticker">Delete</button>
-                </div>
-                <div class="control-group"> 
-                    <label>Image URL</label> 
-                    <div class="image-input-group">
-                        <input type="url" data-key="stickers.${index}.src" value="${sticker.src}">
-                        <button type="button" class="browse-image-btn" onclick="openImageLibrary('stickers.${index}.src')">Browse...</button>
-                    </div>
-                </div>
-                <div class="style-controls-grid">
-                    <div class="control-group"><label>X</label><input type="number" data-key="stickers.${index}.x" value="${Math.round(sticker.x || 0)}"></div>
-                    <div class="control-group"><label>Y</label><input type="number" data-key="stickers.${index}.y" value="${Math.round(sticker.y || 0)}"></div>
-                </div>
-                <div class="style-controls-grid">
-                    <div class="control-group"><label>Width</label><input type="number" data-key="stickers.${index}.width" value="${Math.round(sticker.width || 100)}"></div>
-                    <div class="control-group"><label>Rotation</label><input type="number" data-key="stickers.${index}.rotation" value="${Math.round(sticker.rotation || 0)}"></div>
-                </div>
-                <div class="opacity-control">
-                    <label>Opacity</label>
-                    <input type="range" class="opacity-slider" min="0" max="1" step="0.1" data-key="stickers.${index}.opacity" value="${sticker.opacity || 1}">
-                    <span style="font-size: 12px; color: #666;">${Math.round((sticker.opacity || 1) * 100)}%</span>
-                </div>
-            </div>`;
-        }).join('');
-        
-        return `<hr class="style-separator">
-                <div class="control-group">
-                    <label>Decorative Elements</label>
-                    <button class="add-element-btn" data-block-id="${block.id}" style="width: 100%; background-color: #6f42c1; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">+ Add Element</button>
-                </div>
-                <div id="sticker-editors-container">${stickersHTML}</div>`;
-    }
-
-    function createImageInputHTML(dataKey, value, label) {
-        return `<div class="control-group">
-            <label>${label}</label>
-            <div class="image-input-group">
-                <input type="url" data-key="${dataKey}" value="${value || ''}" placeholder="https://images.unsplash.com/photo-...">
-                <button type="button" class="browse-image-btn" onclick="openImageLibrary('${dataKey}')">Browse...</button>
-            </div>
-        </div>`;
-    }
-
-    function createOpacityControl(dataKey, value, label = 'Opacity') {
-        const opacityValue = value !== undefined ? value : 1;
-        return `<div class="opacity-control">
-            <label>${label}</label>
-            <input type="range" class="opacity-slider" min="0" max="1" step="0.1" data-key="${dataKey}" value="${opacityValue}">
-            <span style="font-size: 12px; color: #666;">${Math.round(opacityValue * 100)}%</span>
-        </div>`;
-    }
-
-    function createEditorFieldsForBlock(block) { 
-        let fieldsHTML = ''; 
-        const c = block.content; 
-        const bgPosField = `<div class="control-group"><label>Background Focus Point</label><input type="text" data-key="backgroundPosition" value="${c.backgroundPosition || 'center center'}" placeholder="e.g., center 30%"></div>`; 
-        const aspectRatioField = `<div class="control-group"><label>Block Shape (Height)</label><select data-key="aspectRatio"> <option value="21/9" ${c.aspectRatio === '21/9' ? 'selected' : ''}>Cinematic</option> <option value="16/9" ${c.aspectRatio === '16/9' ? 'selected' : ''}>Widescreen</option> <option value="8/5" ${c.aspectRatio === '8/5' ? 'selected' : ''}>Landscape (Wide)</option> <option value="3/2"  ${c.aspectRatio === '3/2' ? 'selected' : ''}>Landscape (Classic)</option> <option value="4/3"  ${c.aspectRatio === '4/3' ? 'selected' : ''}>Standard (4:3)</option> <option value="1/1"  ${c.aspectRatio === '1/1' ? 'selected' : ''}>Square</option> <option value="9/12" ${c.aspectRatio === '9/12' ? 'selected' : ''}>Portrait (Standard)</option> <option value="9/16" ${c.aspectRatio === '9/16' ? 'selected' : ''}>Portrait (Tall)</option> </select></div>`; 
-        const titleStyleField = (styleObj, key = 'titleStyle') => `<label>Title Style</label>${createStyleControlsHTML(key, styleObj, { textAlign: true, color: true, size: true, weight: true, family: true })}`; 
-        const sectionTitleField = (title, key = 'title') => `<div class="control-group"><label>Section Title</label><input type="text" data-key="${key}" value="${title || ''}"></div>`; 
-        const createOptionalElementEditor = (key, label) => { 
-            const element = c[key]; 
-            if (!element) return ''; 
-            return `<div class="control-group"> <div class="optional-element-header"> <label>${label}</label> <label><input type="checkbox" data-key="${key}.enabled" ${element.enabled ? 'checked' : ''}> Show</label> </div> <input type="text" data-key="${key}.text" value="${element.text || ''}"> ${createStyleControlsHTML(`${key}.style`, element.style)} </div>`; 
-        };
-        
-        let allFields = [createStickerEditor(block), createInnerBlocksEditor(block), createBackgroundControlsHTML(block), createMirrorControlsHTML(block)];
-        
-        switch(block.type) { 
-            case 'hero': 
-                fieldsHTML = [
-                    createImageInputHTML('imageUrl', c.imageUrl, 'Background Image URL'),
-                    createOpacityControl('opacity', c.opacity, 'Background Opacity'),
-                    `<div class="control-group"><label>Block Width</label><select data-key="fullWidth"><option value="true" ${c.fullWidth ? 'selected' : ''}>Full Width</option><option value="false" ${!c.fullWidth ? 'selected' : ''}>Limited (use global width)</option></select></div>`,
-                    createOptionalElementEditor('names', 'Names'), 
-                    '<hr class="style-separator">',
-                    createOptionalElementEditor('subtitle', 'Subtitle'), 
-                    '<hr class="style-separator">',
-                    createOptionalElementEditor('date', 'Date'), 
-                    '<hr class="style-separator">',
-                    aspectRatioField,
-                    bgPosField
-                ].join('') + allFields.join(''); 
-                break; 
-            case 'text-block': 
-                fieldsHTML = [
-                    `<div class="control-group"><label>Title (optional)</label><input type="text" data-key="title" value="${c.title || ''}"></div>`,
-                    titleStyleField(c.titleStyle),
-                    '<hr class="style-separator">',
-                    `<div class="control-group"><label>Paragraph Text</label><textarea data-key="text">${c.text || ''}</textarea></div>`,
-                    createStyleControlsHTML('textStyle', c.textStyle, { textAlign: true, color: true, size: true, weight: true, family: true })
-                ].join('') + allFields.join(''); 
-                break; 
-            case 'rsvp': 
-                fieldsHTML = [
-                    sectionTitleField(c.title),
-                    titleStyleField(c.titleStyle),
-                    '<hr class="style-separator">',
-                    `<div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${c.subtitle || ''}</textarea>${createStyleControlsHTML('subtitleStyle', c.subtitleStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}</div>`,
-                    '<hr class="style-separator">',
-                    `<label>Button Style</label><div class="style-controls"><div class="style-controls-grid"><div class="control-group"><label>Background Color</label><input type="color" data-key="buttonStyle.backgroundColor" value="${c.buttonStyle.backgroundColor || '#c5a98b'}"></div><div class="control-group"><label>Text Color</label><input type="color" data-key="buttonStyle.color" value="${c.buttonStyle.color || '#FFFFFF'}"></div></div><div style="margin-top: 10px;">${createStyleControlsHTML('buttonStyle', c.buttonStyle, {color: false, size: true, weight: true, family: true})}</div></div>`
-                ].join('') + allFields.join('');
-                break; 
-            case 'countdown': 
-                fieldsHTML = [
-                    sectionTitleField(c.title),
-                    titleStyleField(c.titleStyle),
-                    '<hr class="style-separator">',
-                    `<div class="control-group"><label>Target Date & Time</label><input type="datetime-local" data-key="targetDate" value="${c.targetDate || ''}"></div>`,
-                    '<hr class="style-separator">',
-                    '<label>Numbers Style (e.g., 40)</label>',
-                    createStyleControlsHTML('numberStyle', c.numberStyle, { color: true, size: true, weight: true, family: true }),
-                    '<hr class="style-separator">',
-                    '<label>Labels Style (e.g., Days)</label>',
-                    createStyleControlsHTML('labelStyle', c.labelStyle, { color: true, size: true, weight: true, family: true })
-                ].join('') + allFields.join('');
-                break;  
-            case 'location': 
-                 fieldsHTML = [
-                    sectionTitleField(c.title),
-                    titleStyleField(c.titleStyle),
-                    '<hr class="style-separator">',
-                    `<div class="control-group"><label>Smart Location Search</label><input type="text" class="smart-location-search" placeholder="e.g., Per Se, New York"></div>`,
-                    `<div class="control-group"><label>Address</label><textarea data-key="address.text">${c.address ? c.address.text : ''}</textarea>${createStyleControlsHTML('address.style', c.address ? c.address.style : {}, { textAlign: true, color: true, size: true, weight: true, family: true })}</div>`,
-                    createImageInputHTML('imageUrl', c.imageUrl, 'Photo URL'),
-                    createOpacityControl('opacity', c.opacity, 'Photo Opacity'),
-                    `<div class="control-group"><label>Google Maps Link</label><input type="url" data-key="mapLink" value="${c.mapLink || ''}"></div>`
-                 ].join('') + allFields.join(''); 
-                break;  
-            case 'schedule':
-                fieldsHTML = [
-                    sectionTitleField(c.title),
-                    titleStyleField(c.titleStyle),
-                    '<hr class="style-separator">',
-                    createScheduleItemsEditor(block)
-                ].join('') + allFields.join('');
-                break;
-            case 'image':
-                 fieldsHTML = [
-                    createImageInputHTML('imageUrl', c.imageUrl, 'Image URL'),
-                    createOpacityControl('opacity', c.opacity, 'Image Opacity'),
-                    `<div class="control-group"><label>Title (optional)</label><input type="text" data-key="title" value="${c.title || ''}"></div>`,
-                    createStyleControlsHTML('titleStyle', c.titleStyle, { textAlign: true, color: true, size: true, weight: true, family: true }),
-                    '<hr class="style-separator">',
-                    `<div class="control-group"><label>Description (optional)</label><textarea data-key="description">${c.description || ''}</textarea></div>`,
-                    createStyleControlsHTML('descriptionStyle', c.descriptionStyle, { textAlign: true, color: true, size: true, weight: true, family: true }),
-                    '<hr class="style-separator">',
-                    `<div class="control-group"><label>Caption (optional)</label><input type="text" data-key="caption" value="${c.caption || ''}"></div>`
-                ].join('') + allFields.join('');
-                break;
-            case 'form-header':
-                fieldsHTML = [
-                    sectionTitleField(c.title),
-                    titleStyleField(c.titleStyle),
-                    '<hr class="style-separator">',
-                    `<div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${c.subtitle || ''}</textarea></div>`,
-                    createImageInputHTML('imageUrl', c.imageUrl, 'Background Image URL'),
-                    createOpacityControl('opacity', c.opacity, 'Background Opacity'),
-                    aspectRatioField
-                ].join('') + allFields.join('');
-                break;
-            case 'input-question':
-            case 'textarea-question':
-                fieldsHTML = `<div class="control-group"><label>Question Text</label><input type="text" data-key="title" value="${c.title || ''}"></div><div class="control-group"><label><input type="checkbox" data-key="required" ${c.required ? 'checked' : ''}> Required</label></div>` + createBackgroundControlsHTML(block);
-                break;
-            case 'radio-question':
-                const optionsHTML = (c.options || []).map((option, index) => {
-                    return `<div class="schedule-item-editor" data-item-id="${option.id}">
-                        <div class="schedule-item-editor-header"><h4>Option ${index + 1}</h4><button class="delete-schedule-item-btn" title="Delete this option">Delete</button></div>
-                        <input type="text" class="sub-item-input" data-item-key="text" value="${option.text || ''}" placeholder="Option text">
+    const renderStickers = (stickers, blockId) => {
+        if (!stickers || stickers.length === 0) return '';
+        return stickers.map(sticker => {
+            const opacityStyle = (sticker.opacity !== undefined) ? `opacity: ${sticker.opacity};` : '';
+            return `<div class="sticker-wrapper" data-element-id="${sticker.id}" data-block-id="${blockId}" style="left: ${sticker.x}px; top: ${sticker.y}px; width: ${sticker.width}px; transform: rotate(${sticker.rotation || 0}deg); ${opacityStyle}">
+                        <img src="${sticker.src}" alt="sticker">
+                        <div class="rotate-handle"></div><div class="resize-handle se"></div>
                     </div>`;
-                }).join('');
-                fieldsHTML = `<div class="control-group"><label>Question Text</label><input type="text" data-key="title" value="${c.title || ''}"></div><div class="control-group"><label><input type="checkbox" data-key="required" ${c.required ? 'checked' : ''}> Required</label></div><div class="control-group"><label>Options</label><div class="schedule-items-list">${optionsHTML}</div><button class="add-sub-item-btn action-button" data-list-key="options" style="font-size: 12px; padding: 5px; margin-top: 10px;">+ Add Option</button></div>` + createBackgroundControlsHTML(block);
-                break;
-            case 'form-footer':
-                fieldsHTML = `<div class="control-group"><label>Footer Text</label><input type="text" data-key="text" value="${c.text || ''}"></div>` + allFields.join('');
-                break;
-            default: 
-                fieldsHTML = 'No editor available for this block type.'; 
-        } 
-        return fieldsHTML; 
-    }
+        }).join('');
+    };
     
-    function renderEditor() { 
-        const container = document.getElementById('editor-content'); 
-        const currentlyOpen = [...container.querySelectorAll('.editor-block-content.is-open')].map(el => el.closest('.editor-block').dataset.id); 
-        container.innerHTML = ''; 
-        pageBlocks.forEach(block => { 
-            const tpl = document.getElementById('editor-block-template').content.cloneNode(true); 
-            const editorBlock = tpl.querySelector('.editor-block'); 
-            editorBlock.dataset.id = block.id; 
-            const title = block.type.charAt(0).toUpperCase() + block.type.slice(1).replace(/-/g, ' '); 
-            editorBlock.querySelector('.editor-block-title').textContent = title; 
-            const contentDiv = editorBlock.querySelector('.editor-block-content'); 
-            contentDiv.innerHTML = createEditorFieldsForBlock(block); 
-            if (currentlyOpen.includes(block.id)) { 
-                contentDiv.classList.add('is-open'); 
-                editorBlock.querySelector('.toggle-btn').textContent = '▲'; 
-            } 
-            container.appendChild(tpl); 
-        }); 
-        initializeMapsForEditor(); 
-    }
-    
-    async function handleMapLinkBlur(url, blockIndex) { 
-        // ... (This function remains unchanged)
-    }
-    
-    function initializeMapsForEditor() { 
-        if (typeof google === 'undefined' || typeof google.maps === 'undefined' || typeof google.maps.places === 'undefined') return; 
-        document.querySelectorAll('.smart-location-search').forEach(input => { 
-            if (input.dataset.mapsInitialized) return; 
-            input.dataset.mapsInitialized = 'true'; 
-            const autocomplete = new google.maps.places.Autocomplete(input, { fields: ["name", "formatted_address", "photos", "url"], types: ["establishment"] }); 
-            autocomplete.addListener('place_changed', () => { 
-                const place = autocomplete.getPlace(); 
-                if (!place) return; 
-                const blockDiv = input.closest('.editor-block'); 
-                const blockId = blockDiv.dataset.id; 
-                const blockIndex = pageBlocks.findIndex(b => b.id === blockId); 
-                if (blockIndex === -1) return; 
-                const content = pageBlocks[blockIndex].content; 
-                content.title = place.name || ''; 
-                if (!content.address) content.address = { text: '', style: {} };
-                content.address.text = place.formatted_address || ''; 
-                content.mapLink = place.url || ''; 
-                if (place.photos && place.photos.length > 0) { 
-                    content.imageUrl = place.photos[0].getUrl({ 'maxWidth': 1600 }); 
-                } 
-                renderEditor(); 
-                renderPreview(); 
-            }); 
-        }); 
-    }
-    
-    function setupEventListeners() { 
-        const editorContent = document.getElementById('editor-content'); 
-        const handleEditorChange = (e) => { 
-            const input = e.target; 
-            const blockDiv = input.closest('.editor-block'); 
-            if (!blockDiv) return; 
-            const blockId = blockDiv.dataset.id; 
-            const blockIndex = pageBlocks.findIndex(b => b.id === blockId); 
-            if (blockIndex === -1) return; 
-            const key = input.dataset.key; 
-            if (input.matches('.sub-item-input')) { 
-                const subItemDiv = input.closest('.schedule-item-editor'); 
-                const subItemId = subItemDiv.dataset.itemId; 
-                const subItemKey = input.dataset.itemKey; 
-                const listKey = pageBlocks[blockIndex].content.items ? 'items' : 'options'; 
-                const subItemIndex = pageBlocks[blockIndex].content[listKey].findIndex(i => i.id === subItemId); 
-                if (subItemIndex > -1) pageBlocks[blockIndex].content[listKey][subItemIndex][subItemKey] = input.value; 
-            } else if (key) { 
-                let value = input.type === 'checkbox' ? input.checked : input.value; 
-                if (input.type === 'number') value = parseFloat(value) || 0; 
-                if (input.type === 'range') value = parseFloat(value);
-                if (key === 'fullWidth') value = value === 'true';
-                const keys = key.split('.'); 
-                let current = pageBlocks[blockIndex].content; 
-                for (let i = 0; i < keys.length - 1; i++) { 
-                    if (!current[keys[i]]) current[keys[i]] = {};
-                    current = current[keys[i]];
-                } 
-                current[keys[keys.length - 1]] = value; 
-                if (input.type === 'range' && input.classList.contains('opacity-slider')) {
-                    const span = input.nextElementSibling;
-                    if (span) span.textContent = `${Math.round(value * 100)}%`;
-                }
-            } 
-            renderPreview(); 
-        }; 
-        editorContent.addEventListener('input', handleEditorChange); 
-        editorContent.addEventListener('change', handleEditorChange); 
-        editorContent.addEventListener('blur', (e) => { 
-             const input = e.target;
-             const blockDiv = input.closest('.editor-block');
-             if (blockDiv && pageBlocks[pageBlocks.findIndex(b => b.id === blockDiv.dataset.id)]?.type === 'location' && input.dataset.key === 'mapLink') {
-                 const blockIndex = pageBlocks.findIndex(b => b.id === blockDiv.dataset.id);
-                 handleMapLinkBlur(input.value, blockIndex);
-             }
-        }, true);
+    const renderInnerBlocks = (innerBlocks, blockId) => {
+        if (!innerBlocks || innerBlocks.length === 0) return '';
+        return innerBlocks.map(block => {
+            return `<div class="inner-block-wrapper" data-element-id="${block.id}" data-block-id="${blockId}" style="left: ${block.x}px; top: ${block.y}px; width: ${block.width}px; transform: rotate(${block.rotation || 0}deg);">
+                        ${makeTextEditable(block.text, blockId, `innerBlocks.${innerBlocks.indexOf(block)}.style`, block.style)}
+                        <div class="rotate-handle"></div><div class="resize-handle se"></div>
+                    </div>`;
+        }).join('');
+    };
+
+    const createHeroHTML = (block, s) => {
+        const c = block.content;
+        const mirrorClass = getMirrorClass(c);
+        const isLimited = !c.fullWidth;
+        const headerClasses = `hero-block ${isLimited ? 'limited-width' : ''}`;
+        const headerStyle = `aspect-ratio: ${c.aspectRatio || '16/9'}; max-width: ${isLimited ? (s.maxWidth || '800px') : 'none'};`;
+        const imageHTML = c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'}; opacity: ${c.opacity || 1};" alt="">` : '';
         
-    editorContent.addEventListener('click', (e) => { 
-            const target = e.target; 
-            const blockDiv = target.closest('.editor-block'); 
-            if (!blockDiv) return; 
-            const blockId = blockDiv.dataset.id; 
-            const blockIndex = pageBlocks.findIndex(b => b.id === blockId); 
-            if (blockIndex === -1) return;
-            
-            if (target.matches('.add-element-btn')) {
-                openElementLibrary(target.dataset.blockId);
-            } else if (target.matches('.delete-sticker-btn')) { 
-                const stickerIndex = parseInt(target.closest('.sticker-editor').dataset.stickerIndex, 10); 
-                pageBlocks[blockIndex].content.stickers.splice(stickerIndex, 1); 
-                renderEditor(); 
-                renderPreview(); 
-            } else if (target.matches('.mirror-btn')) {
-                const mirrorType = target.dataset.mirror;
-                const currentValue = target.dataset.current === 'true';
-                const newValue = !currentValue;
-                
-                if (mirrorType === 'horizontal') {
-                    pageBlocks[blockIndex].content.mirrorHorizontal = newValue;
-                } else if (mirrorType === 'vertical') {
-                    pageBlocks[blockIndex].content.mirrorVertical = newValue;
-                }
-                
-                renderEditor();
-                renderPreview();
-            } else if (target.matches('.add-inner-block-btn')) { 
-                const newInnerBlock = { 
-                    id: `inner-${Date.now()}`, 
-                    type: 'text', 
-                    text: 'Floating Text', 
-                    style: {...defaultTextStyle, color: '#000000'},
-                    x: 20,
-                    y: 20,
-                    width: 200
-                }; 
-                if (!pageBlocks[blockIndex].content.innerBlocks) pageBlocks[blockIndex].content.innerBlocks = []; 
-                pageBlocks[blockIndex].content.innerBlocks.push(newInnerBlock); 
-                renderEditor(); 
-                renderPreview(); 
-            } else if (target.matches('.delete-inner-block-btn')) { 
-                const innerIndex = parseInt(target.closest('.inner-block-editor').dataset.index, 10); 
-                pageBlocks[blockIndex].content.innerBlocks.splice(innerIndex, 1); 
-                renderEditor(); 
-                renderPreview(); 
-            } else if (target.closest('.delete-block-btn')) { 
-                if (confirm('Are you sure?')) { 
-                    pageBlocks.splice(blockIndex, 1); 
-                    renderEditor(); 
-                    renderPreview(); 
-                } 
-            } else if (target.closest('.add-sub-item-btn')) { 
-                const listKey = target.dataset.listKey; 
-                if (listKey === 'items') {
-                    pageBlocks[blockIndex].content[listKey].push({ 
-                        id: `item-${Date.now()}`, time: '3:00 PM', title: 'New Event', desc: 'Event description',
-                        timeStyle: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#c5a98b', fontWeight: '700' },
-                        titleStyle: { fontFamily: 'Playfair Display', fontSize: '1.4rem', color: '#333333', fontWeight: '700' },
-                        descStyle: { fontFamily: 'Montserrat', fontSize: '1rem', color: '#666666', fontWeight: '400' }
-                    });
-                } else if (listKey === 'options') {
-                    pageBlocks[blockIndex].content[listKey].push({ id: `opt-${Date.now()}`, text: 'New Option' });
-                }
-                renderEditor(); 
-                renderPreview(); 
-            } else if (target.closest('.delete-schedule-item-btn')) { 
-                const subItemId = target.closest('.schedule-item-editor').dataset.itemId; 
-                const listKey = pageBlocks[blockIndex].content.items ? 'items' : 'options'; 
-                pageBlocks[blockIndex].content[listKey] = pageBlocks[blockIndex].content[listKey].filter(i => i.id !== subItemId); 
-                renderEditor(); 
-                renderPreview(); 
-            } else if (target.closest('.editor-block-header')) { 
-                const content = blockDiv.querySelector('.editor-block-content'); 
-                if (content) { 
-                    content.classList.toggle('is-open'); 
-                    blockDiv.querySelector('.toggle-btn').textContent = content.classList.contains('is-open') ? '▲' : '▼'; 
-                } 
-            } 
-        }); 
-    
-    // ... (rest of the file from addBlockModal onwards is unchanged and correct)
-    
-    const addBlockModal = document.getElementById('add-block-modal'); 
-    document.getElementById('add-block-btn').addEventListener('click', () => addBlockModal.classList.add('is-visible')); 
-    document.getElementById('modal-close-btn').addEventListener('click', () => addBlockModal.classList.remove('is-visible')); 
-    addBlockModal.addEventListener('click', (e) => { 
-        if (e.target === addBlockModal) addBlockModal.classList.remove('is-visible'); 
-    }); 
-    document.getElementById('add-block-options').addEventListener('click', (e) => { 
-        if (e.target.tagName === 'BUTTON' && e.target.dataset.type) { 
-            const newBlock = getNewBlockData(e.target.dataset.type); 
-            pageBlocks.push(newBlock); 
-            renderEditor(); 
-            renderPreview(); 
-            addBlockModal.classList.remove('is-visible'); 
-        } 
-    });
-    
-    let resizeObserver; 
-    function setupResizeObserver() { 
-        if (resizeObserver) resizeObserver.disconnect(); 
-        const previewBody = iframe.contentWindow.document.body; 
-        if (!previewBody) return; 
-        resizeObserver = new ResizeObserver(() => { 
-            iframe.style.height = previewBody.scrollHeight + 'px'; 
-        }); 
-        resizeObserver.observe(previewBody); 
-        iframe.style.height = previewBody.scrollHeight + 'px'; 
-    }
-    
-    function renderPreview() { 
-        if (iframe.contentWindow && typeof iframe.contentWindow.renderPage === 'function') { 
-            iframe.contentWindow.renderPage(pageBlocks, pageSettings); 
-        } 
-    }
-    
-    function initSortable() { 
-        const c = document.getElementById('editor-content'); 
-        Sortable.create(c, { 
-            handle: '.drag-handle', 
-            animation: 150, 
-            onEnd: (evt) => { 
-                const mi = pageBlocks.splice(evt.oldIndex, 1)[0]; 
-                pageBlocks.splice(evt.newIndex, 0, mi); 
-                renderPreview(); 
-            }
-        }); 
-    }
-    
-    document.getElementById('share-button').addEventListener('click', async function() {
-        const statusText = document.getElementById('status-text');
-        this.disabled = true;
-        statusText.innerText = 'Processing...';
-        saveCurrentPageData();
-
-        const currentApiUrl = document.getElementById('sheetdb-api-input').value.trim();
-        if (!currentApiUrl) {
-            alert('Please enter your SheetDB API URL before generating the link.');
-            statusText.innerText = '';
-            this.disabled = false;
-            return;
-        }
+        const subtitleHTML = (c.subtitle && c.subtitle.enabled) ? makeTextEditable(c.subtitle.text, block.id, 'subtitle.style', c.subtitle.style) : '';
+        const namesHTML = (c.names && c.names.enabled) ? makeTextEditable(c.names.text, block.id, 'names.style', c.names.style) : '';
+        const dateHTML = (c.date && c.date.enabled) ? makeTextEditable(c.date.text, block.id, 'date.style', c.date.style) : '';
         
-        rsvpFormData.settings.sheetDbApiUrl = currentApiUrl;
-        const dataToSave = { main: mainPageData, rsvp: rsvpFormData };
+        return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
+                    <header class="${headerClasses}" style="${headerStyle}">
+                        ${imageHTML}
+                        <div class="hero-content">${subtitleHTML}${namesHTML}${dateHTML}</div>
+                        ${renderStickers(c.stickers, block.id)}
+                        ${renderInnerBlocks(c.innerBlocks, block.id)}
+                    </header>
+                </div>`;
+    };
 
-        try {
-            statusText.innerText = 'Saving...';
-            const response = await fetch('/.netlify/functions/create-bundle', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dataToSave)
+    const createLocationHTML = (block, s) => { 
+        const c = block.content; 
+        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${getBlockBackgroundStyle(c)}"></div>` : '';
+        const imageHTML = c.imageUrl ? `<img src="${c.imageUrl}" alt="Venue" style="width:100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-bottom: 20px; opacity:${c.opacity};">` : ''; 
+        const mirrorClass = getMirrorClass(c);
+        
+        return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+                ${backgroundDiv}
+                ${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}
+                ${makeTextEditable(c.address.text, block.id, 'address.style', c.address.style)}
+                ${imageHTML}
+                <a href="${c.mapLink}" class="rsvp-button" target="_blank">View on Map</a>
+                ${renderStickers(c.stickers, block.id)}
+                ${renderInnerBlocks(c.innerBlocks, block.id)}
+            </section>
+        </div>`; 
+    };
+    
+    const createTextBlockHTML = (block, s) => { 
+        const c = block.content; 
+        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${getBlockBackgroundStyle(c)}"></div>` : '';
+        const titleHTML = c.title ? makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle) : ''; 
+        const textHTML = c.text ? makeTextEditable(c.text, block.id, 'textStyle', c.textStyle) : '';
+        const mirrorClass = getMirrorClass(c);
+        
+        return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+                ${backgroundDiv}
+                ${titleHTML}${textHTML}
+                ${renderStickers(c.stickers, block.id)}
+                ${renderInnerBlocks(c.innerBlocks, block.id)}
+            </section>
+        </div>`; 
+    };
+
+    const createScheduleHTML = (block, s) => { 
+        const c = block.content; 
+        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${getBlockBackgroundStyle(c)}"></div>` : '';
+        const mirrorClass = getMirrorClass(c);
+        
+        return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; text-align: left;">
+                ${backgroundDiv}
+                <div style="text-align: center;">${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</div>
+                <ul style="list-style:none;padding:0; margin-top: 20px;">
+                    ${(c.items || []).map((i, index) => `
+                        <li style="display:flex;gap:20px;padding:15px 0;border-bottom:1px solid #eee; align-items: flex-start;">
+                            <div style="flex-shrink: 0; min-width: 80px;">${makeTextEditable(i.time, block.id, `items.${index}.timeStyle`, i.timeStyle)}</div>
+                            <div>
+                                ${makeTextEditable(i.title, block.id, `items.${index}.titleStyle`, i.titleStyle)}
+                                ${makeTextEditable(i.desc, block.id, `items.${index}.descStyle`, i.descStyle)}
+                            </div>
+                        </li>
+                    `).join('')}
+                </ul>
+                ${renderStickers(c.stickers, block.id)}
+                ${renderInnerBlocks(c.innerBlocks, block.id)}
+            </section>
+        </div>`; 
+    };
+    
+    const createCountdownHTML = (block, s) => { 
+        const c = block.content; 
+        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${getBlockBackgroundStyle(c)}"></div>` : '';
+        
+        const inner = `<div id="countdown">
+            <div class="time-block"><div id="days" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div>${makeTextEditable('Days', block.id, 'labelStyle', c.labelStyle)}</div></div>
+            <div class="time-block"><div id="hours" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div>${makeTextEditable('Hours', block.id, 'labelStyle', c.labelStyle)}</div></div>
+            <div class="time-block"><div id="minutes" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div>${makeTextEditable('Minutes', block.id, 'labelStyle', c.labelStyle)}</div></div>
+            <div class="time-block"><div id="seconds" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div>${makeTextEditable('Seconds', block.id, 'labelStyle', c.labelStyle)}</div></div>
+        </div>`; 
+        const mirrorClass = getMirrorClass(c);
+        
+        return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+                ${backgroundDiv}
+                ${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}
+                ${inner}
+                ${renderStickers(c.stickers, block.id)}
+                ${renderInnerBlocks(c.innerBlocks, block.id)}
+            </section>
+        </div>`; 
+    };
+
+    const createRsvpHTML = (block, s, rsvpLink) => { 
+        const c = block.content; 
+        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${getBlockBackgroundStyle(c)}"></div>` : '';
+        const mirrorClass = getMirrorClass(c);
+        
+        return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+                ${backgroundDiv}
+                ${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}
+                ${makeTextEditable(c.subtitle, block.id, 'subtitleStyle', c.subtitleStyle)}
+                <div><a href="${rsvpLink}" class="rsvp-button" style="${getStyleString(c.buttonStyle)}">I'll Be There!</a></div>
+                ${renderStickers(c.stickers, block.id)}
+                ${renderInnerBlocks(c.innerBlocks, block.id)}
+            </section>
+        </div>`; 
+    };
+    
+    function startCountdown(targetDate) { 
+        if (!targetDate) return; 
+        if (countdownInterval) clearInterval(countdownInterval); 
+        const targetTime = new Date(targetDate).getTime(); 
+        const update = () => {
+            const now = new Date().getTime(), distance = targetTime - now; 
+            if (distance < 0) { 
+                clearInterval(countdownInterval); 
+                document.querySelectorAll("#days, #hours, #minutes, #seconds").forEach(el => {
+                    const innerDiv = el.querySelector('.editable-text > div');
+                    if (innerDiv) innerDiv.textContent = '00';
+                });
+                return; 
+            } 
+            ['days','hours','minutes','seconds'].forEach(unit => {
+                const el = document.getElementById(unit)?.querySelector('.editable-text > div');
+                if (el) {
+                    let val;
+                    if(unit === 'days') val = Math.floor(distance / 864e5);
+                    if(unit === 'hours') val = Math.floor(distance % 864e5 / 36e5);
+                    if(unit === 'minutes') val = Math.floor(distance % 36e5 / 6e4);
+                    if(unit === 'seconds') val = Math.floor(distance % 6e4 / 1e3);
+                    el.textContent = val.toString().padStart(2, '0');
+                }
             });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.error || `Server Error (${response.status})`);
-            
-            const mainLink = result.link;
-            await navigator.clipboard.writeText(mainLink);
-            
-            const headers = rsvpFormData.blocks
-                .filter(b => ['input-question', 'textarea-question', 'radio-question'].includes(b.type))
-                .map(b => b.content.title);
-            const headersString = headers.join(', ');
-
-            const instructionContent = document.getElementById('instruction-content');
-            instructionContent.innerHTML = `
-                <h2>Success! Your links are ready.</h2>
-                <p><strong>Your Invitation Link (copied to clipboard):</strong></p>
-                <p style="word-break: break-all; background:#f0f2f5; padding:8px; border-radius:4px;">${mainLink}</p>
-                <hr style="margin: 20px 0;">
-                <h3><strong>Next Step:</strong> Prepare Your Google Sheet</h3>
-                <ol>
-                    <li>Open your Google Sheet.</li>
-                    <li>Copy the headers below and paste them into the <strong>first row</strong> of your sheet.</li>
-                </ol>
-                <pre id="headers-to-copy" style="background: #eee; padding: 10px; border-radius: 5px; cursor: pointer;">${headersString}</pre>
-                <button id="copy-headers-btn" class="action-button" style="background-color: #007bff;">Copy Headers</button>
-            `;
-            document.getElementById('instruction-modal').classList.add('is-visible');
-            document.getElementById('copy-headers-btn').addEventListener('click', () => {
-                navigator.clipboard.writeText(headersString).then(() => alert('Headers copied!'));
-            });
-            statusText.innerText = 'Done! Follow the instructions.';
-        } catch (err) {
-            statusText.innerText = `Error: ${err.message}`;
-        } finally {
-            this.disabled = false;
-        }
-    });
-    
-    const editMainBtn = document.getElementById('edit-main-btn'), 
-          editRsvpBtn = document.getElementById('edit-rsvp-btn'), 
-          globalWidthInput = document.getElementById('global-width-input'), 
-          globalStyleSelect = document.getElementById('global-style-select'), 
-          globalBgImageGroup = document.getElementById('global-bg-image-group'), 
-          globalBgImageInput = document.getElementById('global-bg-image-input'),
-          globalBgColorInput = document.getElementById('global-bg-color-input'),
-          modeBlocksBtn = document.getElementById('mode-blocks'),
-          modeRibbonBtn = document.getElementById('mode-ribbon');
-    
-    function toggleBgImageField() { 
-        globalBgImageGroup.style.display = (pageSettings.style === 'modern') ? 'block' : 'none'; 
-    } 
-    
-    globalStyleSelect.addEventListener('change', () => { 
-        pageSettings.style = globalStyleSelect.value; 
-        toggleBgImageField(); 
-        renderPreview(); 
-    }); 
-    
-    globalBgImageInput.addEventListener('input', () => { 
-        pageSettings.backgroundImage = globalBgImageInput.value; 
-        renderPreview(); 
-    }); 
-    
-    globalBgColorInput.addEventListener('input', () => { 
-        pageSettings.backgroundColor = globalBgColorInput.value; 
-        renderPreview(); 
-    }); 
-    
-    globalWidthInput.addEventListener('input', () => { 
-        pageSettings.maxWidth = globalWidthInput.value; 
-        renderPreview(); 
-    }); 
-
-    modeBlocksBtn.addEventListener('click', () => {
-        pageSettings.displayMode = 'blocks';
-        modeBlocksBtn.classList.add('active');
-        modeRibbonBtn.classList.remove('active');
-        renderPreview();
-    });
-
-    modeRibbonBtn.addEventListener('click', () => {
-        pageSettings.displayMode = 'ribbon';
-        modeRibbonBtn.classList.add('active');
-        modeBlocksBtn.classList.remove('active');
-        renderPreview();
-    });
-
-    document.getElementById('sheetdb-api-input').addEventListener('input', (e) => {
-        if (currentTemplate === rsvpFormData.template) {
-            rsvpFormData.settings.sheetDbApiUrl = e.target.value;
-        }
-    });
-    
-    function saveCurrentPageData() {
-        const data = {
-            settings: JSON.parse(JSON.stringify(pageSettings)),
-            blocks: JSON.parse(JSON.stringify(pageBlocks))
         };
+        update();
+        countdownInterval = setInterval(update, 1000); 
+    }
+
+    function setupTextEditing() {
+        if (window.self === window.top) return;
         
-        if (currentTemplate === mainPageData.template) {
-            mainPageData = {...mainPageData, ...data};
-        } else {
-            rsvpFormData = {...rsvpFormData, ...data};
-            if (!rsvpFormData.settings) rsvpFormData.settings = {};
-            rsvpFormData.settings.sheetDbApiUrl = document.getElementById('sheetdb-api-input').value;
+        document.body.addEventListener('click', (e) => {
+            const editableElement = e.target.closest('.editable-text');
+            if (editableElement) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const blockId = editableElement.dataset.blockId;
+                const elementKey = editableElement.dataset.elementKey;
+                const computedStyle = window.getComputedStyle(editableElement.firstElementChild); // Get style from inner div
+                
+                const currentStyle = {
+                    fontFamily: computedStyle.fontFamily.replace(/["']/g, '').split(',')[0],
+                    fontSize: computedStyle.fontSize,
+                    color: rgbToHex(computedStyle.color),
+                    fontWeight: computedStyle.fontWeight,
+                    textAlign: computedStyle.textAlign
+                };
+                
+                window.parent.postMessage({ type: 'TEXT_ELEMENT_CLICKED', payload: { blockId, elementKey, currentStyle } }, '*');
+            } else {
+                 window.parent.postMessage({ type: 'HIDE_TEXT_TOOLBAR' }, '*');
+            }
+        });
+    }
+
+    function rgbToHex(rgb) {
+        if (!rgb || !rgb.startsWith('rgb')) return rgb;
+        const match = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+        if (!match) return '#000000';
+        const toHex = c => ('0' + parseInt(c).toString(16)).slice(-2);
+        return "#" + toHex(match[1]) + toHex(match[2]) + toHex(match[3]);
+    }
+
+    function renderPage(blocks, settings, rsvpLink = '#') {
+        if (!blocks || !settings) return;
+        document.body.className = '';
+        if (settings.style) document.body.classList.add(`style-${settings.style}`);
+        if (settings.displayMode) document.body.classList.add(`style-${settings.displayMode}`);
+        
+        document.body.style.backgroundColor = settings.backgroundColor || '#f8f7f5';
+        document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? `url('${settings.backgroundImage}')` : 'none';
+        
+        const container = document.getElementById('page-content');
+        container.innerHTML = '';
+        let countdownBlockContent = null;
+
+        blocks.forEach(block => {
+            let blockHTML = '';
+            switch(block.type) {
+                case 'hero': blockHTML = createHeroHTML(block, settings); break;
+                case 'text-block': blockHTML = createTextBlockHTML(block, settings); break;
+                case 'countdown': blockHTML = createCountdownHTML(block, settings); countdownBlockContent = block.content; break;
+                case 'schedule': blockHTML = createScheduleHTML(block, settings); break;
+                case 'location': blockHTML = createLocationHTML(block, settings); break;
+                case 'rsvp': blockHTML = createRsvpHTML(block, settings, rsvpLink); break;
+                default: blockHTML = `<!-- Unsupported block type: ${block.type} -->`;
+            }
+            container.innerHTML += blockHTML;
+        });
+
+        if (countdownBlockContent) startCountdown(countdownBlockContent.targetDate);
+
+        if (window.self !== window.top) {
+            setTimeout(() => {
+                initElementInteraction();
+                setupTextEditing();
+            }, 150);
         }
     }
     
-    function switchEditorMode(target) {
-        currentTemplate = target.template;
-        pageSettings = JSON.parse(JSON.stringify(target.settings));
-        pageBlocks = JSON.parse(JSON.stringify(target.blocks));
+    function initElementInteraction() {
+        if (typeof interact === 'undefined') return;
         
-        globalWidthInput.value = pageSettings.maxWidth;
-        globalStyleSelect.value = pageSettings.style;
-        globalBgImageInput.value = pageSettings.backgroundImage || '';
-        globalBgColorInput.value = pageSettings.backgroundColor || '#f8f7f5';
-        
-        if (pageSettings.displayMode === 'ribbon') {
-            modeRibbonBtn.classList.add('active');
-            modeBlocksBtn.classList.remove('active');
-        } else {
-            modeBlocksBtn.classList.add('active');
-            modeRibbonBtn.classList.remove('active');
-        }
-        
-        toggleBgImageField();
-        
-        iframe.src = `templates/${currentTemplate}?v=${Date.now()}`;
-        
-        editMainBtn.classList.toggle('active', currentTemplate === mainPageData.template);
-        editRsvpBtn.classList.toggle('active', currentTemplate === rsvpFormData.template);
+        const updateElementInParent = (target, newProps) => {
+            const blockId = target.dataset.blockId;
+            const elementId = target.dataset.elementId;
+            const type = target.classList.contains('sticker-wrapper') ? 'UPDATE_STICKER' : 'UPDATE_INNER_BLOCK';
+            window.parent.postMessage({ type, payload: { blockId, elementId, newProps } }, '*');
+        };
 
-        const apiSettingsDiv = document.querySelector('.api-settings');
-        const sheetDbApiInput = document.getElementById('sheetdb-api-input');
-
-        if (currentTemplate === rsvpFormData.template) {
-            apiSettingsDiv.style.display = 'block';
-            sheetDbApiInput.value = target.settings.sheetDbApiUrl || '';
-        } else {
-            apiSettingsDiv.style.display = 'none';
-        }
-        updateAddBlockOptions();
-    }
-
-    function updateAddBlockOptions() {
-        const addBlockOptions = document.getElementById('add-block-options');
-        const isRsvpMode = currentTemplate === rsvpFormData.template;
-        
-        const buttons = addBlockOptions.querySelectorAll('button');
-        buttons.forEach(btn => {
-            const type = btn.dataset.type;
-            const formTypes = ['form-header', 'input-question', 'textarea-question', 'radio-question', 'form-footer'];
-            if (isRsvpMode) {
-                const allowedTypes = ['hero', 'text-block', 'image', ...formTypes];
-                btn.style.display = allowedTypes.includes(type) ? 'block' : 'none';
-            } else {
-                btn.style.display = formTypes.includes(type) ? 'none' : 'block';
-            }
-        });
-
-        const separators = addBlockOptions.querySelectorAll('hr');
-        separators.forEach(sep => {
-            if (isRsvpMode) {
-                sep.style.display = 'block';
-            } else {
-                const nextSibling = sep.nextElementSibling;
-                if (nextSibling && nextSibling.dataset.type === 'form-header') {
-                    sep.style.display = 'none';
-                } else {
-                    sep.style.display = 'block';
+        interact('.sticker-wrapper, .inner-block-wrapper')
+            .draggable({
+                listeners: {
+                    start(event) {
+                        document.querySelectorAll('.sticker-wrapper, .inner-block-wrapper').forEach(el => el.classList.remove('selected'));
+                        event.target.classList.add('selected');
+                        window.parent.postMessage({ type: 'HIDE_TEXT_TOOLBAR' }, '*');
+                        const target = event.target;
+                        target.dataset.x = parseFloat(target.style.left) || 0;
+                        target.dataset.y = parseFloat(target.style.top) || 0;
+                    },
+                    move(event) {
+                        const target = event.target;
+                        const x = (parseFloat(target.dataset.x) || 0) + event.dx;
+                        const y = (parseFloat(target.dataset.y) || 0) + event.dy;
+                        target.style.left = `${x}px`;
+                        target.style.top = `${y}px`;
+                        target.dataset.x = x;
+                        target.dataset.y = y;
+                    },
+                    end(event) {
+                        const newProps = { x: parseFloat(event.target.dataset.x), y: parseFloat(event.target.dataset.y) };
+                        updateElementInParent(event.target, newProps);
+                    }
                 }
-            }
-        });
+            })
+            .resizable({
+                edges: { right: '.resize-handle.se', bottom: '.resize-handle.se' },
+                listeners: {
+                    move(event) {
+                        event.target.style.width = `${event.rect.width}px`;
+                        if (event.target.classList.contains('sticker-wrapper')) {
+                            event.target.style.height = 'auto';
+                        } else {
+                            event.target.style.height = `${event.rect.height}px`;
+                        }
+                    },
+                    end(event) {
+                        const newProps = { width: event.rect.width, height: event.rect.height };
+                        updateElementInParent(event.target, newProps);
+                    }
+                },
+                modifiers: [ interact.modifiers.aspectRatio({ ratio: 'preserve', enabled: (e) => e.target.classList.contains('sticker-wrapper') }) ]
+            });
     }
-    
-    editMainBtn.addEventListener('click', () => { 
-        if (currentTemplate !== mainPageData.template) { 
-            saveCurrentPageData(); 
-            switchEditorMode(mainPageData); 
-        } 
-    }); 
-    
-    editRsvpBtn.addEventListener('click', () => { 
-        if (currentTemplate !== rsvpFormData.template) { 
-            saveCurrentPageData(); 
-            switchEditorMode(rsvpFormData); 
-        } 
-    });
-    
-    async function initEditor() {
+
+    async function loadInvitationData() {
         const params = new URLSearchParams(window.location.search);
-        const id = params.get('id');
-        isCustomerMode = !!id;
-
-        try {
-            const response = await fetch('/.netlify/functions/get-api-keys');
-            if (response.ok) apiKeys = await response.json();
-            else console.warn('Could not fetch API keys from server');
-        } catch (error) { console.warn('Error fetching API keys:', error); }
-
-        window.addEventListener('message', (event) => {
-            if (event.source !== iframe.contentWindow) return;
-            const { type, payload } = event.data;
-            if (type === 'UPDATE_STICKER' || type === 'UPDATE_INNER_BLOCK') {
-                const { blockId, elementId, newProps } = payload;
-                const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
-                if (blockIndex === -1) return;
-                const listKey = type === 'UPDATE_STICKER' ? 'stickers' : 'innerBlocks';
-                if (!pageBlocks[blockIndex].content[listKey]) return;
-                const elementIndex = pageBlocks[blockIndex].content[listKey].findIndex(s => s.id === elementId);
-                if (elementIndex === -1) return;
-                Object.assign(pageBlocks[blockIndex].content[listKey][elementIndex], newProps);
-                renderEditor();
-            } else if (type === 'TEXT_ELEMENT_CLICKED') {
-                showTextEditingToolbar(payload.blockId, payload.elementKey, payload.currentStyle);
-            } else if (type === 'HIDE_TEXT_TOOLBAR') {
-                hideTextEditingToolbar();
+        const id = params.get('id'), pageType = params.get('page') || 'main';
+        if (id && pageType) {
+            try {
+                const r = await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, { headers: { 'X-Access-Key': '$2a$10$c.QWLI8NIw84W3uqmH/mUez32F1LK7KPBirRW7hr1nE0mJ9CAATC6' }});
+                if (!r.ok) throw new Error('Could not load invitation data.');
+                const data = (await r.json()).record;
+                const pageData = data[pageType];
+                if (!pageData) throw new Error(`Page data ('${pageType}') not found.`);
+                const rsvpTemplateFile = data.rsvp ? data.rsvp.template : 'rsvp-form.html';
+                const rsvpLink = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)}${rsvpTemplateFile}?id=${id}&page=rsvp`;
+                renderPage(pageData.blocks, pageData.settings, rsvpLink);
+            } catch (e) {
+                document.getElementById('page-content').innerHTML = `<h1>Error</h1><p>${e.message}</p>`;
             }
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('#text-editing-toolbar') && !e.target.closest('#preview-frame')) {
-                hideTextEditingToolbar();
-            }
-        });
-
-        const initialize = () => { 
-            if (isCustomerMode) document.querySelector('.global-settings')?.remove(); 
-            initSortable(); 
-            setupEventListeners(); 
-            iframe.onload = () => { 
-                renderEditor(); 
-                renderPreview(); 
-                setupResizeObserver(); 
-            }; 
-            switchEditorMode(mainPageData); 
-        };
-        
-        if (isCustomerMode) { 
-            const status = document.getElementById('status-text'); 
-            status.innerText = 'Loading...'; 
-            fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, { 
-                headers: { 'X-Access-Key': '$2a$10$c.QWLI8NIw84W3uqmH/mUez32F1LK7KPBirRW7hr1nE0mJ9CAATC6' } 
-            }).then(r => r.ok ? r.json() : Promise.reject(new Error('Could not load template.')))
-            .then(d => { 
-                mainPageData = d.record.main; 
-                rsvpFormData = d.record.rsvp; 
-                status.innerText = ''; 
-                initialize(); 
-            }).catch(e => document.body.innerHTML = `<h1>Error</h1><p>${e.message}</p>`); 
-        } else { 
-            initialize(); 
+        } else {
+             document.getElementById('page-content').innerHTML = `<h1>Invitation not found</h1><p>Please check the link or provide a valid invitation ID.</p>`;
         }
     }
     
-    function mapsReady() { 
-        initializeMapsForEditor(); 
+    function setupIntroAnimation() {
+        const envelopeWrapper = document.getElementById('envelope-wrapper');
+        const modelViewer = document.getElementById('envelope-3d');
+        if (!envelopeWrapper || !modelViewer || typeof confetti !== 'function') { 
+            document.body.style.opacity = 1; 
+            if(envelopeWrapper) envelopeWrapper.style.display = 'none'; 
+            return; 
+        }
+        
+        document.body.classList.add('intro-active');
+        document.body.style.opacity = 1; 
+        modelViewer.addEventListener('load', () => modelViewer.classList.add('loaded'));
+        
+        const fireConfetti = () => { 
+            const defaults = { spread: 360, ticks: 150, gravity: 0, decay: 0.95, startVelocity: 35, shapes: ['star'], colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'] }; 
+            confetti({ ...defaults, particleCount: 60, scalar: 1.2, shapes: ['star'] }); 
+            confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] }); 
+        };
+        
+        const handleEnvelopeInteraction = () => {
+            fireConfetti(); 
+            modelViewer.style.transform = 'scale(0)'; 
+            modelViewer.style.opacity = '0'; 
+            setTimeout(() => { 
+                document.body.classList.remove('intro-active'); 
+                envelopeWrapper.classList.add('hidden'); 
+            }, 500);
+        };
+        
+        envelopeWrapper.addEventListener('click', handleEnvelopeInteraction, { once: true });
+        envelopeWrapper.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            handleEnvelopeInteraction();
+        }, { once: true });
     }
-    
-    initEditor();
+
+    if (window.self === window.top) {
+        window.addEventListener('DOMContentLoaded', () => { 
+            loadInvitationData(); 
+            setupIntroAnimation(); 
+        });
+    } else {
+        window.renderPage = renderPage;
+        const envelope = document.getElementById('envelope-wrapper');
+        if (envelope) envelope.style.display = 'none';
+        document.body.style.opacity = 1;
+    }
     </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDRylKwrQtZHNk3PvtpPqRbLpPwKQNF26k&libraries=places&callback=mapsReady"></script>
 </body>
 </html>
