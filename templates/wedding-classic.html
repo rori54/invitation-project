@@ -250,7 +250,7 @@
         return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
             <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
                 ${backgroundDiv}
-                <h2>${makeTextEditable(c.title, block.id, 'title', c.titleStyle)}</h2>
+                <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <p>${processText(c.address)}</p>
                 ${imageHTML}
                 <a href="${c.mapLink}" class="rsvp-button" target="_blank">View on Map</a>
