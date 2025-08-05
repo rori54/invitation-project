@@ -1196,8 +1196,7 @@
             return `<div class="control-group"> <div class="optional-element-header"> <label>${label}</label> <label><input type="checkbox" data-key="${key}.enabled" ${element.enabled ? 'checked' : ''}> Show</label> </div> <input type="text" data-key="${key}.text" value="${element.text}"> ${createStyleControlsHTML(`${key}.style`, element.style)} </div>`; 
         };
         
-        
-    switch(block.type) { 
+        switch(block.type) { 
             case 'hero': 
                 fieldsHTML = `${createImageInputHTML('imageUrl', c.imageUrl, 'Background Image URL')}
                     ${createOpacityControl('opacity', c.opacity, 'Background Opacity')}
@@ -1296,6 +1295,8 @@
             default: 
                 fieldsHTML = 'No editor available for this block type.'; 
         }
+        return fieldsHTML; 
+    }
     
     function renderEditor() { 
         const container = document.getElementById('editor-content'); 
