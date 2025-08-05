@@ -1296,11 +1296,12 @@
             case 'form-footer':
                 fieldsHTML = `<div class="control-group"><label>Footer Text</label><input type="text" data-key="text" value="${c.text}"></div>${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
                 break;
-            default: 
+    default: 
                 fieldsHTML = 'No editor available for this block type.'; 
+            }
+            return fieldsHTML; 
         }
-        return fieldsHTML; 
-    }
+        
     
     function renderEditor() { 
         const container = document.getElementById('editor-content'); 
