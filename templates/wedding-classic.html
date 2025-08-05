@@ -110,9 +110,6 @@
                 padding: 20px 0;
             }
             
-            /* Стили для #countdown, .time-block и .time-block .number были удалены, 
-               так как новый адаптивный таймер в них не нуждается */
-            
             .sticker-wrapper {
                 max-width: 80px !important;
             }
@@ -140,16 +137,14 @@
         }
         /* --- RIBBON MODE FIX --- */
 
-        /* 1. Создаем саму "ленту" */
         body.style-ribbon #page-content {
-            background-color: #ffffff; /* Белый фон для всей ленты */
-            max-width: 800px; /* Ограничиваем ширину ленты */
-            margin: 0 auto;   /* Центрируем ленту */
-            padding: 20px 0;    /* Небольшой отступ сверху и снизу самой ленты */
-            box-shadow: 0 6px 25px rgba(0,0,0,0.08); /* Опционально: можно добавить тень для ленты */
+            background-color: #ffffff;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px 0;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.08);
         }
 
-        /* 2. Делаем все блоки внутри ленты прозрачными */
         body.style-ribbon .content-section,
         body.style-ribbon .hero-block,
         body.style-ribbon .form-block,
@@ -161,14 +156,12 @@
             margin: 0 !important;
         }
 
-        /* 3. Добавляем внутренние отступы к каждому блоку для "воздуха" */
         body.style-ribbon .block-wrapper {
-            padding: 25px 40px; /* 25px сверху/снизу, 40px по бокам */
+            padding: 25px 40px;
         }
 
-        /* 4. Особое правило для Hero-блока в ленте */
         body.style-ribbon .hero-block {
-            width: 100%; /* Заставляем его растягиваться на всю ширину ленты */
+            width: 100%;
             max-width: none;
         }
             
@@ -223,7 +216,10 @@
     };
 
     const makeTextEditable = (text, blockId, elementKey, style) => {
-        if (window.self === window.top) return text; // Not in iframe
+        // If not in editor iframe, just return the text
+        if (window.self === window.top) return text;
+        
+        // In editor, wrap in a span with data attributes for the text editing toolbar
         return `<span class="editable-text" data-block-id="${blockId}" data-element-key="${elementKey}" style="${getStyleString(style)}">${text}</span>`;
     };
 
@@ -239,7 +235,7 @@
         }).join('');
     };
     
-    // ИСПРАВЛЕНО: Добавлена недостающая функция для отрисовки Hero-блока
+    // <<< ИСПРАВЛЕНО: ДОБАВЛЕНА НЕДОСТАЮЩАЯ ФУНКЦИЯ >>>
     const createHeroHTML = (block, s) => {
         const c = block.content;
         const mirrorClass = getMirrorClass(c);
@@ -251,15 +247,16 @@
         const imageHTML = c.imageUrl 
             ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'}; opacity: ${c.opacity || 1};" alt="">` 
             : '';
-
+        
+        // Use makeTextEditable for all text elements to enable the toolbar
         const subtitleHTML = (c.subtitle && c.subtitle.enabled) 
-            ? `<p>${makeTextEditable(c.subtitle.text, block.id, 'subtitle', c.subtitle.style)}</p>` 
+            ? `<p>${makeTextEditable(c.subtitle.text, block.id, 'subtitle.style', c.subtitle.style)}</p>` 
             : '';
         const namesHTML = (c.names && c.names.enabled) 
-            ? `<h1>${makeTextEditable(c.names.text, block.id, 'names', c.names.style)}</h1>` 
+            ? `<h1>${makeTextEditable(c.names.text, block.id, 'names.style', c.names.style)}</h1>` 
             : '';
         const dateHTML = (c.date && c.date.enabled) 
-            ? `<p>${makeTextEditable(c.date.text, block.id, 'date', c.date.style)}</p>` 
+            ? `<p>${makeTextEditable(c.date.text, block.id, 'date.style', c.date.style)}</p>` 
             : '';
         
         return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
@@ -300,9 +297,9 @@
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? 
             `<div class="block-background" style="${getBlockBackgroundStyle(c)}"></div>` : '';
         const titleHTML = c.title ? 
-            `<h2>${makeTextEditable(c.title, block.id, 'title', c.titleStyle)}</h2>` : ''; 
+            `<h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>` : ''; 
         const textHTML = c.text ? 
-            `<p>${makeTextEditable(processText(c.text), block.id, 'text', c.textStyle)}</p>` : ''; 
+            `<p>${makeTextEditable(processText(c.text), block.id, 'textStyle', c.textStyle)}</p>` : ''; 
         const mirrorClass = getMirrorClass(c);
         
         return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
@@ -318,9 +315,9 @@
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? 
             `<div class="block-background" style="${getBlockBackgroundStyle(c)}"></div>` : '';
         const titleHTML = c.title ? 
-            `<h2>${makeTextEditable(c.title, block.id, 'title', c.titleStyle)}</h2>` : ''; 
+            `<h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>` : ''; 
         const descriptionHTML = c.description ? 
-            `<div>${makeTextEditable(processText(c.description), block.id, 'description', c.descriptionStyle)}</div>` : ''; 
+            `<div>${makeTextEditable(processText(c.description), block.id, 'descriptionStyle', c.descriptionStyle)}</div>` : ''; 
         const mirrorClass = getMirrorClass(c);
         
         return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
@@ -345,7 +342,7 @@
         return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
             <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
                 ${backgroundDiv}
-                <h2>${makeTextEditable(c.title, block.id, 'title', c.titleStyle)}</h2>
+                <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <ul style="list-style:none;padding:0;">
                     ${(c.items || []).map(i => `
                         <li style="display:flex;gap:20px;padding:15px 0;border-bottom:1px solid #eee;">
@@ -380,7 +377,7 @@
         return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
             <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
                 ${backgroundDiv}
-                <h2>${makeTextEditable(c.title, block.id, 'title', c.titleStyle)}</h2>
+                <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 ${inner}
                 ${renderStickers(c.stickers)}
             </section>
@@ -395,7 +392,7 @@
         return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
             <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
                 ${backgroundDiv}
-                <h2>${makeTextEditable(c.title, block.id, 'title', c.titleStyle)}</h2>
+                <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <p>${processText(c.subtitle)}</p>
                 <div>
                     <a href="${rsvpLink}" class="rsvp-button" style="${getStyleString(c.buttonStyle)}">I'll Be There!</a>
@@ -405,8 +402,6 @@
         </div>`; 
     };
     
-    
-
     function startCountdown(targetDate) { 
         if (!targetDate) return; 
         if (countdownInterval) clearInterval(countdownInterval); 
@@ -431,7 +426,7 @@
     }
 
     function setupTextEditing() {
-        if (window.self === window.top) return; // Not in iframe
+        if (window.self === window.top) return;
         
         document.addEventListener('click', (e) => {
             const editableElement = e.target.closest('.editable-text');
@@ -456,17 +451,22 @@
                     payload: { blockId, elementKey, currentStyle }
                 }, '*');
             } else {
-                window.parent.postMessage({ type: 'HIDE_TEXT_TOOLBAR' }, '*');
+                 window.parent.postMessage({ type: 'HIDE_TEXT_TOOLBAR' }, '*');
             }
         });
     }
 
     function rgbToHex(rgb) {
-        if (rgb.startsWith('#')) return rgb;
+        if (!rgb || rgb.startsWith('#')) return rgb;
         const match = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
         if (!match) return '#000000';
-        return "#" + ((1 << 24) + (parseInt(match[1]) << 16) + (parseInt(match[2]) << 8) + parseInt(match[3])).toString(16).slice(1);
+        function componentToHex(c) {
+            const hex = c.toString(16);
+            return hex.length == 1 ? "0" + hex : hex;
+        }
+        return "#" + componentToHex(parseInt(match[1])) + componentToHex(parseInt(match[2])) + componentToHex(parseInt(match[3]));
     }
+
 
     function renderPage(blocks, settings, rsvpLink = '#') {
         if (!blocks || !settings) return;
@@ -474,7 +474,6 @@
         if (settings.style) document.body.classList.add(`style-${settings.style}`);
         if (settings.displayMode) document.body.classList.add(`style-${settings.displayMode}`);
         
-        // Set page background
         document.body.style.backgroundColor = settings.backgroundColor || '#f8f7f5';
         document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? 
             `url('${settings.backgroundImage}')` : 'none';
@@ -483,30 +482,31 @@
         container.innerHTML = '';
         let countdownBlockContent = null;
 
-    blocks.forEach(block => {
-        let blockHTML = '';
-        switch(block.type) {
-            case 'hero': blockHTML = createHeroHTML(block, settings); break;
-            case 'text-block': blockHTML = createTextBlockHTML(block, settings); break;
-            case 'image': blockHTML = createImageHTML(block, settings); break;
-            case 'countdown': blockHTML = createCountdownHTML(block, settings); countdownBlockContent = block.content; break;
-            case 'schedule': blockHTML = createScheduleHTML(block, settings); break;
-            case 'location': blockHTML = createLocationHTML(block, settings); break;
-            case 'rsvp': blockHTML = createRsvpHTML(block, settings, rsvpLink); break;
-            default: blockHTML = `<!-- Unsupported block type: ${block.type} -->`;
+        blocks.forEach(block => {
+            let blockHTML = '';
+            switch(block.type) {
+                case 'hero': blockHTML = createHeroHTML(block, settings); break;
+                case 'text-block': blockHTML = createTextBlockHTML(block, settings); break;
+                case 'image': blockHTML = createImageHTML(block, settings); break;
+                case 'countdown': blockHTML = createCountdownHTML(block, settings); countdownBlockContent = block.content; break;
+                case 'schedule': blockHTML = createScheduleHTML(block, settings); break;
+                case 'location': blockHTML = createLocationHTML(block, settings); break;
+                case 'rsvp': blockHTML = createRsvpHTML(block, settings, rsvpLink); break;
+                default: blockHTML = `<!-- Unsupported block type: ${block.type} -->`;
+            }
+            container.innerHTML += blockHTML;
+        });
+
+        if (countdownBlockContent) startCountdown(countdownBlockContent.targetDate);
+
+        if (window.self !== window.top) {
+            setTimeout(() => {
+                initStickerInteraction(blocks);
+                setupTextEditing();
+            }, 150);
         }
-        container.innerHTML += blockHTML;
-    });
-
-    if (countdownBlockContent) startCountdown(countdownBlockContent.targetDate);
-
-    if (window.self !== window.top) {
-        setTimeout(() => {
-            initStickerInteraction(blocks);
-            setupTextEditing();
-        }, 150);
     }
-
+    
     async function loadInvitationData() {
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id'), pageType = params.get('page') || 'main';
@@ -550,6 +550,7 @@
                     start(event) {
                         document.querySelectorAll('.sticker-wrapper').forEach(el => el.classList.remove('selected'));
                         event.target.classList.add('selected');
+                        window.parent.postMessage({ type: 'HIDE_TEXT_TOOLBAR' }, '*');
                     },
                     move(event) {
                         const target = event.target;
@@ -636,7 +637,6 @@
             confetti({ ...defaults, particleCount: 20, scalar: 0.75, shapes: ['circle'] }); 
         };
         
-        // Fix mobile touch events
         const handleEnvelopeInteraction = () => {
             fireConfetti(); 
             modelViewer.style.transform = 'scale(0)'; 
@@ -647,7 +647,6 @@
             }, 500);
         };
         
-        // Add both click and touch event listeners for mobile compatibility
         envelopeWrapper.addEventListener('click', handleEnvelopeInteraction, { once: true });
         envelopeWrapper.addEventListener('touchend', (e) => {
             e.preventDefault();
@@ -655,13 +654,13 @@
         }, { once: true });
     }
 
-    if (window.self === window.top) { // Final page opened directly
+    if (window.self === window.top) {
         window.addEventListener('DOMContentLoaded', () => { 
             loadInvitationData(); 
             setupIntroAnimation(); 
         });
-    } else { // Page opened in editor (iframe)
-        window.renderPage = renderPage; // Give render function to editor
+    } else {
+        window.renderPage = renderPage;
         const envelope = document.getElementById('envelope-wrapper');
         if (envelope) envelope.style.display = 'none';
         document.body.style.opacity = 1;
