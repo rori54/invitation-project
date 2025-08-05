@@ -33,7 +33,7 @@
         
         #countdown { display: flex; justify-content: center; gap: 2vw; text-align: center; margin-top: 20px; flex-wrap: wrap; }
         .time-block { background: #f4f4f4; padding: 2.5vw; border-radius: 5px; min-width: 0; flex: 1; max-width: 120px; }
-        .time-block .number { font-size: clamp(1.5rem, 6vw, 2.5rem); font-weight: 700; color: var(--accent-color); line-height: 1; }
+        .time-block .number { font-size: clamp(1.5rem, 6vw, 2.5rem); line-height: 1; }
         .time-block div:last-child { font-size: clamp(0.7rem, 2.5vw, 1rem); margin-top: 5px; }
         
         .rsvp-button{display:inline-block; padding:15px 30px; text-decoration:none; border-radius:50px; transition:transform .2s ease; margin: 10px; background-color: var(--accent-color); color: #fff;}
@@ -327,26 +327,30 @@
         </div>`; 
     };
     
-    const createLocationHTML = (block, s) => { 
+    const createCountdownHTML = (block, s) => { 
         const c = block.content; 
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? 
             `<div class="block-background" style="${getBlockBackgroundStyle(c)}"></div>` : '';
-        const imageHTML = c.imageUrl ? 
-            `<img src="${c.imageUrl}" alt="Venue" style="width:100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-bottom: 20px; opacity:${c.opacity};">` : ''; 
+        const numberStyle = getStyleString(c.numberStyle);
+        const labelStyle = getStyleString(c.labelStyle);
+        
+        const inner = `<div id="countdown">
+            <div class="time-block"><div id="days" class="number" style="${numberStyle}">00</div><div style="${labelStyle}">Days</div></div>
+            <div class="time-block"><div id="hours" class="number" style="${numberStyle}">00</div><div style="${labelStyle}">Hours</div></div>
+            <div class="time-block"><div id="minutes" class="number" style="${numberStyle}">00</div><div style="${labelStyle}">Minutes</div></div>
+            <div class="time-block"><div id="seconds" class="number" style="${numberStyle}">00</div><div style="${labelStyle}">Seconds</div></div>
+        </div>`; 
         const mirrorClass = getMirrorClass(c);
         
         return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
             <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
                 ${backgroundDiv}
                 <h2>${makeTextEditable(c.title, block.id, 'title', c.titleStyle)}</h2>
-                <p>${processText(c.address)}</p>
-                ${imageHTML}
-                <a href="${c.mapLink}" class="rsvp-button" target="_blank">View on Map</a>
+                ${inner}
                 ${renderStickers(c.stickers)}
             </section>
         </div>`; 
     };
-    
     const createRsvpHTML = (block, s, rsvpLink) => { 
         const c = block.content; 
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? 
@@ -367,26 +371,6 @@
     };
     
         const createCountdownHTML = (block, s) => { 
-        const c = block.content; 
-        const backgroundDiv = c.backgroundColor || c.backgroundImage ? 
-            `<div class="block-background" style="${getBlockBackgroundStyle(c)}"></div>` : '';
-        const inner = `<div id="countdown">
-            <div class="time-block"><div id="days" class="number">00</div><div>Days</div></div>
-            <div class="time-block"><div id="hours" class="number">00</div><div>Hours</div></div>
-            <div class="time-block"><div id="minutes" class="number">00</div><div>Minutes</div></div>
-            <div class="time-block"><div id="seconds" class="number">00</div><div>Seconds</div></div>
-        </div>`; 
-        const mirrorClass = getMirrorClass(c);
-        
-        return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
-                ${backgroundDiv}
-                <h2>${makeTextEditable(c.title, block.id, 'title', c.titleStyle)}</h2>
-                ${inner}
-                ${renderStickers(c.stickers)}
-            </section>
-        </div>`; 
-    };
 
     function startCountdown(targetDate) { 
         if (!targetDate) return; 
@@ -404,10 +388,10 @@
                   H = document.getElementById("hours"), 
                   M = document.getElementById("minutes"), 
                   S = document.getElementById("seconds"); 
-            if(D) D.innerText = Math.floor(distance / 864e5).toString().padStart(2, '0'); 
-            if(H) H.innerText = Math.floor(distance % 864e5 / 36e5).toString().padStart(2, '0'); 
-            if(M) M.innerText = Math.floor(distance % 36e5 / 6e4).toString().padStart(2, '0'); 
-            if(S) S.innerText = Math.floor(distance % 6e4 / 1e3).toString().padStart(2, '0'); 
+            if(D) D.textContent = Math.floor(distance / 864e5).toString().padStart(2, '0'); 
+            if(H) H.textContent = Math.floor(distance % 864e5 / 36e5).toString().padStart(2, '0'); 
+            if(M) M.textContent = Math.floor(distance % 36e5 / 6e4).toString().padStart(2, '0'); 
+            if(S) S.textContent = Math.floor(distance % 6e4 / 1e3).toString().padStart(2, '0'); 
         }, 1000); 
     }
 
