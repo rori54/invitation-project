@@ -239,24 +239,23 @@
         }).join('');
     };
     
-    // Functions for creating HTML blocks
-    const createHeroHTML = (block, s) => { 
+    const createLocationHTML = (block, s) => { 
         const c = block.content; 
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? 
             `<div class="block-background" style="${getBlockBackgroundStyle(c)}"></div>` : '';
+        const imageHTML = c.imageUrl ? 
+            `<img src="${c.imageUrl}" alt="Venue" style="width:100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-bottom: 20px; opacity:${c.opacity};">` : ''; 
         const mirrorClass = getMirrorClass(c);
         
         return `<div class="block-wrapper ${mirrorClass}" data-block-id="${block.id}">
-            <header class="hero-block ${!c.fullWidth ? 'limited-width' : ''}" style="aspect-ratio: ${c.aspectRatio}; max-width: ${!c.fullWidth ? s.maxWidth : 'none'};">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
                 ${backgroundDiv}
-                ${c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'}; opacity: ${c.opacity};" alt="">` : ''} 
-                <div class="hero-content">
-                    ${(c.subtitle && c.subtitle.enabled) ? `<p>${makeTextEditable(c.subtitle.text, block.id, 'subtitle.text', c.subtitle.style)}</p>` : ''}
-                    ${(c.names && c.names.enabled) ? `<h1>${makeTextEditable(c.names.text, block.id, 'names.text', c.names.style)}</h1>` : ''}
-                    ${(c.date && c.date.enabled) ? `<p>${makeTextEditable(c.date.text, block.id, 'date.text', c.date.style)}</p>` : ''}
-                </div> 
-                ${renderStickers(c.stickers)} 
-            </header>
+                <h2>${makeTextEditable(c.title, block.id, 'title', c.titleStyle)}</h2>
+                <p>${processText(c.address)}</p>
+                ${imageHTML}
+                <a href="${c.mapLink}" class="rsvp-button" target="_blank">View on Map</a>
+                ${renderStickers(c.stickers)}
+            </section>
         </div>`; 
     };
     
