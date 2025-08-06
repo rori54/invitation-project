@@ -432,11 +432,28 @@
                             target.style.left = `${x}px`;
                             target.style.top = `${y}px`;
                         },
+
                         end(event) {
                             const target = event.target;
                             const blockWrapper = target.closest('.block-wrapper');
                             if (!blockWrapper) return;
-                            const newProps = { x: parseFloat(target.style.left), y: parseFloat(target.style.top) };
+
+                            // --- НОВАЯ ЛОГИКА КОНВЕРТАЦИИ В ПРОЦЕНТЫ ---
+                            const parent = target.parentElement;
+                            if (!parent) return;
+
+                            const parentRect = parent.getBoundingClientRect();
+                            // Используем сам target для получения его позиции
+                            const targetX = parseFloat(target.style.left) || 0;
+                            const targetY = parseFloat(target.style.top) || 0;
+                            
+                            // Вычисляем позицию в процентах
+                            const xPercent = (targetX / parentRect.width) * 100;
+                            const yPercent = (targetY / parentRect.height) * 100;
+
+                            const newProps = { x: xPercent, y: yPercent };
+
+                            // Отправляем новые ПРОЦЕНТНЫЕ координаты в редактор
                             window.parent.postMessage({ type: target.dataset.updateType, payload: { blockId: blockWrapper.dataset.blockId, id: target.dataset.id, newProps } }, '*');
                         }
                     }
@@ -453,6 +470,8 @@
                             const target = event.target;
                             const blockWrapper = target.closest('.block-wrapper');
                             if (!blockWrapper) return;
+
+                            // --- ВАЖНО: При изменении размера, ширина должна быть в пикселях, а не 'auto'
                             const newProps = { width: event.rect.width };
                             window.parent.postMessage({ type: target.dataset.updateType, payload: { blockId: blockWrapper.dataset.blockId, id: target.dataset.id, newProps } }, '*');
                         }

@@ -635,6 +635,7 @@
         });
     }
 
+    // --- ЗАМЕНИТЕ ЭТУ ФУНКЦИЮ в index.html ---
     function updateTextStyle() {
         if (!currentEditingElement) return;
         
@@ -649,14 +650,25 @@
         }
         
         const styleKey = keys[keys.length - 1];
-        if (!current[styleKey]) current[styleKey] = {};
         
-        // Update style object
-        current[styleKey].fontFamily = document.getElementById('toolbar-font-family').value;
-        current[styleKey].fontSize = document.getElementById('toolbar-font-size').value;
-        current[styleKey].color = document.getElementById('toolbar-color').value;
-        current[styleKey].fontWeight = document.getElementById('toolbar-font-weight').value;
-        current[styleKey].textAlign = document.getElementById('toolbar-text-align').value;
+        // --- НОВАЯ, БОЛЕЕ НАДЕЖНАЯ ЛОГИКА ---
+        // 1. Получаем существующий объект стилей (или создаем пустой)
+        const existingStyle = current[styleKey] || {};
+
+        // 2. Считываем ВСЕ значения из панели
+        const newStyles = {
+            fontFamily: document.getElementById('toolbar-font-family').value,
+            fontSize: document.getElementById('toolbar-font-size').value,
+            color: document.getElementById('toolbar-color').value,
+            fontWeight: document.getElementById('toolbar-font-weight').value,
+            textAlign: document.getElementById('toolbar-text-align').value
+        };
+
+        // 3. "Сливаем" старые стили с новыми. Новые значения перезапишут старые.
+        Object.assign(existingStyle, newStyles);
+
+        // 4. Присваиваем обновленный объект обратно
+        current[styleKey] = existingStyle;
         
         renderPreview();
         renderEditor();
@@ -1442,7 +1454,7 @@
                     style: { ...defaultTextStyle, color: '#333333', fontSize: '1.5rem', textAlign: 'center' },
                     // --- НОВЫЕ ЗНАЧЕНИЯ ---
                     x: 50, // Используем проценты для центрирования
-                    y: 40, // Чуть выше центра
+                    y: 50, // Чуть выше центра
                     width: 'auto', // ЗАДАЕМ АВТОМАТИЧЕСКУЮ ШИРИНУ
                     rotation: 0
                 }; 
