@@ -936,14 +936,6 @@
                 </div>`;
     }
     
-    function createInnerBlocksEditor(block) { 
-        let innerBlocksHTML = (block.content.innerBlocks || []).map((innerBlock, index) => { 
-            const textContentField = innerBlock.type === 'heading' ? `<input type="text" data-key="innerBlocks.${index}.text" value="${innerBlock.text || ''}">` : `<textarea data-key="innerBlocks.${index}.text">${innerBlock.text || ''}</textarea>`; 
-            return `<div class="inner-block-editor" data-index="${index}"> <button class="delete-inner-block-btn" title="Delete this element">×</button> <label style="text-transform: capitalize;">${innerBlock.type} Text</label> ${textContentField} ${createStyleControlsHTML(`innerBlocks.${index}.style`, innerBlock.style, { textAlign: true, color: true, size: true, weight: true, family: true })} </div>`; 
-        }).join(''); 
-        return `<div class="inner-blocks-container"> <label style="font-weight: bold; color: #333;">Additional Elements</label> <div class="inner-blocks-list">${innerBlocksHTML}</div> <div class="add-inner-block-controls"> <button class="add-inner-block-btn" data-inner-type="heading">+ Add Heading</button> <button class="add-inner-block-btn" data-inner-type="paragraph">+ Add Paragraph</button> </div> </div>`; 
-    }
-
     function createScheduleItemsEditor(block) {
         let itemsHTML = (block.content.items || []).map((item, index) => {
             return `<div class="schedule-item-editor" data-item-id="${item.id}">
