@@ -43,7 +43,7 @@
         .sticker-wrapper, .inner-block-wrapper { position: absolute; box-sizing: border-box; z-index: 5; cursor: grab; touch-action: none; border: 1px dashed transparent; }
         .sticker-wrapper.selected, .inner-block-wrapper.selected { border-color: #007bff; }
         .sticker-wrapper img { width: 100%; height: 100%; display: block; pointer-events: none; }
-        .inner-block-wrapper { padding: 5px; } /* Padding for text elements */
+        .inner-block-wrapper { padding: 5px; white-space: pre-wrap; word-break: break-word; height: auto; }
         .resize-handle { position: absolute; width: 12px; height: 12px; background: #fff; border: 1px solid #007bff; border-radius: 50%; display: none; }
         .selected .resize-handle { display: block; }
         .resize-handle.se { bottom: -6px; right: -6px; cursor: se-resize; }
@@ -91,7 +91,7 @@
     <script>
     let countdownInterval;
 
-    const processText = (text) => (text || '').replace(/\n/g, '<br>');
+    const processText = (text) => (text || '');
 
     const getStyleString = (style) => { 
         if (!style) return ''; 
@@ -375,18 +375,38 @@
         }
     }
     
+    // --- ДОБАВЬТЕ ЭТОТ КОД В НАЧАЛО ФУНКЦИИ initInteraction() ---
     function initInteraction() {
         if (typeof interact === 'undefined') return;
-        
+
+        // --- УЛУЧШЕННЫЙ КОД: Снятие выделения при клике на пустое место ---
+        // Слушатель теперь на контейнере, а не на всем документе, чтобы избежать конфликтов.
+        const container = document.getElementById('page-content');
+        if (!container) return;
+
+        container.addEventListener('pointerdown', (e) => {
+            // Если клик произошел на самом контейнере (пустом месте) или на неинтерактивном блоке
+            const clickedInteractive = e.target.closest('.sticker-wrapper, .inner-block-wrapper');
+            
+            if (!clickedInteractive) {
+                // Убираем класс .selected со всех элементов
+                document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+                // Сообщаем редактору, чтобы он тоже скрыл панель стилей текста
+                window.parent.postMessage({ type: 'HIDE_TEXT_TOOLBAR' }, '*');
+            }
+        });
+
+
         const setupInteractable = (selector) => {
              interact(selector)
+                .on('down', (event) => {
+                    // При клике на интерактивный элемент, сначала убираем выделение со всех...
+                    document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+                    // ...а потом добавляем его только текущему элементу.
+                    event.currentTarget.classList.add('selected');
+                })
                 .draggable({
                     listeners: {
-                        start(event) {
-                            document.querySelectorAll('.sticker-wrapper, .inner-block-wrapper').forEach(el => el.classList.remove('selected'));
-                            event.target.classList.add('selected');
-                            window.parent.postMessage({ type: 'HIDE_TEXT_TOOLBAR' }, '*');
-                        },
                         move(event) {
                             const target = event.target;
                             const x = (parseFloat(target.style.left) || 0) + event.dx;
@@ -409,7 +429,7 @@
                         move(event) {
                             let target = event.target;
                             target.style.width = `${event.rect.width}px`;
-                            if(target.dataset.type === 'sticker') target.style.height = 'auto'; // Stickers maintain aspect ratio
+                            if(target.dataset.type === 'sticker') target.style.height = 'auto';
                         },
                         end(event) {
                             const target = event.target;
