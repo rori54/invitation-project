@@ -1439,10 +1439,11 @@
                 const newInnerBlock = { 
                     id: `inner-${Date.now()}`, 
                     text: 'New Text', 
-                    style: { ...defaultTextStyle, color: '#333333', fontSize: '1rem', textAlign: 'center' },
-                    x: 50, // Появится в центре (x=50, y=50)
-                    y: 50,
-                    width: 150,
+                    style: { ...defaultTextStyle, color: '#333333', fontSize: '1.5rem', textAlign: 'center' },
+                    // --- НОВЫЕ ЗНАЧЕНИЯ ---
+                    x: 50, // Используем проценты для центрирования
+                    y: 40, // Чуть выше центра
+                    width: 'auto', // ЗАДАЕМ АВТОМАТИЧЕСКУЮ ШИРИНУ
                     rotation: 0
                 }; 
                 if (!pageBlocks[blockIndex].content.innerBlocks) {

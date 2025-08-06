@@ -114,6 +114,7 @@
         return `<span style="${getStyleString(styleObject)}">${processText(text)}</span>`;
     };
 
+    // --- ЗАМЕНИТЕ ЭТУ ФУНКЦИЮ в wedding-classic.html ---
     const renderInteractiveElements = (elements, blockId, type) => {
         if (!elements || elements.length === 0) return '';
         const wrapperClass = type === 'sticker' ? 'sticker-wrapper' : 'inner-block-wrapper';
@@ -121,13 +122,22 @@
 
         return elements.map((el, index) => {
             const opacityStyle = (el.opacity !== undefined) ? `opacity: ${el.opacity};` : '';
-            const positionStyle = `left: ${el.x || 0}px; top: ${el.y || 0}px; width: ${el.width || 'auto'}px; transform: rotate(${el.rotation || 0}deg); ${opacityStyle}`;
+            
+            // --- НОВАЯ ЛОГИКА ПОЗИЦИОНИРОВАНИЯ И РАЗМЕРА ---
+            const xPos = `${el.x || 0}%`; // Используем проценты
+            const yPos = `${el.y || 0}%`; // Используем проценты
+            // Если ширина 'auto', ставим ее. Иначе - в пикселях.
+            const widthStyle = (el.width === 'auto' || !el.width) ? 'width: auto;' : `width: ${el.width}px;`;
+            
+            // Добавляем transform для точного центрирования, если используются проценты
+            const transformStyle = `translate(-50%, -50%) rotate(${el.rotation || 0}deg)`;
+
+            const positionStyle = `left: ${xPos}; top: ${yPos}; ${widthStyle} transform: ${transformStyle}; ${opacityStyle}`;
             
             let content;
             if (type === 'sticker') {
                 content = `<img src="${el.src}" alt="sticker">`;
             } else { // 'innerBlock'
-                // Use a nested editable text for inner blocks
                 content = makeTextEditable(el.text, blockId, `innerBlocks.${index}.style`, el.style);
             }
 
@@ -308,15 +318,25 @@
         countdownInterval = setInterval(update, 1000); 
     }
 
+    // --- ЗАМЕНИТЕ ЭТУ ФУНКЦИЮ в wedding-classic.html ---
     function setupTextEditing() {
         if (window.self === window.top) return;
         
-        document.addEventListener('click', (e) => {
+        // Используем 'pointerdown' для более быстрого отклика
+        document.addEventListener('pointerdown', (e) => {
             const editableElement = e.target.closest('.editable-text');
-            if (editableElement && !e.target.closest('.inner-block-wrapper.selected')) { // Avoid conflict when clicking a selected inner block
-                e.preventDefault();
-                e.stopPropagation();
+
+            // Теперь мы просто проверяем, кликнули ли мы на редактируемый текст
+            if (editableElement) {
+                e.stopPropagation(); // Останавливаем всплытие, чтобы не сработал слушатель снятия выделения
                 
+                // Выделяем родительский блок, если он еще не выделен
+                const wrapper = editableElement.closest('.sticker-wrapper, .inner-block-wrapper');
+                if (wrapper && !wrapper.classList.contains('selected')) {
+                     document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+                     wrapper.classList.add('selected');
+                }
+
                 const blockId = editableElement.dataset.blockId;
                 const elementKey = editableElement.dataset.elementKey;
                 const computedStyle = window.getComputedStyle(editableElement);
@@ -330,8 +350,6 @@
                 };
                 
                 window.parent.postMessage({ type: 'TEXT_ELEMENT_CLICKED', payload: { blockId, elementKey, currentStyle } }, '*');
-            } else if (!e.target.closest('.selected')) {
-                 window.parent.postMessage({ type: 'HIDE_TEXT_TOOLBAR' }, '*');
             }
         });
     }
