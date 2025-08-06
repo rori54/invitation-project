@@ -417,41 +417,52 @@
     function initInteraction() {
         if (typeof interact === 'undefined') return;
 
-        // --- УЛУЧШЕННЫЙ КОД: Снятие выделения при клике на пустое место ---
-        // Слушатель теперь на контейнере, а не на всем документе, чтобы избежать конфликтов.
         const container = document.getElementById('page-content');
         if (!container) return;
 
         container.addEventListener('pointerdown', (e) => {
-            // Если клик произошел на самом контейнере (пустом месте) или на неинтерактивном блоке
             const clickedInteractive = e.target.closest('.sticker-wrapper, .inner-block-wrapper');
-            
             if (!clickedInteractive) {
-                // Убираем класс .selected со всех элементов
                 document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
-                // Сообщаем редактору, чтобы он тоже скрыл панель стилей текста
                 window.parent.postMessage({ type: 'HIDE_TEXT_TOOLBAR' }, '*');
             }
         });
 
-
         const setupInteractable = (selector) => {
              interact(selector)
                 .on('down', (event) => {
-                    // При клике на интерактивный элемент, сначала убираем выделение со всех...
                     document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
-                    // ...а потом добавляем его только текущему элементу.
                     event.currentTarget.classList.add('selected');
                 })
                 .draggable({
                     listeners: {
                         move(event) {
                             const target = event.target;
-                            // Эта логика правильная, она отвечает за визуальное перемещение
-                            const x = (parseFloat(target.style.left) || 0) + event.dx;
-                            const y = (parseFloat(target.style.top) || 0) + event.dy;
-                            target.style.left = `${x}px`;
-                            target.style.top = `${y}px`;
+                            // --- ИСПРАВЛЕНИЕ: Используем transform для плавного перемещения, не меняя left/top ---
+                            const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                            const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+                            // Обновляем позицию через transform
+                            target.style.transform = `translate(${x}px, ${y}px) rotate(${parseFloat(target.getAttribute('data-rot')) || 0}deg)`;
+
+                            // Сохраняем временные пиксельные значения в data-атрибутах
+                            target.setAttribute('data-x', x);
+                            target.setAttribute('data-y', y);
+                        },
+                        start(event) {
+                            const target = event.target;
+                            // При старте считываем transform и сохраняем его
+                            const transform = window.getComputedStyle(target).transform;
+                            let x = 0, y = 0;
+                            if (transform && transform !== 'none') {
+                               const matrix = new DOMMatrix(transform);
+                               x = matrix.m41;
+                               y = matrix.m42;
+                            }
+                            target.setAttribute('data-x', x);
+                            target.setAttribute('data-y', y);
+                            // Сохраняем текущий угол поворота
+                            target.setAttribute('data-rot', parseFloat(target.style.transform.match(/rotate\((.+)deg\)/)?.[1] || 0));
                         },
                         end(event) {
                             const target = event.target;
@@ -461,19 +472,26 @@
                             const parent = target.parentElement;
                             if (!parent) return;
 
-                            // --- ИСПРАВЛЕННАЯ ЛОГИКА ---
-                            // 1. Получаем финальную позицию в ПИКСЕЛЯХ из стиля элемента
-                            const targetX = parseFloat(target.style.left) || 0;
-                            const targetY = parseFloat(target.style.top) || 0;
-                            
-                            // 2. Конвертируем пиксели в ПРОЦЕНТЫ относительно родительского контейнера
-                            const xPercent = (targetX / parent.offsetWidth) * 100;
-                            const yPercent = (targetY / parent.offsetHeight) * 100;
+                            // --- ИСПРАВЛЕННАЯ ЛОГИКА КОНВЕРТАЦИИ ---
+                            const targetRect = target.getBoundingClientRect();
+                            const parentRect = parent.getBoundingClientRect();
 
-                            // 3. Создаем объект с новыми ПРОЦЕНТНЫМИ координатами
+                            // Координаты центра элемента относительно родителя
+                            const centerX = (targetRect.left - parentRect.left) + targetRect.width / 2;
+                            const centerY = (targetRect.top - parentRect.top) + targetRect.height / 2;
+
+                            // Конвертируем в проценты
+                            const xPercent = (centerX / parent.offsetWidth) * 100;
+                            const yPercent = (centerY / parent.offsetHeight) * 100;
+
                             const newProps = { x: xPercent, y: yPercent };
 
-                            // 4. Отправляем ПРОЦЕНТЫ в редактор для сохранения
+                            // Сбрасываем transform и data-атрибуты после сохранения
+                            target.style.transform = `translate(-50%, -50%) rotate(${target.getAttribute('data-rot') || 0}deg)`;
+                            target.removeAttribute('data-x');
+                            target.removeAttribute('data-y');
+                            target.removeAttribute('data-rot');
+                            
                             window.parent.postMessage({ type: target.dataset.updateType, payload: { blockId: blockWrapper.dataset.blockId, id: target.dataset.id, newProps } }, '*');
                         }
                     }
@@ -491,7 +509,6 @@
                             const blockWrapper = target.closest('.block-wrapper');
                             if (!blockWrapper) return;
 
-                            // --- ВАЖНО: При изменении размера, ширина должна быть в пикселях, а не 'auto'
                             const newProps = { width: event.rect.width };
                             window.parent.postMessage({ type: target.dataset.updateType, payload: { blockId: blockWrapper.dataset.blockId, id: target.dataset.id, newProps } }, '*');
                         }
@@ -507,7 +524,6 @@
                     const rect = wrapper.getBoundingClientRect();
                     wrapper.setAttribute('data-center-x', rect.left + rect.width / 2);
                     wrapper.setAttribute('data-center-y', rect.top + rect.height / 2);
-                    wrapper.setAttribute('data-angle', parseFloat(wrapper.style.transform.replace('rotate(', '').replace('deg)', '')) || 0);
                 },
                 onmove: function (event) {
                     const wrapper = event.target.closest('.sticker-wrapper, .inner-block-wrapper');
@@ -516,13 +532,20 @@
                     const angle = Math.atan2(event.pageY - centerY, event.pageX - centerX);
                     const degrees = angle * (180 / Math.PI);
                     const currentRotation = degrees + 90;
-                    wrapper.style.transform = `rotate(${currentRotation}deg)`;
+                    
+                    // --- ИСПРАВЛЕНИЕ: Комбинируем rotate с translate ---
+                    const existingTransform = wrapper.style.transform.match(/translate\((.+?)\)/);
+                    const translatePart = existingTransform ? `translate(${existingTransform[1]})` : 'translate(-50%, -50%)';
+                    wrapper.style.transform = `${translatePart} rotate(${currentRotation}deg)`;
                 },
                 onend: function(event) {
                     const wrapper = event.target.closest('.sticker-wrapper, .inner-block-wrapper');
                     const blockWrapper = wrapper.closest('.block-wrapper');
                     if (!blockWrapper) return;
-                    const rotation = parseFloat(wrapper.style.transform.replace('rotate(', '').replace('deg)', ''));
+
+                    const transformMatch = wrapper.style.transform.match(/rotate\((.+)deg\)/);
+                    const rotation = transformMatch ? parseFloat(transformMatch[1]) : 0;
+
                     const newProps = { rotation };
                     window.parent.postMessage({ type: wrapper.dataset.updateType, payload: { blockId: blockWrapper.dataset.blockId, id: wrapper.dataset.id, newProps } }, '*');
                 }

@@ -1267,10 +1267,14 @@
         return fieldsHTML;
     }
     
-    // --- ДОБАВЬТЕ ЭТОТ КОД ---
     function createInnerBlocksEditor(block) {
         const innerBlocksHTML = (block.content.innerBlocks || []).map((innerBlock, index) => {
             const textContentField = `<textarea data-key="innerBlocks.${index}.text">${innerBlock.text || ''}</textarea>`;
+            
+            // --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
+            // Проверяем, если ширина 'auto' или не задана, поле будет пустым. Иначе - выводим число.
+            const widthValue = (innerBlock.width === 'auto' || innerBlock.width === undefined) ? '' : Math.round(innerBlock.width);
+
             return `<div class="inner-block-editor" data-inner-id="${innerBlock.id}" data-index="${index}">
                         <button class="delete-inner-block-btn" title="Delete this element">×</button>
                         <label>Floating Text #${index + 1}</label>
@@ -1281,8 +1285,14 @@
                             <div class="control-group"><label>Y</label><input type="number" data-key="innerBlocks.${index}.y" value="${Math.round(innerBlock.y || 0)}"></div>
                         </div>
                         <div class="style-controls-grid">
-                            <div class="control-group"><label>Width</label><input type="number" data-key="innerBlocks.${index}.width" value="${Math.round(innerBlock.width || 150)}"></div>
-                            <div class="control-group"><label>Rotation</label><input type="number" data-key="innerBlocks.${index}.rotation" value="${Math.round(innerBlock.rotation || 0)}"></div>
+                            <div class="control-group">
+                                <label>Width</label>
+                                <input type="number" data-key="innerBlocks.${index}.width" value="${widthValue}" placeholder="auto">
+                            </div>
+                            <div class="control-group">
+                                <label>Rotation</label>
+                                <input type="number" data-key="innerBlocks.${index}.rotation" value="${Math.round(innerBlock.rotation || 0)}">
+                            </div>
                         </div>
                     </div>`;
         }).join('');
@@ -1823,37 +1833,34 @@
         }
 
         // --- ЗАМЕНИТЕ ЭТОТ ОБРАБОТЧИК ВНУТРИ initEditor() ---
-    window.addEventListener('message', (event) => {
-        if (event.source !== iframe.contentWindow) return;
-        const { type, payload } = event.data;
-        
-        // --- ОБНОВЛЕННАЯ УНИВЕРСАЛЬНАЯ ЛОГИКА ---
-        if (type === 'UPDATE_STICKER' || type === 'UPDATE_INNER_BLOCK') {
-            const { blockId, id, newProps } = payload;
-            const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
-            if (blockIndex === -1) return;
-
-            // Определяем, с каким массивом работаем: stickers или innerBlocks
-            const targetArrayKey = (type === 'UPDATE_STICKER') ? 'stickers' : 'innerBlocks';
-            const targetArray = pageBlocks[blockIndex].content[targetArrayKey];
-            if (!targetArray) return;
-
-            const elementIndex = targetArray.findIndex(s => s.id === id);
-            if (elementIndex === -1) return;
+        window.addEventListener('message', (event) => {
+            if (event.source !== iframe.contentWindow) return;
+            const { type, payload } = event.data;
             
-            // Обновляем свойства элемента
-            Object.assign(targetArray[elementIndex], newProps);
-            
-            // Перерисовываем редактор, чтобы поля (X, Y, Width) обновились
-            renderEditor(); 
-        } 
-        else if (type === 'TEXT_ELEMENT_CLICKED') {
-            showTextEditingToolbar(payload.blockId, payload.elementKey, payload.currentStyle);
-        } 
-        else if (type === 'HIDE_TEXT_TOOLBAR') {
-            hideTextEditingToolbar();
-        }
-    });
+            if (type === 'UPDATE_STICKER' || type === 'UPDATE_INNER_BLOCK') {
+                const { blockId, id, newProps } = payload;
+                const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
+                if (blockIndex === -1) return;
+
+                const targetArrayKey = (type === 'UPDATE_STICKER') ? 'stickers' : 'innerBlocks';
+                const targetArray = pageBlocks[blockIndex].content[targetArrayKey];
+                if (!targetArray) return;
+
+                const elementIndex = targetArray.findIndex(s => s.id === id);
+                if (elementIndex === -1) return;
+                
+                Object.assign(targetArray[elementIndex], newProps);
+                
+                // --- ИСПРАВЛЕНИЕ: Перерисовываем редактор, чтобы поля (X, Y, Width) обновились ---
+                renderEditor(); 
+            } 
+            else if (type === 'TEXT_ELEMENT_CLICKED') {
+                showTextEditingToolbar(payload.blockId, payload.elementKey, payload.currentStyle);
+            } 
+            else if (type === 'HIDE_TEXT_TOOLBAR') {
+                hideTextEditingToolbar();
+            }
+        });
 
         const initialize = () => { 
             if (isCustomerMode) {
