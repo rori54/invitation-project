@@ -485,13 +485,7 @@
                             const yPercent = (centerY / parent.offsetHeight) * 100;
 
                             const newProps = { x: xPercent, y: yPercent };
-
-                            // Сбрасываем transform и data-атрибуты после сохранения
-                            target.style.transform = `translate(-50%, -50%) rotate(${target.getAttribute('data-rot') || 0}deg)`;
-                            target.removeAttribute('data-x');
-                            target.removeAttribute('data-y');
-                            target.removeAttribute('data-rot');
-                            
+   
                             window.parent.postMessage({ type: target.dataset.updateType, payload: { blockId: blockWrapper.dataset.blockId, id: target.dataset.id, newProps } }, '*');
                         }
                     }
