@@ -192,22 +192,21 @@
                 </div>`;
     };
 
-    // --- Замените эту функцию ---
+    // --- ЗАМЕНИТЕ ЭТУ ФУНКЦИЮ в wedding-classic.html ---
     const createTextBlockHTML = (block, s) => { 
         const c = block.content; 
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="background-color:${c.backgroundColor}; background-image:url('${c.backgroundImage}');"></div>` : '';
         const titleHTML = c.title ? `<h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>` : ''; 
         const textHTML = c.text ? `<div>${makeTextEditable(c.text, block.id, 'textStyle', c.textStyle)}</div>` : '';
         
+        // Добавили position: relative;
         return `<div class="block-wrapper" data-block-id="${block.id}">
             <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative;">
                 ${backgroundDiv}
                 ${titleHTML}
                 ${textHTML}
-                <div class="interactive-overlay">
-                    ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
-                    ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
-                </div>
+                ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
+                ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
             </section>
         </div>`; 
     };
