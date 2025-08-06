@@ -1259,12 +1259,10 @@
         return fieldsHTML;
     }
     
+    // --- ЗАМЕНИТЕ ЭТУ ФУНКЦИЮ в index.html ---
     function createInnerBlocksEditor(block) {
         const innerBlocksHTML = (block.content.innerBlocks || []).map((innerBlock, index) => {
             const textContentField = `<textarea data-key="innerBlocks.${index}.text">${innerBlock.text || ''}</textarea>`;
-            
-            // --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-            // Проверяем, если ширина 'auto' или не задана, поле будет пустым. Иначе - выводим число.
             const widthValue = (innerBlock.width === 'auto' || innerBlock.width === undefined) ? '' : Math.round(innerBlock.width);
 
             return `<div class="inner-block-editor" data-inner-id="${innerBlock.id}" data-index="${index}">
@@ -1824,7 +1822,6 @@
             console.warn('Error fetching API keys:', error);
         }
 
-        // --- ЗАМЕНИТЕ ЭТОТ ОБРАБОТЧИК ВНУТРИ initEditor() ---
         window.addEventListener('message', (event) => {
             if (event.source !== iframe.contentWindow) return;
             const { type, payload } = event.data;
@@ -1843,8 +1840,11 @@
                 
                 Object.assign(targetArray[elementIndex], newProps);
                 
-                // --- ИСПРАВЛЕНИЕ: Перерисовываем редактор, чтобы поля (X, Y, Width) обновились ---
+                // --- ГЛАВНОЕ ИСПРАВЛЕНИЕ ЗДЕСЬ ---
+                // После обновления данных при перетаскивании, мы должны не только
+                // перерисовать редактор, но и ПЕРЕРИСОВАТЬ ПРЕВЬЮ.
                 renderEditor(); 
+                renderPreview(); // <--- ЭТА СТРОЧКА ВСЕ ИСПРАВИТ
             } 
             else if (type === 'TEXT_ELEMENT_CLICKED') {
                 showTextEditingToolbar(payload.blockId, payload.elementKey, payload.currentStyle);
