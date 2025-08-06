@@ -1389,50 +1389,54 @@
     function setupEventListeners() { 
         const editorContent = document.getElementById('editor-content'); 
 
-        // --- ОБЩИЙ ОБРАБОТЧИК ИЗМЕНЕНИЙ В ПОЛЯХ РЕДАКТОРА ---
-        const handleEditorChange = (e) => { 
-            const input = e.target; 
-            const blockDiv = input.closest('.editor-block'); 
-            if (!blockDiv) return; 
+    const handleEditorChange = (e) => {
+        const input = e.target;
+        const blockDiv = input.closest('.editor-block');
+        if (!blockDiv) return;
 
-            const blockId = blockDiv.dataset.id; 
-            const blockIndex = pageBlocks.findIndex(b => b.id === blockId); 
-            if (blockIndex === -1) return; 
+        const blockId = blockDiv.dataset.id;
+        const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
+        if (blockIndex === -1) return;
 
-            const key = input.dataset.key; 
+        const key = input.dataset.key;
 
-            if (input.matches('.sub-item-input')) { // Для элементов расписания/опций
-                const subItemDiv = input.closest('.schedule-item-editor'); 
-                const subItemId = subItemDiv.dataset.itemId; 
-                const subItemKey = input.dataset.itemKey; 
-                const listKey = pageBlocks[blockIndex].content.items ? 'items' : 'options'; 
-                const subItemIndex = pageBlocks[blockIndex].content[listKey].findIndex(i => i.id === subItemId); 
-                if (subItemIndex > -1) pageBlocks[blockIndex].content[listKey][subItemIndex][subItemKey] = input.value; 
+        if (input.matches('.sub-item-input')) {
+            const subItemDiv = input.closest('.schedule-item-editor');
+            const subItemId = subItemDiv.dataset.itemId;
+            const subItemKey = input.dataset.itemKey;
+            const listKey = pageBlocks[blockIndex].content.items ? 'items' : 'options';
+            const subItemIndex = pageBlocks[blockIndex].content[listKey].findIndex(i => i.id === subItemId);
+            if (subItemIndex > -1) pageBlocks[blockIndex].content[listKey][subItemIndex][subItemKey] = input.value;
 
-            } else if (key) { // Для всех остальных полей с data-key
-                let value = input.type === 'checkbox' ? input.checked : input.value; 
-                if (input.type === 'number' || input.type === 'range') value = parseFloat(value) || 0; 
-                if (key === 'fullWidth') value = value === 'true';
+        } else if (key) {
+            let value = input.type === 'checkbox' ? input.checked : input.value;
+            if (input.type === 'number' || input.type === 'range') value = parseFloat(value) || 0;
+            if (key === 'fullWidth') value = value === 'true';
 
-                const keys = key.split('.'); 
-                let current = pageBlocks[blockIndex].content; 
-                for (let i = 0; i < keys.length - 1; i++) { 
-                    // Если вложенный объект не существует, создаем его
-                    if (!current[keys[i]]) {
-                        // Определяем, должен ли это быть массив или объект
-                        current[keys[i]] = isNaN(parseInt(keys[i+1], 10)) ? {} : [];
-                    }
-                    current = current[keys[i]]; 
-                } 
-                current[keys[keys.length - 1]] = value; 
-                
-                if (input.type === 'range' && input.classList.contains('opacity-slider')) {
-                    const span = input.nextElementSibling;
-                    if (span) span.textContent = `${Math.round(value * 100)}%`;
+            const keys = key.split('.');
+            let current = pageBlocks[blockIndex].content;
+            for (let i = 0; i < keys.length - 1; i++) {
+                if (!current[keys[i]]) {
+                    current[keys[i]] = isNaN(parseInt(keys[i + 1], 10)) ? {} : [];
                 }
-            } 
-            renderPreview(); 
-        }; 
+                current = current[keys[i]];
+            }
+            current[keys[keys.length - 1]] = value;
+
+            if (keys[0] === 'innerBlocks' && keys[2] === 'text') {
+                const innerBlockIndex = parseInt(keys[1], 10);
+                if (pageBlocks[blockIndex]?.content?.innerBlocks?.[innerBlockIndex]) {
+                    pageBlocks[blockIndex].content.innerBlocks[innerBlockIndex].width = 'auto';
+                }
+            }
+
+            if (input.type === 'range' && input.classList.contains('opacity-slider')) {
+                const span = input.nextElementSibling;
+                if (span) span.textContent = `${Math.round(value * 100)}%`;
+            }
+        }
+        renderPreview();
+    };
         editorContent.addEventListener('input', handleEditorChange); 
         editorContent.addEventListener('change', handleEditorChange); 
         
