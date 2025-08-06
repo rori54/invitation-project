@@ -167,9 +167,9 @@
                             ${subtitleHTML}
                             ${namesHTML}
                             ${dateHTML}
-                            ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
                         </div>
                         ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
+                        ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
                     </header>
                 </div>`;
     };
@@ -354,7 +354,20 @@
         });
     }
 
-    function rgbToHex(rgb) { /* ... same as before ... */ return rgb; } // Placeholder
+    // --- НОВАЯ, РАБОЧАЯ ВЕРСИЯ ---
+    function rgbToHex(rgb) {
+        if (!rgb || !rgb.startsWith('rgb')) return rgb; // Если это уже hex или что-то другое, возвращаем как есть
+        
+        let parts = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+        if (!parts) return '#000000'; // В случае ошибки вернем черный
+        
+        delete parts[0];
+        for (let i = 1; i <= 3; ++i) {
+            parts[i] = parseInt(parts[i]).toString(16);
+            if (parts[i].length == 1) parts[i] = '0' + parts[i];
+        } 
+        return `#${parts.join('')}`;
+    }
 
     function renderPage(blocks, settings, rsvpLink = '#') {
         if (!blocks || !settings) return;
@@ -427,33 +440,33 @@
                     listeners: {
                         move(event) {
                             const target = event.target;
+                            // Эта логика правильная, она отвечает за визуальное перемещение
                             const x = (parseFloat(target.style.left) || 0) + event.dx;
                             const y = (parseFloat(target.style.top) || 0) + event.dy;
                             target.style.left = `${x}px`;
                             target.style.top = `${y}px`;
                         },
-
                         end(event) {
                             const target = event.target;
                             const blockWrapper = target.closest('.block-wrapper');
                             if (!blockWrapper) return;
 
-                            // --- НОВАЯ ЛОГИКА КОНВЕРТАЦИИ В ПРОЦЕНТЫ ---
                             const parent = target.parentElement;
                             if (!parent) return;
 
-                            const parentRect = parent.getBoundingClientRect();
-                            // Используем сам target для получения его позиции
+                            // --- ИСПРАВЛЕННАЯ ЛОГИКА ---
+                            // 1. Получаем финальную позицию в ПИКСЕЛЯХ из стиля элемента
                             const targetX = parseFloat(target.style.left) || 0;
                             const targetY = parseFloat(target.style.top) || 0;
                             
-                            // Вычисляем позицию в процентах
-                            const xPercent = (targetX / parentRect.width) * 100;
-                            const yPercent = (targetY / parentRect.height) * 100;
+                            // 2. Конвертируем пиксели в ПРОЦЕНТЫ относительно родительского контейнера
+                            const xPercent = (targetX / parent.offsetWidth) * 100;
+                            const yPercent = (targetY / parent.offsetHeight) * 100;
 
+                            // 3. Создаем объект с новыми ПРОЦЕНТНЫМИ координатами
                             const newProps = { x: xPercent, y: yPercent };
 
-                            // Отправляем новые ПРОЦЕНТНЫЕ координаты в редактор
+                            // 4. Отправляем ПРОЦЕНТЫ в редактор для сохранения
                             window.parent.postMessage({ type: target.dataset.updateType, payload: { blockId: blockWrapper.dataset.blockId, id: target.dataset.id, newProps } }, '*');
                         }
                     }
