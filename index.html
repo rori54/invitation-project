@@ -1373,36 +1373,47 @@
         }); 
     }
     
+        // --- ЗАМЕНИТЕ ЭТУ ФУНКЦИЮ ПОЛНОСТЬЮ ---
     function setupEventListeners() { 
         const editorContent = document.getElementById('editor-content'); 
+
+        // --- ОБЩИЙ ОБРАБОТЧИК ИЗМЕНЕНИЙ В ПОЛЯХ РЕДАКТОРА ---
         const handleEditorChange = (e) => { 
             const input = e.target; 
             const blockDiv = input.closest('.editor-block'); 
             if (!blockDiv) return; 
+
             const blockId = blockDiv.dataset.id; 
             const blockIndex = pageBlocks.findIndex(b => b.id === blockId); 
             if (blockIndex === -1) return; 
+
             const key = input.dataset.key; 
-            if (input.matches('.sub-item-input')) { 
+
+            if (input.matches('.sub-item-input')) { // Для элементов расписания/опций
                 const subItemDiv = input.closest('.schedule-item-editor'); 
                 const subItemId = subItemDiv.dataset.itemId; 
                 const subItemKey = input.dataset.itemKey; 
                 const listKey = pageBlocks[blockIndex].content.items ? 'items' : 'options'; 
                 const subItemIndex = pageBlocks[blockIndex].content[listKey].findIndex(i => i.id === subItemId); 
                 if (subItemIndex > -1) pageBlocks[blockIndex].content[listKey][subItemIndex][subItemKey] = input.value; 
-            } else if (key) { 
+
+            } else if (key) { // Для всех остальных полей с data-key
                 let value = input.type === 'checkbox' ? input.checked : input.value; 
-                if (input.type === 'number') value = parseFloat(value) || 0; 
-                if (input.type === 'range') value = parseFloat(value);
+                if (input.type === 'number' || input.type === 'range') value = parseFloat(value) || 0; 
                 if (key === 'fullWidth') value = value === 'true';
+
                 const keys = key.split('.'); 
                 let current = pageBlocks[blockIndex].content; 
                 for (let i = 0; i < keys.length - 1; i++) { 
-                    current = current[keys[i]] = current[keys[i]] || {}; 
+                    // Если вложенный объект не существует, создаем его
+                    if (!current[keys[i]]) {
+                        // Определяем, должен ли это быть массив или объект
+                        current[keys[i]] = isNaN(parseInt(keys[i+1], 10)) ? {} : [];
+                    }
+                    current = current[keys[i]]; 
                 } 
                 current[keys[keys.length - 1]] = value; 
                 
-                // Update opacity display
                 if (input.type === 'range' && input.classList.contains('opacity-slider')) {
                     const span = input.nextElementSibling;
                     if (span) span.textContent = `${Math.round(value * 100)}%`;
@@ -1412,23 +1423,43 @@
         }; 
         editorContent.addEventListener('input', handleEditorChange); 
         editorContent.addEventListener('change', handleEditorChange); 
-        editorContent.addEventListener('blur', (e) => { 
-            const input = e.target; 
-            const blockDiv = input.closest('.editor-block'); 
-            if (blockDiv && pageBlocks[pageBlocks.findIndex(b => b.id === blockDiv.dataset.id)]?.type === 'location' && input.dataset.key === 'mapLink') { 
-                const blockIndex = pageBlocks.findIndex(b => b.id === blockDiv.dataset.id); 
-                handleMapLinkBlur(input.value, blockIndex); 
-            } 
-        }, true);
         
+        // --- ОБРАБОТЧИК КЛИКОВ НА КНОПКИ И ДРУГИЕ ЭЛЕМЕНТЫ ---
         editorContent.addEventListener('click', (e) => { 
             const target = e.target; 
             const blockDiv = target.closest('.editor-block'); 
             if (!blockDiv) return; 
-            const blockId = blockDiv.dataset.id; 
-            const blockIndex = pageBlocks.findIndex(b => b.id === blockId); 
             
-            if (target.matches('.add-element-btn')) {
+            const blockId = blockDiv.dataset.id; 
+            const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
+            if (blockIndex === -1) return;
+            
+            // --- НОВАЯ ЛОГИКА: Добавление плавающего текста ---
+            if (target.matches('.add-inner-block-btn')) { 
+                const newInnerBlock = { 
+                    id: `inner-${Date.now()}`, 
+                    text: 'New Text', 
+                    style: { ...defaultTextStyle, color: '#333333', fontSize: '1rem', textAlign: 'center' },
+                    x: 50, // Появится в центре (x=50, y=50)
+                    y: 50,
+                    width: 150,
+                    rotation: 0
+                }; 
+                if (!pageBlocks[blockIndex].content.innerBlocks) {
+                    pageBlocks[blockIndex].content.innerBlocks = [];
+                }
+                pageBlocks[blockIndex].content.innerBlocks.push(newInnerBlock); 
+                renderEditor(); 
+                renderPreview(); 
+            } 
+            // --- НОВАЯ ЛОГИКА: Удаление плавающего текста ---
+            else if (target.matches('.delete-inner-block-btn')) { 
+                const innerIndex = parseInt(target.closest('.inner-block-editor').dataset.index, 10); 
+                pageBlocks[blockIndex].content.innerBlocks.splice(innerIndex, 1); 
+                renderEditor(); 
+                renderPreview(); 
+            }
+            else if (target.matches('.add-element-btn')) {
                 openElementLibrary(target.dataset.blockId);
             } else if (target.matches('.delete-sticker-btn')) { 
                 const stickerIndex = parseInt(target.closest('.sticker-editor').dataset.stickerIndex, 10); 
@@ -1439,32 +1470,10 @@
                 const mirrorType = target.dataset.mirror;
                 const currentValue = target.dataset.current === 'true';
                 const newValue = !currentValue;
-                
-                if (mirrorType === 'horizontal') {
-                    pageBlocks[blockIndex].content.mirrorHorizontal = newValue;
-                } else if (mirrorType === 'vertical') {
-                    pageBlocks[blockIndex].content.mirrorVertical = newValue;
-                }
-                
+                if (mirrorType === 'horizontal') pageBlocks[blockIndex].content.mirrorHorizontal = newValue;
+                else if (mirrorType === 'vertical') pageBlocks[blockIndex].content.mirrorVertical = newValue;
                 renderEditor();
                 renderPreview();
-            } else if (target.matches('.add-inner-block-btn')) { 
-                const type = target.dataset.innerType; 
-                const newInnerBlock = { 
-                    id: `inner-${Date.now()}`, 
-                    type, 
-                    text: `New ${type}`, 
-                    style: type === 'heading' ? {...defaultTitleStyle, color: '#FFFFFF'} : {...defaultTextStyle, color: '#FFFFFF'} 
-                }; 
-                if (!pageBlocks[blockIndex].content.innerBlocks) pageBlocks[blockIndex].content.innerBlocks = []; 
-                pageBlocks[blockIndex].content.innerBlocks.push(newInnerBlock); 
-                renderEditor(); 
-                renderPreview(); 
-            } else if (target.matches('.delete-inner-block-btn')) { 
-                const innerIndex = parseInt(target.closest('.inner-block-editor').dataset.index, 10); 
-                pageBlocks[blockIndex].content.innerBlocks.splice(innerIndex, 1); 
-                renderEditor(); 
-                renderPreview(); 
             } else if (target.closest('.delete-block-btn')) { 
                 if (confirm('Are you sure?')) { 
                     pageBlocks.splice(blockIndex, 1); 
@@ -1474,15 +1483,7 @@
             } else if (target.closest('.add-sub-item-btn')) { 
                 const listKey = target.dataset.listKey; 
                 if (listKey === 'items') {
-                    pageBlocks[blockIndex].content[listKey].push({ 
-                        id: `item-${Date.now()}`, 
-                        time: '3:00 PM', 
-                        title: 'New Event', 
-                        desc: 'Event description',
-                        timeStyle: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#c5a98b', fontWeight: '700' },
-                        titleStyle: { fontFamily: 'Playfair Display', fontSize: '1.4rem', color: '#333333', fontWeight: '700' },
-                        descStyle: { fontFamily: 'Montserrat', fontSize: '1rem', color: '#666666', fontWeight: '400' }
-                    });
+                    pageBlocks[blockIndex].content[listKey].push({ id: `item-${Date.now()}`, time: '3:00 PM', title: 'New Event', desc: 'Event description', timeStyle: { fontFamily: 'Montserrat', fontSize: '1.2rem', color: '#c5a98b', fontWeight: '700' }, titleStyle: { fontFamily: 'Playfair Display', fontSize: '1.4rem', color: '#333333', fontWeight: '700' }, descStyle: { fontFamily: 'Montserrat', fontSize: '1rem', color: '#666666', fontWeight: '400' } });
                 } else if (listKey === 'options') {
                     pageBlocks[blockIndex].content[listKey].push({ id: `opt-${Date.now()}`, text: 'New Option' });
                 }
@@ -1805,33 +1806,38 @@
             console.warn('Error fetching API keys:', error);
         }
 
-        // Set up iframe communication for text editing toolbar
-        window.addEventListener('message', (event) => {
-            if (event.source !== iframe.contentWindow) return;
-            const { type, payload } = event.data;
-            
-            if (type === 'UPDATE_STICKER') {
-                const { blockId, stickerId, newProps } = payload;
-                const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
-                if (blockIndex === -1) return;
-                const stickerIndex = pageBlocks[blockIndex].content.stickers.findIndex(s => s.id === stickerId);
-                if (stickerIndex === -1) return;
-                
-                Object.assign(pageBlocks[blockIndex].content.stickers[stickerIndex], newProps);
-                renderEditor();
-            } else if (type === 'TEXT_ELEMENT_CLICKED') {
-                showTextEditingToolbar(payload.blockId, payload.elementKey, payload.currentStyle);
-            } else if (type === 'HIDE_TEXT_TOOLBAR') {
-                hideTextEditingToolbar();
-            }
-        });
+        // --- ЗАМЕНИТЕ ЭТОТ ОБРАБОТЧИК ВНУТРИ initEditor() ---
+    window.addEventListener('message', (event) => {
+        if (event.source !== iframe.contentWindow) return;
+        const { type, payload } = event.data;
+        
+        // --- ОБНОВЛЕННАЯ УНИВЕРСАЛЬНАЯ ЛОГИКА ---
+        if (type === 'UPDATE_STICKER' || type === 'UPDATE_INNER_BLOCK') {
+            const { blockId, id, newProps } = payload;
+            const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
+            if (blockIndex === -1) return;
 
-        // Click outside to hide toolbar
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('#text-editing-toolbar') && !e.target.closest('#preview-frame')) {
-                hideTextEditingToolbar();
-            }
-        });
+            // Определяем, с каким массивом работаем: stickers или innerBlocks
+            const targetArrayKey = (type === 'UPDATE_STICKER') ? 'stickers' : 'innerBlocks';
+            const targetArray = pageBlocks[blockIndex].content[targetArrayKey];
+            if (!targetArray) return;
+
+            const elementIndex = targetArray.findIndex(s => s.id === id);
+            if (elementIndex === -1) return;
+            
+            // Обновляем свойства элемента
+            Object.assign(targetArray[elementIndex], newProps);
+            
+            // Перерисовываем редактор, чтобы поля (X, Y, Width) обновились
+            renderEditor(); 
+        } 
+        else if (type === 'TEXT_ELEMENT_CLICKED') {
+            showTextEditingToolbar(payload.blockId, payload.elementKey, payload.currentStyle);
+        } 
+        else if (type === 'HIDE_TEXT_TOOLBAR') {
+            hideTextEditingToolbar();
+        }
+    });
 
         const initialize = () => { 
             if (isCustomerMode) {
