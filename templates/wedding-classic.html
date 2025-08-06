@@ -41,7 +41,7 @@
 
         /* --- STYLES FOR STICKERS AND INNER BLOCKS --- */
         .sticker-wrapper, .inner-block-wrapper { position: absolute; box-sizing: border-box; z-index: 5; cursor: grab; touch-action: none; border: 1px dashed transparent; }
-        .sticker-wrapper.selected, .inner-block-wrapper.selected { border-color: #007bff; }
+        .sticker-wrapper.selected, .inner-block-wrapper.selected { border-color: #007bff; z-index: 10; }
         .sticker-wrapper img { width: 100%; height: 100%; display: block; pointer-events: none; }
         .inner-block-wrapper { padding: 5px; white-space: pre-wrap; word-break: break-word; height: auto; }
         .resize-handle { position: absolute; width: 12px; height: 12px; background: #fff; border: 1px solid #007bff; border-radius: 50%; display: none; }
@@ -123,16 +123,23 @@
         return elements.map((el, index) => {
             const opacityStyle = (el.opacity !== undefined) ? `opacity: ${el.opacity};` : '';
             
-            // --- НОВАЯ ЛОГИКА ПОЗИЦИОНИРОВАНИЯ И РАЗМЕРА ---
+            // --- Логика позиционирования и размера (остается без изменений) ---
             const xPos = `${el.x || 0}%`; // Используем проценты
             const yPos = `${el.y || 0}%`; // Используем проценты
-            // Если ширина 'auto', ставим ее. Иначе - в пикселях.
             const widthStyle = (el.width === 'auto' || !el.width) ? 'width: auto;' : `width: ${el.width}px;`;
             
-            // Добавляем transform для точного центрирования, если используются проценты
             const transformStyle = `translate(-50%, -50%) rotate(${el.rotation || 0}deg)`;
 
-            const positionStyle = `left: ${xPos}; top: ${yPos}; ${widthStyle} transform: ${transformStyle}; ${opacityStyle}`;
+            // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+            // Извлекаем text-align, если это текстовый блок, и применяем его к контейнеру,
+            // чтобы выравнивание работало для элементов с заданной шириной.
+            const textAlignStyle = (type === 'innerBlock' && el.style && el.style.textAlign) 
+                ? `text-align: ${el.style.textAlign};` 
+                : '';
+            
+            // Объединяем все стили, включая новый стиль выравнивания
+            const positionStyle = `left: ${xPos}; top: ${yPos}; ${widthStyle} transform: ${transformStyle}; ${opacityStyle} ${textAlignStyle}`;
+            // --- КОНЕЦ ИЗМЕНЕНИЯ ---
             
             let content;
             if (type === 'sticker') {

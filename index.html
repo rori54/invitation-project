@@ -1448,14 +1448,13 @@
             
             // --- НОВАЯ ЛОГИКА: Добавление плавающего текста ---
             if (target.matches('.add-inner-block-btn')) { 
-                const newInnerBlock = { 
-                    id: `inner-${Date.now()}`, 
-                    text: 'New Text', 
-                    style: { ...defaultTextStyle, color: '#333333', fontSize: '1.5rem', textAlign: 'center' },
-                    // --- НОВЫЕ ЗНАЧЕНИЯ ---
-                    x: 50, // Используем проценты для центрирования
-                    y: 50, // Чуть выше центра
-                    width: 'auto', // ЗАДАЕМ АВТОМАТИЧЕСКУЮ ШИРИНУ
+                const newInnerBlock = {
+                    id: `inner-${Date.now()}`,
+                    text: 'New Text',
+                    style: { ...defaultTextStyle, fontFamily: 'Montserrat', color: '#cc0000', fontSize: '24px', textAlign: 'center' }, // Стили как на скриншоте
+                    x: 50,      // Центр по горизонтали
+                    y: 30,      // Чуть выше центра по вертикали
+                    width: 200,   // <--- Задаем фиксированную ширину в пикселях
                     rotation: 0
                 }; 
                 if (!pageBlocks[blockIndex].content.innerBlocks) {
