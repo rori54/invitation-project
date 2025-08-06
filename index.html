@@ -1450,15 +1450,15 @@
             const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
             if (blockIndex === -1) return;
             
-            // --- НОВАЯ ЛОГИКА: Добавление плавающего текста ---
+            // --- ЭТО НОВЫЙ, ПРАВИЛЬНЫЙ КОД ---
             if (target.matches('.add-inner-block-btn')) { 
                 const newInnerBlock = {
                     id: `inner-${Date.now()}`,
                     text: 'New Text',
-                    style: { ...defaultTextStyle, fontFamily: 'Montserrat', color: '#cc0000', fontSize: '24px', textAlign: 'center' }, // Стили как на скриншоте
-                    x: 50,      // Центр по горизонтали
-                    y: 30,      // Чуть выше центра по вертикали
-                    width: 'auto',   // <--- Задаем фиксированную ширину в пикселях
+                    style: { ...defaultTextStyle, fontFamily: 'Montserrat', color: '#cc0000', fontSize: '24px', textAlign: 'left' }, // <--- ИСПРАВЛЕНИЕ ЗДЕСЬ
+                    x: 50,
+                    y: 30,
+                    width: 'auto',
                     rotation: 0
                 }; 
                 if (!pageBlocks[blockIndex].content.innerBlocks) {
