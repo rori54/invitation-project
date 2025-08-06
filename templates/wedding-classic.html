@@ -43,6 +43,7 @@
         .sticker-wrapper, .inner-block-wrapper { position: absolute; box-sizing: border-box; z-index: 5; cursor: grab; touch-action: none; border: 1px dashed transparent; }
         .sticker-wrapper.selected, .inner-block-wrapper.selected { border-color: #007bff; z-index: 10; }
         .sticker-wrapper img { width: 100%; height: 100%; display: block; pointer-events: none; }
+        .interactive-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; } .interactive-overlay > .sticker-wrapper, .interactive-overlay > .inner-block-wrapper { pointer-events: auto; }
         .inner-block-wrapper { padding: 5px; white-space: pre-wrap; word-break: break-word; height: auto; }
         .resize-handle { position: absolute; width: 12px; height: 12px; background: #fff; border: 1px solid #007bff; border-radius: 50%; display: none; }
         .selected .resize-handle { display: block; }
@@ -163,6 +164,7 @@
         }).join('');
     };
 
+    // --- Замените эту функцию ---
     const createHeroHTML = (block, s) => {
         const c = block.content;
         const isLimited = !c.fullWidth;
@@ -182,12 +184,15 @@
                             ${namesHTML}
                             ${dateHTML}
                         </div>
-                        ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
-                        ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
+                        <div class="interactive-overlay">
+                            ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
+                            ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
+                        </div>
                     </header>
                 </div>`;
     };
 
+    // --- Замените эту функцию ---
     const createTextBlockHTML = (block, s) => { 
         const c = block.content; 
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="background-color:${c.backgroundColor}; background-image:url('${c.backgroundImage}');"></div>` : '';
@@ -195,13 +200,15 @@
         const textHTML = c.text ? `<div>${makeTextEditable(c.text, block.id, 'textStyle', c.textStyle)}</div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative;">
                 ${backgroundDiv}
                 ${titleHTML}
                 ${textHTML}
+                <div class="interactive-overlay">
+                    ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
+                    ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
+                </div>
             </section>
-            ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
-            ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
         </div>`; 
     };
 
@@ -420,13 +427,13 @@
         }
     }
     
+    // --- ДОБАВЬТЕ ЭТОТ КОД В НАЧАЛО ФУНКЦИИ initInteraction() ---
     function initInteraction() {
         if (typeof interact === 'undefined') return;
 
         const container = document.getElementById('page-content');
         if (!container) return;
 
-        // Этот слушатель для снятия выделения остается без изменений
         container.addEventListener('pointerdown', (e) => {
             const clickedInteractive = e.target.closest('.sticker-wrapper, .inner-block-wrapper');
             if (!clickedInteractive) {
@@ -445,17 +452,20 @@
                     listeners: {
                         move(event) {
                             const target = event.target;
+                            // --- ИСПРАВЛЕНИЕ: Используем transform для плавного перемещения, не меняя left/top ---
                             const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
                             const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-                            
-                            const currentRotation = parseFloat(target.getAttribute('data-rot')) || 0;
-                            target.style.transform = `translate(${x}px, ${y}px) rotate(${currentRotation}deg)`;
 
+                            // Обновляем позицию через transform
+                            target.style.transform = `translate(${x}px, ${y}px) rotate(${parseFloat(target.getAttribute('data-rot')) || 0}deg)`;
+
+                            // Сохраняем временные пиксельные значения в data-атрибутах
                             target.setAttribute('data-x', x);
                             target.setAttribute('data-y', y);
                         },
                         start(event) {
                             const target = event.target;
+                            // При старте считываем transform и сохраняем его
                             const transform = window.getComputedStyle(target).transform;
                             let x = 0, y = 0;
                             if (transform && transform !== 'none') {
@@ -465,9 +475,8 @@
                             }
                             target.setAttribute('data-x', x);
                             target.setAttribute('data-y', y);
-                            
-                            const transformMatch = target.style.transform.match(/rotate\((.+)deg\)/);
-                            target.setAttribute('data-rot', transformMatch ? parseFloat(transformMatch[1]) : 0);
+                            // Сохраняем текущий угол поворота
+                            target.setAttribute('data-rot', parseFloat(target.style.transform.match(/rotate\((.+)deg\)/)?.[1] || 0));
                         },
                         end(event) {
                             const target = event.target;
@@ -477,37 +486,21 @@
                             const parent = target.parentElement;
                             if (!parent) return;
 
+                            // --- ИСПРАВЛЕННАЯ ЛОГИКА КОНВЕРТАЦИИ ---
                             const targetRect = target.getBoundingClientRect();
                             const parentRect = parent.getBoundingClientRect();
 
-                            // --- ВОТ ГЛАВНОЕ ИСПРАВЛЕНИЕ ---
-                            // По умолчанию считаем, что точка привязки - это центр.
-                            let anchorX_px = (targetRect.left - parentRect.left) + (targetRect.width / 2);
-                            const centerY_px = (targetRect.top - parentRect.top) + (targetRect.height / 2);
+                            // Координаты центра элемента относительно родителя
+                            const centerX = (targetRect.left - parentRect.left) + targetRect.width / 2;
+                            const centerY = (targetRect.top - parentRect.top) + targetRect.height / 2;
 
-                            // Если это текстовый блок, проверяем его выравнивание.
-                            if (target.matches('.inner-block-wrapper')) {
-                                const textAlign = target.style.textAlign;
-                                if (textAlign === 'left') {
-                                    // Точка привязки - левый край.
-                                    anchorX_px = targetRect.left - parentRect.left;
-                                } else if (textAlign === 'right') {
-                                    // Точка привязки - правый край.
-                                    anchorX_px = (targetRect.left - parentRect.left) + targetRect.width;
-                                }
-                            }
-
-                            // Конвертируем финальную точку привязки в проценты.
-                            const xPercent = (anchorX_px / parent.offsetWidth) * 100;
-                            const yPercent = (centerY_px / parent.offsetHeight) * 100;
-                            // --- КОНЕЦ ГЛАВНОГО ИСПРАВЛЕНИЯ ---
+                            // Конвертируем в проценты
+                            const xPercent = (centerX / parent.offsetWidth) * 100;
+                            const yPercent = (centerY / parent.offsetHeight) * 100;
 
                             const newProps = { x: xPercent, y: yPercent };
-       
-                            window.parent.postMessage({ 
-                                type: target.dataset.updateType, 
-                                payload: { blockId: blockWrapper.dataset.blockId, id: target.dataset.id, newProps } 
-                            }, '*');
+   
+                            window.parent.postMessage({ type: target.dataset.updateType, payload: { blockId: blockWrapper.dataset.blockId, id: target.dataset.id, newProps } }, '*');
                         }
                     }
                 })
@@ -523,8 +516,7 @@
                             const target = event.target;
                             const blockWrapper = target.closest('.block-wrapper');
                             if (!blockWrapper) return;
-                            
-                            // При изменении размера, ширина НЕ должна становиться 'auto'
+
                             const newProps = { width: event.rect.width };
                             window.parent.postMessage({ type: target.dataset.updateType, payload: { blockId: blockWrapper.dataset.blockId, id: target.dataset.id, newProps } }, '*');
                         }
@@ -540,7 +532,6 @@
                     const rect = wrapper.getBoundingClientRect();
                     wrapper.setAttribute('data-center-x', rect.left + rect.width / 2);
                     wrapper.setAttribute('data-center-y', rect.top + rect.height / 2);
-                    wrapper.setAttribute('data-start-transform', wrapper.style.transform);
                 },
                 onmove: function (event) {
                     const wrapper = event.target.closest('.sticker-wrapper, .inner-block-wrapper');
@@ -550,10 +541,9 @@
                     const degrees = angle * (180 / Math.PI);
                     const currentRotation = degrees + 90;
                     
-                    const existingTransform = wrapper.getAttribute('data-start-transform');
-                    const translateMatch = existingTransform.match(/translate\(([^)]+)\)/);
-                    const translatePart = translateMatch ? `translate(${translateMatch[1]})` : 'translate(-50%, -50%)';
-                    
+                    // --- ИСПРАВЛЕНИЕ: Комбинируем rotate с translate ---
+                    const existingTransform = wrapper.style.transform.match(/translate\((.+?)\)/);
+                    const translatePart = existingTransform ? `translate(${existingTransform[1]})` : 'translate(-50%, -50%)';
                     wrapper.style.transform = `${translatePart} rotate(${currentRotation}deg)`;
                 },
                 onend: function(event) {
