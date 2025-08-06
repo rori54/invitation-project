@@ -123,23 +123,30 @@
         return elements.map((el, index) => {
             const opacityStyle = (el.opacity !== undefined) ? `opacity: ${el.opacity};` : '';
             
-            // --- Логика позиционирования и размера (остается без изменений) ---
-            const xPos = `${el.x || 0}%`; // Используем проценты
-            const yPos = `${el.y || 0}%`; // Используем проценты
+            const xPos = `${el.x || 0}%`;
+            const yPos = `${el.y || 0}%`;
             const widthStyle = (el.width === 'auto' || !el.width) ? 'width: auto;' : `width: ${el.width}px;`;
             
-            const transformStyle = `translate(-50%, -50%) rotate(${el.rotation || 0}deg)`;
-
-            // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
-            // Извлекаем text-align, если это текстовый блок, и применяем его к контейнеру,
-            // чтобы выравнивание работало для элементов с заданной шириной.
+            // --- ГЛАВНОЕ ИСПРАВЛЕНИЕ ЗДЕСЬ ---
+            // Определяем горизонтальное смещение в зависимости от выравнивания текста.
+            let translateX = '-50%'; // По умолчанию - центр
+            if (type === 'innerBlock' && el.style && el.style.textAlign) {
+                if (el.style.textAlign === 'left') {
+                    translateX = '0%';
+                } else if (el.style.textAlign === 'right') {
+                    translateX = '-100%';
+                }
+            }
+            
+            const transformStyle = `translate(${translateX}, -50%) rotate(${el.rotation || 0}deg)`;
+            
+            // Применяем text-align к самому контейнеру, чтобы он работал, если задана ширина
             const textAlignStyle = (type === 'innerBlock' && el.style && el.style.textAlign) 
                 ? `text-align: ${el.style.textAlign};` 
                 : '';
             
-            // Объединяем все стили, включая новый стиль выравнивания
             const positionStyle = `left: ${xPos}; top: ${yPos}; ${widthStyle} transform: ${transformStyle}; ${opacityStyle} ${textAlignStyle}`;
-            // --- КОНЕЦ ИЗМЕНЕНИЯ ---
+            // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
             
             let content;
             if (type === 'sticker') {
