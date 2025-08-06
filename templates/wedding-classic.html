@@ -164,12 +164,11 @@
         }).join('');
     };
 
-    // --- Замените эту функцию ---
     const createHeroHTML = (block, s) => {
         const c = block.content;
         const isLimited = !c.fullWidth;
         const headerClasses = `hero-block ${isLimited ? 'limited-width' : ''}`;
-        const headerStyle = `aspect-ratio: ${c.aspectRatio || '16/9'}; max-width: ${isLimited ? (s.maxWidth || '800px') : 'none'};`;
+        const headerStyle = `aspect-ratio: ${c.aspectRatio || '16/9'}; max-width: ${isLimited ? (s.maxWidth || '800px') : 'none'}; position: relative;`;
         const imageHTML = c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'}; opacity: ${c.opacity || 1};" alt="">` : '';
         
         const subtitleHTML = (c.subtitle && c.subtitle.enabled) ? `<p>${makeTextEditable(c.subtitle.text, block.id, 'subtitle.style', c.subtitle.style)}</p>` : '';
@@ -184,22 +183,18 @@
                             ${namesHTML}
                             ${dateHTML}
                         </div>
-                        <div class="interactive-overlay">
-                            ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
-                            ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
-                        </div>
+                        ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
+                        ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
                     </header>
                 </div>`;
     };
 
-    // --- ЗАМЕНИТЕ ЭТУ ФУНКЦИЮ в wedding-classic.html ---
     const createTextBlockHTML = (block, s) => { 
         const c = block.content; 
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="background-color:${c.backgroundColor}; background-image:url('${c.backgroundImage}');"></div>` : '';
         const titleHTML = c.title ? `<h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>` : ''; 
         const textHTML = c.text ? `<div>${makeTextEditable(c.text, block.id, 'textStyle', c.textStyle)}</div>` : '';
         
-        // Добавили position: relative;
         return `<div class="block-wrapper" data-block-id="${block.id}">
             <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative;">
                 ${backgroundDiv}
@@ -219,14 +214,14 @@
         const descriptionHTML = c.description ? `<div>${makeTextEditable(c.description, block.id, 'descriptionStyle', c.descriptionStyle)}</div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative;">
                 ${backgroundDiv}
                 ${titleHTML}
                 ${imageTag}
                 ${descriptionHTML}
+                ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
+                ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
             </section>
-            ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
-            ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
         </div>`;
     };
 
@@ -235,7 +230,7 @@
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="background-color:${c.backgroundColor}; background-image:url('${c.backgroundImage}');"></div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative;">
                 ${backgroundDiv}
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <ul style="list-style:none;padding:0;text-align:left;">
@@ -249,9 +244,9 @@
                         </li>
                     `).join('')}
                 </ul>
+                ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
+                ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
             </section>
-            ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
-            ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
         </div>`; 
     };
 
@@ -261,24 +256,24 @@
         const imageHTML = c.imageUrl ? `<img src="${c.imageUrl}" alt="Venue" style="width:100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-bottom: 20px; opacity:${c.opacity};">` : ''; 
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative;">
                 ${backgroundDiv}
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <div>${makeTextEditable(c.address, block.id, 'addressStyle', c.addressStyle)}</div>
                 ${imageHTML}
                 <a href="${c.mapLink}" class="rsvp-button" target="_blank">View on Map</a>
+                ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
+                ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
             </section>
-            ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
-            ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
         </div>`; 
     };
-    
+        
     const createCountdownHTML = (block, s) => { 
         const c = block.content;
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="background-color:${c.backgroundColor}; background-image:url('${c.backgroundImage}');"></div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative;">
                 ${backgroundDiv}
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <div id="countdown">
@@ -287,9 +282,9 @@
                     <div class="time-block"><div id="minutes" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div class="label">${makeTextEditable('Minutes', block.id, 'labelStyle', c.labelStyle)}</div></div>
                     <div class="time-block"><div id="seconds" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div class="label">${makeTextEditable('Seconds', block.id, 'labelStyle', c.labelStyle)}</div></div>
                 </div>
+                ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
+                ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
             </section>
-            ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
-            ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
         </div>`; 
     };
 
@@ -298,14 +293,14 @@
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="background-color:${c.backgroundColor}; background-image:url('${c.backgroundImage}');"></div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative;">
                 ${backgroundDiv}
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <div>${makeTextEditable(c.subtitle, block.id, 'subtitleStyle', c.subtitleStyle)}</div>
                 <div><a href="${rsvpLink}" class="rsvp-button" style="${getStyleString(c.buttonStyle)}">I'll Be There!</a></div>
+                ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
+                ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
             </section>
-            ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
-            ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
         </div>`; 
     };
     
