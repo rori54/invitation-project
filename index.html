@@ -635,7 +635,6 @@
         });
     }
 
-    // --- ЗАМЕНИТЕ ЭТУ ФУНКЦИЮ в index.html ---
     function updateTextStyle() {
         if (!currentEditingElement) return;
         
@@ -650,25 +649,14 @@
         }
         
         const styleKey = keys[keys.length - 1];
+        if (!current[styleKey]) current[styleKey] = {};
         
-        // --- НОВАЯ, БОЛЕЕ НАДЕЖНАЯ ЛОГИКА ---
-        // 1. Получаем существующий объект стилей (или создаем пустой)
-        const existingStyle = current[styleKey] || {};
-
-        // 2. Считываем ВСЕ значения из панели
-        const newStyles = {
-            fontFamily: document.getElementById('toolbar-font-family').value,
-            fontSize: document.getElementById('toolbar-font-size').value,
-            color: document.getElementById('toolbar-color').value,
-            fontWeight: document.getElementById('toolbar-font-weight').value,
-            textAlign: document.getElementById('toolbar-text-align').value
-        };
-
-        // 3. "Сливаем" старые стили с новыми. Новые значения перезапишут старые.
-        Object.assign(existingStyle, newStyles);
-
-        // 4. Присваиваем обновленный объект обратно
-        current[styleKey] = existingStyle;
+        // Update style object
+        current[styleKey].fontFamily = document.getElementById('toolbar-font-family').value;
+        current[styleKey].fontSize = document.getElementById('toolbar-font-size').value;
+        current[styleKey].color = document.getElementById('toolbar-color').value;
+        current[styleKey].fontWeight = document.getElementById('toolbar-font-weight').value;
+        current[styleKey].textAlign = document.getElementById('toolbar-text-align').value;
         
         renderPreview();
         renderEditor();
@@ -936,6 +924,14 @@
                 </div>`;
     }
     
+    function createInnerBlocksEditor(block) { 
+        let innerBlocksHTML = (block.content.innerBlocks || []).map((innerBlock, index) => { 
+            const textContentField = innerBlock.type === 'heading' ? `<input type="text" data-key="innerBlocks.${index}.text" value="${innerBlock.text || ''}">` : `<textarea data-key="innerBlocks.${index}.text">${innerBlock.text || ''}</textarea>`; 
+            return `<div class="inner-block-editor" data-index="${index}"> <button class="delete-inner-block-btn" title="Delete this element">×</button> <label style="text-transform: capitalize;">${innerBlock.type} Text</label> ${textContentField} ${createStyleControlsHTML(`innerBlocks.${index}.style`, innerBlock.style, { textAlign: true, color: true, size: true, weight: true, family: true })} </div>`; 
+        }).join(''); 
+        return `<div class="inner-blocks-container"> <label style="font-weight: bold; color: #333;">Additional Elements</label> <div class="inner-blocks-list">${innerBlocksHTML}</div> <div class="add-inner-block-controls"> <button class="add-inner-block-btn" data-inner-type="heading">+ Add Heading</button> <button class="add-inner-block-btn" data-inner-type="paragraph">+ Add Paragraph</button> </div> </div>`; 
+    }
+
     function createScheduleItemsEditor(block) {
         let itemsHTML = (block.content.items || []).map((item, index) => {
             return `<div class="schedule-item-editor" data-item-id="${item.id}">
@@ -1142,21 +1138,21 @@
         </div>`;
     }
 
-    function createEditorFieldsForBlock(block) {
-        let fieldsHTML = '';
-        const c = block.content;
-        const bgPosField = `<div class="control-group"><label>Background Focus Point</label><input type="text" data-key="backgroundPosition" value="${c.backgroundPosition || 'center center'}" placeholder="e.g., center 30%"></div>`;
-        const aspectRatioField = `<div class="control-group"><label>Block Shape (Height)</label><select data-key="aspectRatio"> <option value="21/9" ${c.aspectRatio === '21/9' ? 'selected' : ''}>Cinematic</option> <option value="16/9" ${c.aspectRatio === '16/9' ? 'selected' : ''}>Widescreen</option> <option value="8/5" ${c.aspectRatio === '8/5' ? 'selected' : ''}>Landscape (Wide)</option> <option value="3/2"  ${c.aspectRatio === '3/2' ? 'selected' : ''}>Landscape (Classic)</option> <option value="4/3"  ${c.aspectRatio === '4/3' ? 'selected' : ''}>Standard (4:3)</option> <option value="1/1"  ${c.aspectRatio === '1/1' ? 'selected' : ''}>Square</option> <option value="9/12" ${c.aspectRatio === '9/12' ? 'selected' : ''}>Portrait (Standard)</option> <option value="9/16" ${c.aspectRatio === '9/16' ? 'selected' : ''}>Portrait (Tall)</option> </select></div>`;
-        const titleStyleField = (styleObj) => `<label>Title Style</label>${createStyleControlsHTML('titleStyle', styleObj, { textAlign: true, color: true, size: true, weight: true, family: true })}`;
-        const sectionTitleField = (title) => `<div class="control-group"><label>Section Title</label><input type="text" data-key="title" value="${title}"></div>`;
-        const createOptionalElementEditor = (key, label) => {
-            const element = c[key];
-            if (!element) return '';
-            return `<div class="control-group"> <div class="optional-element-header"> <label>${label}</label> <label><input type="checkbox" data-key="${key}.enabled" ${element.enabled ? 'checked' : ''}> Show</label> </div> <input type="text" data-key="${key}.text" value="${element.text}"> ${createStyleControlsHTML(`${key}.style`, element.style)} </div>`;
+    function createEditorFieldsForBlock(block) { 
+        let fieldsHTML = ''; 
+        const c = block.content; 
+        const bgPosField = `<div class="control-group"><label>Background Focus Point</label><input type="text" data-key="backgroundPosition" value="${c.backgroundPosition || 'center center'}" placeholder="e.g., center 30%"></div>`; 
+        const aspectRatioField = `<div class="control-group"><label>Block Shape (Height)</label><select data-key="aspectRatio"> <option value="21/9" ${c.aspectRatio === '21/9' ? 'selected' : ''}>Cinematic</option> <option value="16/9" ${c.aspectRatio === '16/9' ? 'selected' : ''}>Widescreen</option> <option value="8/5" ${c.aspectRatio === '8/5' ? 'selected' : ''}>Landscape (Wide)</option> <option value="3/2"  ${c.aspectRatio === '3/2' ? 'selected' : ''}>Landscape (Classic)</option> <option value="4/3"  ${c.aspectRatio === '4/3' ? 'selected' : ''}>Standard (4:3)</option> <option value="1/1"  ${c.aspectRatio === '1/1' ? 'selected' : ''}>Square</option> <option value="9/12" ${c.aspectRatio === '9/12' ? 'selected' : ''}>Portrait (Standard)</option> <option value="9/16" ${c.aspectRatio === '9/16' ? 'selected' : ''}>Portrait (Tall)</option> </select></div>`; 
+        const titleStyleField = (styleObj) => `<label>Title Style</label>${createStyleControlsHTML('titleStyle', styleObj, { textAlign: true, color: true, size: true, weight: true, family: true })}`; 
+        const sectionTitleField = (title) => `<div class="control-group"><label>Section Title</label><input type="text" data-key="title" value="${title}"></div>`; 
+        const createOptionalElementEditor = (key, label) => { 
+            const element = c[key]; 
+            if (!element) return ''; 
+            return `<div class="control-group"> <div class="optional-element-header"> <label>${label}</label> <label><input type="checkbox" data-key="${key}.enabled" ${element.enabled ? 'checked' : ''}> Show</label> </div> <input type="text" data-key="${key}.text" value="${element.text}"> ${createStyleControlsHTML(`${key}.style`, element.style)} </div>`; 
         };
-
-        switch (block.type) {
-            case 'hero':
+        
+        switch(block.type) { 
+            case 'hero': 
                 fieldsHTML = `${createImageInputHTML('imageUrl', c.imageUrl, 'Background Image URL')}
                     ${createOpacityControl('opacity', c.opacity, 'Background Opacity')}
                     <div class="control-group">
@@ -1166,32 +1162,32 @@
                             <option value="false" ${!c.fullWidth ? 'selected' : ''}>Limited (use global width)</option>
                         </select>
                     </div>
-                    ${createOptionalElementEditor('names', 'Names')}
-                    <hr class="style-separator">
-                    ${createOptionalElementEditor('subtitle', 'Subtitle')}
-                    <hr class="style-separator">
-                    ${createOptionalElementEditor('date', 'Date')}
-                    <hr class="style-separator">
-                    ${aspectRatioField}${bgPosField}
-                    ${createInnerBlocksEditor(block)}
-                    ${createStickerEditor(block)}
+                    ${createOptionalElementEditor('names', 'Names')} 
+                    <hr class="style-separator"> 
+                    ${createOptionalElementEditor('subtitle', 'Subtitle')} 
+                    <hr class="style-separator"> 
+                    ${createOptionalElementEditor('date', 'Date')} 
+                    <hr class="style-separator"> 
+                    ${aspectRatioField}${bgPosField} 
+                    ${createInnerBlocksEditor(block)} 
+                    ${createStickerEditor(block)} ${createInnerBlocksEditor(block)}
                     ${createBackgroundControlsHTML(block)}
-                    ${createMirrorControlsHTML(block)}`;
-                break; // <--- ВОТ ЭТА КОМАНДА БЫЛА ПРОПУЩЕНА
+                    ${createMirrorControlsHTML(block)}`; 
 
-            case 'text-block':
-                fieldsHTML = `<div class="control-group"><label>Title (optional)</label><input type="text" data-key="title" value="${c.title || ''}"></div>${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Paragraph Text</label><textarea data-key="text">${c.text}</textarea></div>${createStyleControlsHTML('textStyle', c.textStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}${createInnerBlocksEditor(block)}${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
-                break;
+            // --- ЗАМЕНИТЕ ЭТОТ ФРАГМЕНТ КОДА ВНУТРИ createEditorFieldsForBlock ---
+            case 'text-block': 
+                fieldsHTML = `<div class="control-group"><label>Title (optional)</label><input type="text" data-key="title" value="${c.title || ''}"></div>${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Paragraph Text</label><textarea data-key="text">${c.text}</textarea></div>${createStyleControlsHTML('textStyle', c.textStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}${createInnerBlocksEditor(block)}${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`; 
+                break; 
 
-            case 'rsvp':
+            case 'rsvp': 
                 fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${c.subtitle}</textarea>${createStyleControlsHTML('subtitleStyle', c.subtitleStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}</div><hr class="style-separator"><label>Button Style</label><div class="style-controls"><div class="style-controls-grid"><div class="control-group"><label>Background Color</label><input type="color" data-key="buttonStyle.backgroundColor" value="${c.buttonStyle.backgroundColor || '#c5a98b'}"></div><div class="control-group"><label>Text Color</label><input type="color" data-key="buttonStyle.color" value="${c.buttonStyle.color || '#FFFFFF'}"></div></div><div style="margin-top: 10px;">${createStyleControlsHTML('buttonStyle', c.buttonStyle, {color: false, size: true, weight: true, family: true})}</div></div>${createInnerBlocksEditor(block)}${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
-                break;
+                break; 
 
-            case 'countdown':
-            case 'location':
-                fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}`;
-
-                if (block.type === 'countdown') {
+            case 'countdown': 
+            case 'location': 
+                fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}`; 
+                
+                if(block.type === 'countdown') {
                     fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Target Date & Time</label><input type="datetime-local" data-key="targetDate" value="${c.targetDate}"></div>
                     <hr class="style-separator">
                     <label>Numbers Style (e.g., 40)</label>
@@ -1199,17 +1195,17 @@
                     <hr class="style-separator">
                     <label>Labels Style (e.g., Days)</label>
                     ${createStyleControlsHTML('labelStyle', c.labelStyle, { color: true, size: true, weight: true, family: true })}`;
-                }
-
-                if (block.type === 'location') {
+                } 
+                
+                if(block.type === 'location') { 
                     fieldsHTML += `<hr class="style-separator"><div class="control-group"><label>Smart Location Search</label><input type="text" class="smart-location-search" placeholder="e.g., Per Se, New York"></div>
                     <div class="control-group"><label>Address</label><textarea data-key="address">${c.address || ''}</textarea></div>
                     ${createStyleControlsHTML('addressStyle', c.addressStyle, { textAlign: true, color: true, size: true, weight: true, family: true })}
-                    ${createImageInputHTML('imageUrl', c.imageUrl, 'Photo URL')}${createOpacityControl('opacity', c.opacity, 'Photo Opacity')}<div class="control-group"><label>Google Maps Link</label><input type="url" data-key="mapLink" value="${c.mapLink || ''}"></div>`;
-                }
-
+                    ${createImageInputHTML('imageUrl', c.imageUrl, 'Photo URL')}${createOpacityControl('opacity', c.opacity, 'Photo Opacity')}<div class="control-group"><label>Google Maps Link</label><input type="url" data-key="mapLink" value="${c.mapLink || ''}"></div>`; 
+                } 
+                
                 fieldsHTML += createInnerBlocksEditor(block) + createStickerEditor(block) + createBackgroundControlsHTML(block) + createMirrorControlsHTML(block);
-                break;
+                break;  
 
             case 'schedule':
                 fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator">${createScheduleItemsEditor(block)}${createInnerBlocksEditor(block)}${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
@@ -1231,7 +1227,7 @@
             case 'form-header':
                 fieldsHTML = `${sectionTitleField(c.title)}${titleStyleField(c.titleStyle)}<hr class="style-separator"><div class="control-group"><label>Subtitle</label><textarea data-key="subtitle">${c.subtitle}</textarea></div>${createImageInputHTML('imageUrl', c.imageUrl, 'Background Image URL')}${createOpacityControl('opacity', c.opacity, 'Background Opacity')}${aspectRatioField}${createInnerBlocksEditor(block)}${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
                 break;
-
+                
             case 'input-question':
             case 'textarea-question':
                 fieldsHTML = `<div class="control-group"><label>Question Text</label><input type="text" data-key="title" value="${c.title}"></div><div class="control-group"><label><input type="checkbox" data-key="required" ${c.required ? 'checked' : ''}> Required</label></div>${createBackgroundControlsHTML(block)}`;
@@ -1249,22 +1245,20 @@
                 }).join('');
                 fieldsHTML = `<div class="control-group"><label>Question Text</label><input type="text" data-key="title" value="${c.title}"></div><div class="control-group"><label><input type="checkbox" data-key="required" ${c.required ? 'checked' : ''}> Required</label></div><div class="control-group"><label>Options</label><div class="schedule-items-list">${optionsHTML}</div><button class="add-sub-item-btn action-button" data-list-key="options" style="font-size: 12px; padding: 5px; margin-top: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px;">+ Add Option</button></div>${createBackgroundControlsHTML(block)}`;
                 break;
-
+                
             case 'form-footer':
                 fieldsHTML = `<div class="control-group"><label>Footer Text</label><input type="text" data-key="text" value="${c.text}"></div>${createInnerBlocksEditor(block)}${createStickerEditor(block)}${createBackgroundControlsHTML(block)}${createMirrorControlsHTML(block)}`;
                 break;
-            default:
-                fieldsHTML = 'No editor available for this block type.';
-        }
-        return fieldsHTML;
+            default: 
+                fieldsHTML = 'No editor available for this block type.'; 
+        } 
+        return fieldsHTML; 
     }
     
-    // --- ЗАМЕНИТЕ ЭТУ ФУНКЦИЮ в index.html ---
+    // --- ДОБАВЬТЕ ЭТОТ КОД ---
     function createInnerBlocksEditor(block) {
         const innerBlocksHTML = (block.content.innerBlocks || []).map((innerBlock, index) => {
             const textContentField = `<textarea data-key="innerBlocks.${index}.text">${innerBlock.text || ''}</textarea>`;
-            const widthValue = (innerBlock.width === 'auto' || innerBlock.width === undefined) ? '' : Math.round(innerBlock.width);
-
             return `<div class="inner-block-editor" data-inner-id="${innerBlock.id}" data-index="${index}">
                         <button class="delete-inner-block-btn" title="Delete this element">×</button>
                         <label>Floating Text #${index + 1}</label>
@@ -1275,14 +1269,8 @@
                             <div class="control-group"><label>Y</label><input type="number" data-key="innerBlocks.${index}.y" value="${Math.round(innerBlock.y || 0)}"></div>
                         </div>
                         <div class="style-controls-grid">
-                            <div class="control-group">
-                                <label>Width</label>
-                                <input type="number" data-key="innerBlocks.${index}.width" value="${widthValue}" placeholder="auto">
-                            </div>
-                            <div class="control-group">
-                                <label>Rotation</label>
-                                <input type="number" data-key="innerBlocks.${index}.rotation" value="${Math.round(innerBlock.rotation || 0)}">
-                            </div>
+                            <div class="control-group"><label>Width</label><input type="number" data-key="innerBlocks.${index}.width" value="${Math.round(innerBlock.width || 150)}"></div>
+                            <div class="control-group"><label>Rotation</label><input type="number" data-key="innerBlocks.${index}.rotation" value="${Math.round(innerBlock.rotation || 0)}"></div>
                         </div>
                     </div>`;
         }).join('');
@@ -1389,71 +1377,50 @@
     function setupEventListeners() { 
         const editorContent = document.getElementById('editor-content'); 
 
-    // --- ЗАМЕНИТЕ ЭТУ ФУНКЦИЮ ПОЛНОСТЬЮ в index.html ---
-    const handleEditorChange = (e) => {
-        const input = e.target;
-        const blockDiv = input.closest('.editor-block');
-        if (!blockDiv) return;
+        // --- ОБЩИЙ ОБРАБОТЧИК ИЗМЕНЕНИЙ В ПОЛЯХ РЕДАКТОРА ---
+        const handleEditorChange = (e) => { 
+            const input = e.target; 
+            const blockDiv = input.closest('.editor-block'); 
+            if (!blockDiv) return; 
 
-        const blockId = blockDiv.dataset.id;
-        const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
-        if (blockIndex === -1) return;
+            const blockId = blockDiv.dataset.id; 
+            const blockIndex = pageBlocks.findIndex(b => b.id === blockId); 
+            if (blockIndex === -1) return; 
 
-        const key = input.dataset.key;
+            const key = input.dataset.key; 
 
-        if (input.matches('.sub-item-input')) {
-            const subItemDiv = input.closest('.schedule-item-editor');
-            const subItemId = subItemDiv.dataset.itemId;
-            const subItemKey = input.dataset.itemKey;
-            const listKey = pageBlocks[blockIndex].content.items ? 'items' : 'options';
-            const subItemIndex = pageBlocks[blockIndex].content[listKey].findIndex(i => i.id === subItemId);
-            if (subItemIndex > -1) pageBlocks[blockIndex].content[listKey][subItemIndex][subItemKey] = input.value;
+            if (input.matches('.sub-item-input')) { // Для элементов расписания/опций
+                const subItemDiv = input.closest('.schedule-item-editor'); 
+                const subItemId = subItemDiv.dataset.itemId; 
+                const subItemKey = input.dataset.itemKey; 
+                const listKey = pageBlocks[blockIndex].content.items ? 'items' : 'options'; 
+                const subItemIndex = pageBlocks[blockIndex].content[listKey].findIndex(i => i.id === subItemId); 
+                if (subItemIndex > -1) pageBlocks[blockIndex].content[listKey][subItemIndex][subItemKey] = input.value; 
 
-        } else if (key) {
-            let value = input.type === 'checkbox' ? input.checked : input.value;
-            if (input.type === 'number' || input.type === 'range') value = parseFloat(value) || 0;
-            if (key === 'fullWidth') value = value === 'true';
+            } else if (key) { // Для всех остальных полей с data-key
+                let value = input.type === 'checkbox' ? input.checked : input.value; 
+                if (input.type === 'number' || input.type === 'range') value = parseFloat(value) || 0; 
+                if (key === 'fullWidth') value = value === 'true';
 
-            const keys = key.split('.');
-            let current = pageBlocks[blockIndex].content;
-            for (let i = 0; i < keys.length - 1; i++) {
-                if (!current[keys[i]]) {
-                    current[keys[i]] = isNaN(parseInt(keys[i + 1], 10)) ? {} : [];
-                }
-                current = current[keys[i]];
-            }
-            current[keys[keys.length - 1]] = value;
-
-            // --- ГЛАВНОЕ ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-            // Если мы меняем выравнивание для плавающего текста...
-            if (keys[0] === 'innerBlocks' && keys[2] === 'style' && keys[3] === 'textAlign') {
-                // ... и новое значение - 'center',
-                if (value === 'center') {
-                    // то принудительно возвращаем его координату X на 50.
-                    const innerBlockIndex = parseInt(keys[1], 10);
-                    if (pageBlocks[blockIndex]?.content?.innerBlocks?.[innerBlockIndex]) {
-                        pageBlocks[blockIndex].content.innerBlocks[innerBlockIndex].x = 50;
-                        // Перерисовываем редактор, чтобы поле X обновилось
-                        renderEditor(); 
+                const keys = key.split('.'); 
+                let current = pageBlocks[blockIndex].content; 
+                for (let i = 0; i < keys.length - 1; i++) { 
+                    // Если вложенный объект не существует, создаем его
+                    if (!current[keys[i]]) {
+                        // Определяем, должен ли это быть массив или объект
+                        current[keys[i]] = isNaN(parseInt(keys[i+1], 10)) ? {} : [];
                     }
+                    current = current[keys[i]]; 
+                } 
+                current[keys[keys.length - 1]] = value; 
+                
+                if (input.type === 'range' && input.classList.contains('opacity-slider')) {
+                    const span = input.nextElementSibling;
+                    if (span) span.textContent = `${Math.round(value * 100)}%`;
                 }
-            }
-            // --- КОНЕЦ ГЛАВНОГО ИСПРАВЛЕНИЯ ---
-
-            if (keys[0] === 'innerBlocks' && keys[2] === 'text') {
-                const innerBlockIndex = parseInt(keys[1], 10);
-                if (pageBlocks[blockIndex]?.content?.innerBlocks?.[innerBlockIndex]) {
-                    pageBlocks[blockIndex].content.innerBlocks[innerBlockIndex].width = 'auto';
-                }
-            }
-
-            if (input.type === 'range' && input.classList.contains('opacity-slider')) {
-                const span = input.nextElementSibling;
-                if (span) span.textContent = `${Math.round(value * 100)}%`;
-            }
-        }
-        renderPreview();
-    };
+            } 
+            renderPreview(); 
+        }; 
         editorContent.addEventListener('input', handleEditorChange); 
         editorContent.addEventListener('change', handleEditorChange); 
         
@@ -1469,13 +1436,13 @@
             
             // --- НОВАЯ ЛОГИКА: Добавление плавающего текста ---
             if (target.matches('.add-inner-block-btn')) { 
-                const newInnerBlock = {
-                    id: `inner-${Date.now()}`,
-                    text: 'New Text',
-                    style: { ...defaultTextStyle, fontFamily: 'Montserrat', color: '#cc0000', fontSize: '24px', textAlign: 'center' }, // Стили как на скриншоте
-                    x: 50,      // Центр по горизонтали
-                    y: 30,      // Чуть выше центра по вертикали
-                    width: 'auto',   // <--- Задаем фиксированную ширину в пикселях
+                const newInnerBlock = { 
+                    id: `inner-${Date.now()}`, 
+                    text: 'New Text', 
+                    style: { ...defaultTextStyle, color: '#333333', fontSize: '1rem', textAlign: 'center' },
+                    x: 50, // Появится в центре (x=50, y=50)
+                    y: 50,
+                    width: 150,
                     rotation: 0
                 }; 
                 if (!pageBlocks[blockIndex].content.innerBlocks) {
@@ -1839,37 +1806,38 @@
             console.warn('Error fetching API keys:', error);
         }
 
-        window.addEventListener('message', (event) => {
-            if (event.source !== iframe.contentWindow) return;
-            const { type, payload } = event.data;
+        // --- ЗАМЕНИТЕ ЭТОТ ОБРАБОТЧИК ВНУТРИ initEditor() ---
+    window.addEventListener('message', (event) => {
+        if (event.source !== iframe.contentWindow) return;
+        const { type, payload } = event.data;
+        
+        // --- ОБНОВЛЕННАЯ УНИВЕРСАЛЬНАЯ ЛОГИКА ---
+        if (type === 'UPDATE_STICKER' || type === 'UPDATE_INNER_BLOCK') {
+            const { blockId, id, newProps } = payload;
+            const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
+            if (blockIndex === -1) return;
+
+            // Определяем, с каким массивом работаем: stickers или innerBlocks
+            const targetArrayKey = (type === 'UPDATE_STICKER') ? 'stickers' : 'innerBlocks';
+            const targetArray = pageBlocks[blockIndex].content[targetArrayKey];
+            if (!targetArray) return;
+
+            const elementIndex = targetArray.findIndex(s => s.id === id);
+            if (elementIndex === -1) return;
             
-            if (type === 'UPDATE_STICKER' || type === 'UPDATE_INNER_BLOCK') {
-                const { blockId, id, newProps } = payload;
-                const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
-                if (blockIndex === -1) return;
-
-                const targetArrayKey = (type === 'UPDATE_STICKER') ? 'stickers' : 'innerBlocks';
-                const targetArray = pageBlocks[blockIndex].content[targetArrayKey];
-                if (!targetArray) return;
-
-                const elementIndex = targetArray.findIndex(s => s.id === id);
-                if (elementIndex === -1) return;
-                
-                Object.assign(targetArray[elementIndex], newProps);
-                
-                // --- ГЛАВНОЕ ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-                // После обновления данных при перетаскивании, мы должны не только
-                // перерисовать редактор, но и ПЕРЕРИСОВАТЬ ПРЕВЬЮ.
-                renderEditor(); 
-                renderPreview(); // <--- ЭТА СТРОЧКА ВСЕ ИСПРАВИТ
-            } 
-            else if (type === 'TEXT_ELEMENT_CLICKED') {
-                showTextEditingToolbar(payload.blockId, payload.elementKey, payload.currentStyle);
-            } 
-            else if (type === 'HIDE_TEXT_TOOLBAR') {
-                hideTextEditingToolbar();
-            }
-        });
+            // Обновляем свойства элемента
+            Object.assign(targetArray[elementIndex], newProps);
+            
+            // Перерисовываем редактор, чтобы поля (X, Y, Width) обновились
+            renderEditor(); 
+        } 
+        else if (type === 'TEXT_ELEMENT_CLICKED') {
+            showTextEditingToolbar(payload.blockId, payload.elementKey, payload.currentStyle);
+        } 
+        else if (type === 'HIDE_TEXT_TOOLBAR') {
+            hideTextEditingToolbar();
+        }
+    });
 
         const initialize = () => { 
             if (isCustomerMode) {
