@@ -24,8 +24,8 @@
         @keyframes floatAnimation { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { translateY(0); } }
 
         .block-wrapper { position: relative; }
-        .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; position: relative; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); box-sizing: border-box;}
-        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; width: 100%; user-select: none; }
+        .content-section{background: #fff; margin: 30px auto; padding: 50px 20px; text-align: center; position: relative; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); box-sizing: border-box; overflow: hidden;}
+        .hero-block { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; position: relative; width: 100%; user-select: none; overflow: hidden; }
         .hero-block.limited-width { margin: 30px auto; border-radius: 8px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); }
         .hero-background-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; }
         .hero-block::before{ content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); z-index: 1; pointer-events: none;}
@@ -43,7 +43,6 @@
         .sticker-wrapper, .inner-block-wrapper { position: absolute; box-sizing: border-box; z-index: 5; cursor: grab; touch-action: none; border: 1px dashed transparent; }
         .sticker-wrapper.selected, .inner-block-wrapper.selected { border-color: #007bff; z-index: 10; }
         .sticker-wrapper img { width: 100%; height: 100%; display: block; pointer-events: none; }
-        .interactive-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; } .interactive-overlay > .sticker-wrapper, .interactive-overlay > .inner-block-wrapper { pointer-events: auto; }
         .inner-block-wrapper { padding: 5px; white-space: pre-wrap; word-break: break-word; height: auto; }
         .resize-handle { position: absolute; width: 12px; height: 12px; background: #fff; border: 1px solid #007bff; border-radius: 50%; display: none; }
         .selected .resize-handle { display: block; }
@@ -53,55 +52,34 @@
         .rotate-handle::before { content: ''; position: absolute; top: -15px; left: 50%; width: 1px; height: 15px; background: #007bff; transform: translateX(-50%); }
 
         /* Ribbon mode styles */
-        body.style-ribbon #page-content {
-            /* Убираем рамку и фон с главного контейнера */
-            background: none;
-            box-shadow: none;
-            padding: 0;
-            margin: 0;
-            max-width: none;
-        }
-
-        body.style-ribbon .block-wrapper {
-            /* Каждый блок теперь - полноширинный контейнер для своего фона */
-            position: relative;
-            width: 100%;
-            overflow: hidden; /* Важно для фонов */
-        }
+        .style-ribbon .content-section,
+        .style-ribbon .hero-block.limited-width { background: none !important; box-shadow: none !important; border-radius: 0 !important; margin: 0 !important; padding: 20px !important; }
+        .style-ribbon .hero-block { border-radius: 0 !important; box-shadow: none !important; }
         
-        body.style-ribbon .content-section,
-        body.style-ribbon .hero-block {
-            /* А это - контейнер для контента ВНУТРИ блока */
-            position: relative; /* Чтобы быть поверх фона */
-            z-index: 2;
-            margin-left: auto;
-            margin-right: auto;
-            padding: 60px 25px; /* Отступы для текста, чтобы не прилипал к краям */
-            box-shadow: none;
-            background: transparent !important; /* ОБЯЗАТЕЛЬНО: делаем прозрачным, чтобы видеть фон */
-            border: none;
-            border-radius: 0;
-            max-width: 800px; /* Используем глобальную ширину для контента */
+        /* Block background styles */
+        .block-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; border-radius: inherit; background-size: cover; background-position: center; background-repeat: no-repeat; }
+
+        /* Text elements for editing */
+        .editable-text { cursor: text; position: relative; display: inline-block; transition: outline 0.2s; }
+        .editable-text:hover { outline: 1px dashed rgba(0, 123, 255, 0.5); }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .content-section { margin: 15px; padding: 30px 15px; }
+            .hero-content { padding: 20px 0; }
         }
 
-        /* Особые стили для блока Hero в режиме Ribbon */
-        body.style-ribbon .hero-block {
-            padding: 0; /* Убираем паддинг, так как он будет у .hero-content */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        body.style-ribbon .hero-content {
-            width: 100%;
-            padding: 60px 25px; /* Добавляем отступы здесь */
-        }
+        /* Ribbon Mode Fix */
+        body.style-ribbon #page-content { background-color: #ffffff; max-width: 800px; margin: 0 auto; padding: 20px 0; box-shadow: 0 6px 25px rgba(0,0,0,0.08); }
+        body.style-ribbon .content-section, body.style-ribbon .hero-block { background: none !important; box-shadow: none !important; border: none !important; margin: 0 !important; }
+        body.style-ribbon .block-wrapper { padding: 25px 40px; }
+        body.style-ribbon .hero-block { width: 100%; max-width: none; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 </head>
 <body>
     <div id="envelope-wrapper">
-        <model-viewer id="envelope-3d" src="/templates/envelope.glb" alt="An interactive 3D envelope" camera-controls disable-zoom interaction-prompt="none" camera-orbit="0deg 75deg 105%" style="width: 100%; height: 100%; background: none;"></model-viewer>
+        <model-viewer id="envelope-3d" src="https://raw.githubusercontent.com/google/model-viewer/master/packages/modelviewer.dev/assets/ShopifyModels/Chair.glb" alt="An interactive 3D envelope" camera-controls disable-zoom interaction-prompt="none" camera-orbit="0deg 75deg 105%" style="width: 100%; height: 100%; background: none;"></model-viewer>
     </div>
 
     <main id="page-content"></main>
@@ -132,7 +110,6 @@
         return `<span style="${getStyleString(styleObject)}">${processText(text)}</span>`;
     };
 
-    // --- ЗАМЕНИТЕ ЭТУ ФУНКЦИЮ в wedding-classic.html ---
     const renderInteractiveElements = (elements, blockId, type) => {
         if (!elements || elements.length === 0) return '';
         const wrapperClass = type === 'sticker' ? 'sticker-wrapper' : 'inner-block-wrapper';
@@ -140,13 +117,14 @@
 
         return elements.map((el, index) => {
             const opacityStyle = (el.opacity !== undefined) ? `opacity: ${el.opacity};` : '';
-            const xPos = `${el.x || 0}%`;
-            const yPos = `${el.y || 0}%`;
+            
+            // Position using percentages for left/top, but keep width in pixels
+            const xPos = `${el.x || 50}%`;
+            const yPos = `${el.y || 50}%`;
             const widthStyle = (el.width === 'auto' || !el.width) ? 'width: auto;' : `width: ${el.width}px;`;
             
-            // Простая и надежная логика: всегда центрируем контейнер
             const transformStyle = `translate(-50%, -50%) rotate(${el.rotation || 0}deg)`;
-            
+
             const textAlignStyle = (type === 'innerBlock' && el.style && el.style.textAlign) 
                 ? `text-align: ${el.style.textAlign};` 
                 : '';
@@ -156,7 +134,7 @@
             let content;
             if (type === 'sticker') {
                 content = `<img src="${el.src}" alt="sticker">`;
-            } else {
+            } else { // 'innerBlock'
                 content = makeTextEditable(el.text, blockId, `innerBlocks.${index}.style`, el.style);
             }
 
@@ -170,26 +148,23 @@
 
     const createHeroHTML = (block, s) => {
         const c = block.content;
-        const hasBg = c.backgroundColor || c.backgroundImage;
-        let bgStyle = '';
-        if (hasBg) {
-            bgStyle = `background-color: ${c.backgroundColor || 'transparent'}; background-image: url('${c.backgroundImage || ''}'); background-size: ${c.backgroundSize || 'cover'}; background-position: center; opacity: ${c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1}; transform: ${(c.mirrorHorizontal ? 'scaleX(-1) ' : '') + (c.mirrorVertical ? 'scaleY(-1)' : '')};`;
-        }
-        const backgroundDiv = hasBg ? `<div class="block-background" style="${bgStyle}"></div>` : '';
-
         const isLimited = !c.fullWidth;
         const headerClasses = `hero-block ${isLimited ? 'limited-width' : ''}`;
-        // ВАЖНО: Делаем header прозрачным, если есть кастомный фон
-        const headerStyle = `aspect-ratio: ${c.aspectRatio || '16/9'}; max-width: ${isLimited ? (s.maxWidth || '800px') : 'none'}; position: relative; ${hasBg ? 'background: transparent;' : ''}`;
+        const headerStyle = `aspect-ratio: ${c.aspectRatio || '16/9'}; max-width: ${isLimited ? (s.maxWidth || '800px') : 'none'};`;
+        
+        // Background with opacity
+        const bgOpacity = c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1;
+        const backgroundStyle = `background-color: ${c.backgroundColor || 'transparent'}; ${c.backgroundImage ? `background-image: url('${c.backgroundImage}'); background-size: ${c.backgroundSize || 'cover'}; background-position: center; opacity: ${bgOpacity};` : ''}`;
         
         const imageHTML = c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'}; opacity: ${c.opacity || 1};" alt="">` : '';
+        
         const subtitleHTML = (c.subtitle && c.subtitle.enabled) ? `<p>${makeTextEditable(c.subtitle.text, block.id, 'subtitle.style', c.subtitle.style)}</p>` : '';
         const namesHTML = (c.names && c.names.enabled) ? `<h1>${makeTextEditable(c.names.text, block.id, 'names.style', c.names.style)}</h1>` : '';
         const dateHTML = (c.date && c.date.enabled) ? `<p>${makeTextEditable(c.date.text, block.id, 'date.style', c.date.style)}</p>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-                    ${backgroundDiv} 
                     <header class="${headerClasses}" style="${headerStyle}">
+                        ${c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${backgroundStyle}"></div>` : ''}
                         ${imageHTML}
                         <div class="hero-content">
                             ${subtitleHTML}
@@ -203,19 +178,17 @@
     };
 
     const createTextBlockHTML = (block, s) => { 
-        const c = block.content;
-        const hasBg = c.backgroundColor || c.backgroundImage;
-        let bgStyle = '';
-        if (hasBg) {
-            bgStyle = `background-color: ${c.backgroundColor || 'transparent'}; background-image: url('${c.backgroundImage || ''}'); background-size: ${c.backgroundSize || 'cover'}; background-position: center; opacity: ${c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1}; transform: ${(c.mirrorHorizontal ? 'scaleX(-1) ' : '') + (c.mirrorVertical ? 'scaleY(-1)' : '')};`;
-        }
-        const backgroundDiv = hasBg ? `<div class="block-background" style="${bgStyle}"></div>` : '';
+        const c = block.content; 
+        const bgOpacity = c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1;
+        const backgroundStyle = `background-color: ${c.backgroundColor || 'transparent'}; ${c.backgroundImage ? `background-image: url('${c.backgroundImage}'); background-size: ${c.backgroundSize || 'cover'}; background-position: center; opacity: ${bgOpacity};` : ''}`;
+        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${backgroundStyle}"></div>` : '';
+        
         const titleHTML = c.title ? `<h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>` : ''; 
         const textHTML = c.text ? `<div>${makeTextEditable(c.text, block.id, 'textStyle', c.textStyle)}</div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            ${backgroundDiv}
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; ${hasBg ? 'background: transparent;' : ''}">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+                ${backgroundDiv}
                 ${titleHTML}
                 ${textHTML}
                 ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
@@ -226,19 +199,17 @@
 
     const createImageHTML = (block, s) => { 
         const c = block.content;
-        const hasBg = c.backgroundColor || c.backgroundImage;
-        let bgStyle = '';
-        if (hasBg) {
-            bgStyle = `background-color: ${c.backgroundColor || 'transparent'}; background-image: url('${c.backgroundImage || ''}'); background-size: ${c.backgroundSize || 'cover'}; background-position: center; opacity: ${c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1}; transform: ${(c.mirrorHorizontal ? 'scaleX(-1) ' : '') + (c.mirrorVertical ? 'scaleY(-1)' : '')};`;
-        }
-        const backgroundDiv = hasBg ? `<div class="block-background" style="${bgStyle}"></div>` : '';
+        const bgOpacity = c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1;
+        const backgroundStyle = `background-color: ${c.backgroundColor || 'transparent'}; ${c.backgroundImage ? `background-image: url('${c.backgroundImage}'); background-size: ${c.backgroundSize || 'cover'}; background-position: center; opacity: ${bgOpacity};` : ''}`;
+        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${backgroundStyle}"></div>` : '';
+        
         const titleHTML = c.title ? `<h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>` : '';
         const imageTag = c.imageUrl ? `<img src="${c.imageUrl}" alt="${c.caption || c.title}" style="width: 100%; opacity: ${c.opacity || 1}; border-radius: 8px; margin: 15px 0;">` : '';
         const descriptionHTML = c.description ? `<div>${makeTextEditable(c.description, block.id, 'descriptionStyle', c.descriptionStyle)}</div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            ${backgroundDiv}
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; ${hasBg ? 'background: transparent;' : ''}">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+                ${backgroundDiv}
                 ${titleHTML}
                 ${imageTag}
                 ${descriptionHTML}
@@ -250,16 +221,13 @@
 
     const createScheduleHTML = (block, s) => { 
         const c = block.content;
-        const hasBg = c.backgroundColor || c.backgroundImage;
-        let bgStyle = '';
-        if (hasBg) {
-            bgStyle = `background-color: ${c.backgroundColor || 'transparent'}; background-image: url('${c.backgroundImage || ''}'); background-size: ${c.backgroundSize || 'cover'}; background-position: center; opacity: ${c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1}; transform: ${(c.mirrorHorizontal ? 'scaleX(-1) ' : '') + (c.mirrorVertical ? 'scaleY(-1)' : '')};`;
-        }
-        const backgroundDiv = hasBg ? `<div class="block-background" style="${bgStyle}"></div>` : '';
+        const bgOpacity = c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1;
+        const backgroundStyle = `background-color: ${c.backgroundColor || 'transparent'}; ${c.backgroundImage ? `background-image: url('${c.backgroundImage}'); background-size: ${c.backgroundSize || 'cover'}; background-position: center; opacity: ${bgOpacity};` : ''}`;
+        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${backgroundStyle}"></div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            ${backgroundDiv}
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; ${hasBg ? 'background: transparent;' : ''}">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+                ${backgroundDiv}
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <ul style="list-style:none;padding:0;text-align:left;">
                     ${(c.items || []).map((i, index) => `
@@ -280,17 +248,15 @@
 
     const createLocationHTML = (block, s) => { 
         const c = block.content;
-        const hasBg = c.backgroundColor || c.backgroundImage;
-        let bgStyle = '';
-        if (hasBg) {
-            bgStyle = `background-color: ${c.backgroundColor || 'transparent'}; background-image: url('${c.backgroundImage || ''}'); background-size: ${c.backgroundSize || 'cover'}; background-position: center; opacity: ${c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1}; transform: ${(c.mirrorHorizontal ? 'scaleX(-1) ' : '') + (c.mirrorVertical ? 'scaleY(-1)' : '')};`;
-        }
-        const backgroundDiv = hasBg ? `<div class="block-background" style="${bgStyle}"></div>` : '';
+        const bgOpacity = c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1;
+        const backgroundStyle = `background-color: ${c.backgroundColor || 'transparent'}; ${c.backgroundImage ? `background-image: url('${c.backgroundImage}'); background-size: ${c.backgroundSize || 'cover'}; background-position: center; opacity: ${bgOpacity};` : ''}`;
+        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${backgroundStyle}"></div>` : '';
+        
         const imageHTML = c.imageUrl ? `<img src="${c.imageUrl}" alt="Venue" style="width:100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-bottom: 20px; opacity:${c.opacity};">` : ''; 
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            ${backgroundDiv}
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; ${hasBg ? 'background: transparent;' : ''}">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+                ${backgroundDiv}
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <div>${makeTextEditable(c.address, block.id, 'addressStyle', c.addressStyle)}</div>
                 ${imageHTML}
@@ -300,21 +266,18 @@
             </section>
         </div>`; 
     };
-        
+    
     const createCountdownHTML = (block, s) => { 
         const c = block.content;
-        const hasBg = c.backgroundColor || c.backgroundImage;
-        let bgStyle = '';
-        if (hasBg) {
-            bgStyle = `background-color: ${c.backgroundColor || 'transparent'}; background-image: url('${c.backgroundImage || ''}'); background-size: ${c.backgroundSize || 'cover'}; background-position: center; opacity: ${c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1}; transform: ${(c.mirrorHorizontal ? 'scaleX(-1) ' : '') + (c.mirrorVertical ? 'scaleY(-1)' : '')};`;
-        }
-        const backgroundDiv = hasBg ? `<div class="block-background" style="${bgStyle}"></div>` : '';
+        const bgOpacity = c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1;
+        const backgroundStyle = `background-color: ${c.backgroundColor || 'transparent'}; ${c.backgroundImage ? `background-image: url('${c.backgroundImage}'); background-size: ${c.backgroundSize || 'cover'}; background-position: center; opacity: ${bgOpacity};` : ''}`;
+        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${backgroundStyle}"></div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            ${backgroundDiv}
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; ${hasBg ? 'background: transparent;' : ''}">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+                ${backgroundDiv}
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
-                <div id="countdown">
+                <div id="countdown" data-target-date="${c.targetDate}">
                     <div class="time-block"><div id="days" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div class="label">${makeTextEditable('Days', block.id, 'labelStyle', c.labelStyle)}</div></div>
                     <div class="time-block"><div id="hours" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div class="label">${makeTextEditable('Hours', block.id, 'labelStyle', c.labelStyle)}</div></div>
                     <div class="time-block"><div id="minutes" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div class="label">${makeTextEditable('Minutes', block.id, 'labelStyle', c.labelStyle)}</div></div>
@@ -328,16 +291,13 @@
 
     const createRsvpHTML = (block, s, rsvpLink) => { 
         const c = block.content;
-        const hasBg = c.backgroundColor || c.backgroundImage;
-        let bgStyle = '';
-        if (hasBg) {
-            bgStyle = `background-color: ${c.backgroundColor || 'transparent'}; background-image: url('${c.backgroundImage || ''}'); background-size: ${c.backgroundSize || 'cover'}; background-position: center; opacity: ${c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1}; transform: ${(c.mirrorHorizontal ? 'scaleX(-1) ' : '') + (c.mirrorVertical ? 'scaleY(-1)' : '')};`;
-        }
-        const backgroundDiv = hasBg ? `<div class="block-background" style="${bgStyle}"></div>` : '';
+        const bgOpacity = c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1;
+        const backgroundStyle = `background-color: ${c.backgroundColor || 'transparent'}; ${c.backgroundImage ? `background-image: url('${c.backgroundImage}'); background-size: ${c.backgroundSize || 'cover'}; background-position: center; opacity: ${bgOpacity};` : ''}`;
+        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${backgroundStyle}"></div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            ${backgroundDiv}
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; ${hasBg ? 'background: transparent;' : ''}">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+                ${backgroundDiv}
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <div>${makeTextEditable(c.subtitle, block.id, 'subtitleStyle', c.subtitleStyle)}</div>
                 <div><a href="${rsvpLink}" class="rsvp-button" style="${getStyleString(c.buttonStyle)}">I'll Be There!</a></div>
@@ -361,10 +321,10 @@
                 return; 
             } 
             // Select the editable span *inside* the number div to update only the text
-            const D = document.querySelector("#days .editable-text"), 
-                  H = document.querySelector("#hours .editable-text"), 
-                  M = document.querySelector("#minutes .editable-text"), 
-                  S = document.querySelector("#seconds .editable-text");
+            const D = document.querySelector("#days .editable-text") || document.querySelector("#days"), 
+                  H = document.querySelector("#hours .editable-text") || document.querySelector("#hours"), 
+                  M = document.querySelector("#minutes .editable-text") || document.querySelector("#minutes"), 
+                  S = document.querySelector("#seconds .editable-text") || document.querySelector("#seconds");
             
             if(D) D.textContent = Math.floor(distance / 864e5).toString().padStart(2, '0'); 
             if(H) H.textContent = Math.floor(distance % 864e5 / 36e5).toString().padStart(2, '0'); 
@@ -376,19 +336,15 @@
         countdownInterval = setInterval(update, 1000); 
     }
 
-    // --- ЗАМЕНИТЕ ЭТУ ФУНКЦИЮ в wedding-classic.html ---
     function setupTextEditing() {
         if (window.self === window.top) return;
         
-        // Используем 'pointerdown' для более быстрого отклика
         document.addEventListener('pointerdown', (e) => {
             const editableElement = e.target.closest('.editable-text');
 
-            // Теперь мы просто проверяем, кликнули ли мы на редактируемый текст
             if (editableElement) {
-                e.stopPropagation(); // Останавливаем всплытие, чтобы не сработал слушатель снятия выделения
+                e.stopPropagation();
                 
-                // Выделяем родительский блок, если он еще не выделен
                 const wrapper = editableElement.closest('.sticker-wrapper, .inner-block-wrapper');
                 if (wrapper && !wrapper.classList.contains('selected')) {
                      document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
@@ -412,12 +368,11 @@
         });
     }
 
-    // --- НОВАЯ, РАБОЧАЯ ВЕРСИЯ ---
     function rgbToHex(rgb) {
-        if (!rgb || !rgb.startsWith('rgb')) return rgb; // Если это уже hex или что-то другое, возвращаем как есть
+        if (!rgb || !rgb.startsWith('rgb')) return rgb;
         
         let parts = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
-        if (!parts) return '#000000'; // В случае ошибки вернем черный
+        if (!parts) return '#000000';
         
         delete parts[0];
         for (let i = 1; i <= 3; ++i) {
@@ -428,203 +383,265 @@
     }
 
     function renderPage(blocks, settings, rsvpLink = '#') {
-        if (!blocks || !settings) return;
-        document.body.className = '';
-        if (settings.style) document.body.classList.add(`style-${settings.style}`);
-        if (settings.displayMode) document.body.classList.add(`style-${settings.displayMode}`);
-        document.body.style.backgroundColor = settings.backgroundColor || '#f8f7f5';
-        document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? `url('${settings.backgroundImage}')` : 'none';
-        
-        const container = document.getElementById('page-content');
-        container.innerHTML = '';
-        let countdownBlockContent = null;
-
-        blocks.forEach(block => {
-            let blockHTML = '';
-            switch(block.type) {
-                case 'hero': blockHTML = createHeroHTML(block, settings); break;
-                case 'text-block': blockHTML = createTextBlockHTML(block, settings); break;
-                case 'image': blockHTML = createImageHTML(block, settings); break;
-                case 'countdown': blockHTML = createCountdownHTML(block, settings); countdownBlockContent = block.content; break;
-                case 'schedule': blockHTML = createScheduleHTML(block, settings); break;
-                case 'location': blockHTML = createLocationHTML(block, settings); break;
-                case 'rsvp': blockHTML = createRsvpHTML(block, settings, rsvpLink); break;
-                default: blockHTML = `<!-- Unsupported block type: ${block.type} -->`;
-            }
-            container.innerHTML += blockHTML;
-        });
-
-        if (countdownBlockContent) startCountdown(countdownBlockContent.targetDate);
-
-        if (window.self !== window.top) {
-            setTimeout(() => {
-                initInteraction();
-                setupTextEditing();
-            }, 150);
-        }
-    }
-    
-    function initInteraction() {
-        if (typeof interact === 'undefined') return;
-
-        const container = document.getElementById('page-content');
-        if (!container) return;
-
-        container.addEventListener('pointerdown', (e) => {
-            const clickedInteractive = e.target.closest('.sticker-wrapper, .inner-block-wrapper');
-            if (!clickedInteractive) {
-                document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
-                window.parent.postMessage({ type: 'HIDE_TEXT_TOOLBAR' }, '*');
-            }
-        });
-
-        const setupInteractable = (selector) => {
-             interact(selector)
-                .on('down', (event) => {
-                    document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
-                    event.currentTarget.classList.add('selected');
-                })
-                .draggable({
-                    listeners: {
-                        move(event) {
-                            const target = event.target;
-                            const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-                            const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-                            target.style.transform = `translate(${x}px, ${y}px) rotate(${parseFloat(target.getAttribute('data-rot')) || 0}deg)`;
-                            target.setAttribute('data-x', x);
-                            target.setAttribute('data-y', y);
-                        },
-                        start(event) {
-                            const target = event.target;
-                            const transform = window.getComputedStyle(target).transform;
-                            let x = 0, y = 0;
-                            if (transform && transform !== 'none') {
-                               const matrix = new DOMMatrix(transform);
-                               x = matrix.m41;
-                               y = matrix.m42;
-                            }
-                            target.setAttribute('data-x', x);
-                            target.setAttribute('data-y', y);
-                            target.setAttribute('data-rot', parseFloat(target.style.transform.match(/rotate\((.+)deg\)/)?.[1] || 0));
-                        },
-                        end(event) {
-                            const target = event.target;
-                            const blockWrapper = target.closest('.block-wrapper');
-                            if (!blockWrapper) return;
-                            const parent = target.parentElement;
-                            if (!parent) return;
-
-                            // Простая логика: всегда считаем координаты центра
-                            const targetRect = target.getBoundingClientRect();
-                            const parentRect = parent.getBoundingClientRect();
-                            const centerX = (targetRect.left - parentRect.left) + targetRect.width / 2;
-                            const centerY = (targetRect.top - parentRect.top) + targetRect.height / 2;
-
-                            const xPercent = (centerX / parent.offsetWidth) * 100;
-                            const yPercent = (centerY / parent.offsetHeight) * 100;
-
-                            const newProps = { x: xPercent, y: yPercent };
+       if (!blocks || !settings) return;
+       document.body.className = '';
+       if (settings.style) document.body.classList.add(`style-${settings.style}`);
+       if (settings.displayMode) document.body.classList.add(`style-${settings.displayMode}`);
+       document.body.style.backgroundColor = settings.backgroundColor || '#f8f7f5';
+       document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? `url('${settings.backgroundImage}')` : 'none';
        
-                            window.parent.postMessage({ type: target.dataset.updateType, payload: { blockId: blockWrapper.dataset.blockId, id: target.dataset.id, newProps } }, '*');
-                        }
-                    }
-                })
-                .resizable({
-                    edges: { right: '.resize-handle.se', bottom: '.resize-handle.se' },
-                    listeners: {
-                        move(event) {
-                            let target = event.target;
-                            target.style.width = `${event.rect.width}px`;
-                            if(target.dataset.type === 'sticker') target.style.height = 'auto';
-                        },
-                        end(event) {
-                            const target = event.target;
-                            const blockWrapper = target.closest('.block-wrapper');
-                            if (!blockWrapper) return;
-                            const newProps = { width: event.rect.width };
-                            window.parent.postMessage({ type: target.dataset.updateType, payload: { blockId: blockWrapper.dataset.blockId, id: target.dataset.id, newProps } }, '*');
-                        }
-                    },
-                    modifiers: [ interact.modifiers.aspectRatio({ ratio: 'preserve', equalDelta: true, enabled: (event) => event.target.dataset.type === 'sticker' }) ]
-                });
-        };
-        
-        // setupRotatable остается без изменений
-        const setupRotatable = (handleSelector) => {
-            interact(handleSelector).draggable({
-                onstart: function (event) {
-                    const wrapper = event.target.closest('.sticker-wrapper, .inner-block-wrapper');
-                    const rect = wrapper.getBoundingClientRect();
-                    wrapper.setAttribute('data-center-x', rect.left + rect.width / 2);
-                    wrapper.setAttribute('data-center-y', rect.top + rect.height / 2);
-                },
-                onmove: function (event) {
-                    const wrapper = event.target.closest('.sticker-wrapper, .inner-block-wrapper');
-                    const centerX = parseFloat(wrapper.getAttribute('data-center-x'));
-                    const centerY = parseFloat(wrapper.getAttribute('data-center-y'));
-                    const angle = Math.atan2(event.pageY - centerY, event.pageX - centerX);
-                    const degrees = angle * (180 / Math.PI);
-                    const currentRotation = degrees + 90;
-                    
-                    const existingTransform = wrapper.style.transform.match(/translate\((.+?)\)/);
-                    const translatePart = existingTransform ? `translate(${existingTransform[1]})` : 'translate(-50%, -50%)';
-                    wrapper.style.transform = `${translatePart} rotate(${currentRotation}deg)`;
-                },
-                onend: function(event) {
-                    const wrapper = event.target.closest('.sticker-wrapper, .inner-block-wrapper');
-                    const blockWrapper = wrapper.closest('.block-wrapper');
-                    if (!blockWrapper) return;
+       const container = document.getElementById('page-content');
+       container.innerHTML = '';
+       let countdownBlockContent = null;
 
-                    const transformMatch = wrapper.style.transform.match(/rotate\((.+)deg\)/);
-                    const rotation = transformMatch ? parseFloat(transformMatch[1]) : 0;
+       blocks.forEach(block => {
+           let blockHTML = '';
+           switch(block.type) {
+               case 'hero': blockHTML = createHeroHTML(block, settings); break;
+               case 'text-block': blockHTML = createTextBlockHTML(block, settings); break;
+               case 'image': blockHTML = createImageHTML(block, settings); break;
+               case 'countdown': 
+                   blockHTML = createCountdownHTML(block, settings); 
+                   countdownBlockContent = block.content; 
+                   break;
+               case 'schedule': blockHTML = createScheduleHTML(block, settings); break;
+               case 'location': blockHTML = createLocationHTML(block, settings); break;
+               case 'rsvp': blockHTML = createRsvpHTML(block, settings, rsvpLink); break;
+               default: blockHTML = `<!-- Unsupported block type: ${block.type} -->`;
+           }
+           container.innerHTML += blockHTML;
+       });
 
-                    const newProps = { rotation };
-                    window.parent.postMessage({ type: wrapper.dataset.updateType, payload: { blockId: blockWrapper.dataset.blockId, id: wrapper.dataset.id, newProps } }, '*');
-                }
-            });
-        };
-        
-        setupInteractable('.sticker-wrapper');
-        setupInteractable('.inner-block-wrapper');
-        setupRotatable('.rotate-handle');
-    }
+       // Start countdown if countdown block exists
+       if (countdownBlockContent && countdownBlockContent.targetDate) {
+           startCountdown(countdownBlockContent.targetDate);
+       }
 
-    async function loadInvitationData() {
-        const params = new URLSearchParams(window.location.search);
-        const id = params.get('id'), pageType = params.get('page') || 'main';
-        if (id && pageType) {
-            try {
-                const r = await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, { headers: { 'X-Access-Key': '$2a$10$c.QWLI8NIw84W3uqmH/mUez32F1LK7KPBirRW7hr1nE0mJ9CAATC6' }});
-                if (!r.ok) throw new Error('Could not load invitation data.');
-                const data = (await r.json()).record;
-                const pageData = data[pageType];
-                if (!pageData) throw new Error(`Page data ('${pageType}') not found.`);
-                const rsvpTemplateFile = data.rsvp ? data.rsvp.template : 'rsvp-form.html';
-                const rsvpLink = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)}${rsvpTemplateFile}?id=${id}&page=rsvp`;
-                renderPage(pageData.blocks, pageData.settings, rsvpLink);
-            } catch (e) {
-                document.getElementById('page-content').innerHTML = `<h1>Error</h1><p>${e.message}</p>`;
-            }
-        } else {
-             document.getElementById('page-content').innerHTML = `<h1>Invitation not found</h1><p>Please check the link or provide a valid invitation ID.</p>`;
-        }
-    }
-    
-    function setupIntroAnimation() { /* ... same as before ... */ }
+       if (window.self !== window.top) {
+           setTimeout(() => {
+               initInteraction();
+               setupTextEditing();
+           }, 150);
+       }
+   }
+   
+   function initInteraction() {
+       if (typeof interact === 'undefined') return;
 
-    if (window.self === window.top) {
-        window.addEventListener('DOMContentLoaded', () => { 
-            loadInvitationData(); 
-            // setupIntroAnimation(); 
-            document.getElementById('envelope-wrapper').style.display='none';
-            document.body.style.opacity = 1;
-        });
-    } else {
-        window.renderPage = renderPage;
-        const envelope = document.getElementById('envelope-wrapper');
-        if (envelope) envelope.style.display = 'none';
-        document.body.style.opacity = 1;
-    }
-    </script>
+       const container = document.getElementById('page-content');
+       if (!container) return;
+
+       container.addEventListener('pointerdown', (e) => {
+           const clickedInteractive = e.target.closest('.sticker-wrapper, .inner-block-wrapper');
+           
+           if (!clickedInteractive) {
+               document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+               window.parent.postMessage({ type: 'HIDE_TEXT_TOOLBAR' }, '*');
+           }
+       });
+
+       const setupInteractable = (selector) => {
+            interact(selector)
+               .on('down', (event) => {
+                   document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+                   event.currentTarget.classList.add('selected');
+               })
+               .draggable({
+                   listeners: {
+                       move(event) {
+                           const target = event.target;
+                           const parentRect = target.parentElement.getBoundingClientRect();
+                           const targetRect = target.getBoundingClientRect();
+                           
+                           // Calculate current position in pixels
+                           const currentX = targetRect.left - parentRect.left + targetRect.width / 2;
+                           const currentY = targetRect.top - parentRect.top + targetRect.height / 2;
+                           
+                           // Add the drag delta
+                           const newX = currentX + event.dx;
+                           const newY = currentY + event.dy;
+                           
+                           // Convert to percentage
+                           const xPercent = (newX / parentRect.width) * 100;
+                           const yPercent = (newY / parentRect.height) * 100;
+                           
+                           // Apply new position
+                           target.style.left = `${xPercent}%`;
+                           target.style.top = `${yPercent}%`;
+                       },
+                       end(event) {
+                           const target = event.target;
+                           const blockWrapper = target.closest('.block-wrapper');
+                           if (!blockWrapper) return;
+
+                           const parent = target.parentElement;
+                           if (!parent) return;
+
+                           // Get final position in percentages
+                           const xPercent = parseFloat(target.style.left);
+                           const yPercent = parseFloat(target.style.top);
+
+                           const newProps = { x: xPercent, y: yPercent };
+
+                           window.parent.postMessage({ 
+                               type: target.dataset.updateType, 
+                               payload: { 
+                                   blockId: blockWrapper.dataset.blockId, 
+                                   id: target.dataset.id, 
+                                   newProps 
+                               } 
+                           }, '*');
+                       }
+                   }
+               })
+               .resizable({
+                   edges: { right: '.resize-handle.se', bottom: '.resize-handle.se' },
+                   listeners: {
+                       move(event) {
+                           let target = event.target;
+                           target.style.width = `${event.rect.width}px`;
+                           if(target.dataset.type === 'sticker') target.style.height = 'auto';
+                       },
+                       end(event) {
+                           const target = event.target;
+                           const blockWrapper = target.closest('.block-wrapper');
+                           if (!blockWrapper) return;
+
+                           const newProps = { width: event.rect.width };
+                           window.parent.postMessage({ 
+                               type: target.dataset.updateType, 
+                               payload: { 
+                                   blockId: blockWrapper.dataset.blockId, 
+                                   id: target.dataset.id, 
+                                   newProps 
+                               } 
+                           }, '*');
+                       }
+                   },
+                   modifiers: [ 
+                       interact.modifiers.aspectRatio({ 
+                           ratio: 'preserve', 
+                           equalDelta: true, 
+                           enabled: (event) => event.target.dataset.type === 'sticker' 
+                       }) 
+                   ]
+               });
+       };
+
+       const setupRotatable = (handleSelector) => {
+           interact(handleSelector).draggable({
+               onstart: function (event) {
+                   const wrapper = event.target.closest('.sticker-wrapper, .inner-block-wrapper');
+                   const rect = wrapper.getBoundingClientRect();
+                   wrapper.setAttribute('data-center-x', rect.left + rect.width / 2);
+                   wrapper.setAttribute('data-center-y', rect.top + rect.height / 2);
+                   
+                   const currentTransform = wrapper.style.transform;
+                   const currentRotation = currentTransform.match(/rotate\((-?\d+\.?\d*)deg\)/);
+                   wrapper.setAttribute('data-angle', currentRotation ? parseFloat(currentRotation[1]) : 0);
+               },
+               onmove: function (event) {
+                   const wrapper = event.target.closest('.sticker-wrapper, .inner-block-wrapper');
+                   const centerX = parseFloat(wrapper.getAttribute('data-center-x'));
+                   const centerY = parseFloat(wrapper.getAttribute('data-center-y'));
+                   const angle = Math.atan2(event.pageY - centerY, event.pageX - centerX);
+                   const degrees = angle * (180 / Math.PI);
+                   const currentRotation = degrees + 90;
+                   
+                   // Preserve existing transform but update rotation
+                   const existingTransform = wrapper.style.transform;
+                   const newTransform = existingTransform.replace(/rotate\(-?\d+\.?\d*deg\)/, `rotate(${currentRotation}deg)`);
+                   wrapper.style.transform = newTransform;
+               },
+               onend: function(event) {
+                   const wrapper = event.target.closest('.sticker-wrapper, .inner-block-wrapper');
+                   const blockWrapper = wrapper.closest('.block-wrapper');
+                   if (!blockWrapper) return;
+                   
+                   const transformMatch = wrapper.style.transform.match(/rotate\((-?\d+\.?\d*)deg\)/);
+                   const rotation = transformMatch ? parseFloat(transformMatch[1]) : 0;
+                   
+                   const newProps = { rotation };
+                   window.parent.postMessage({ 
+                       type: wrapper.dataset.updateType, 
+                       payload: { 
+                           blockId: blockWrapper.dataset.blockId, 
+                           id: wrapper.dataset.id, 
+                           newProps 
+                       } 
+                   }, '*');
+               }
+           });
+       };
+       
+       setupInteractable('.sticker-wrapper');
+       setupInteractable('.inner-block-wrapper');
+       setupRotatable('.rotate-handle');
+   }
+
+   async function loadInvitationData() {
+       const params = new URLSearchParams(window.location.search);
+       const id = params.get('id'), pageType = params.get('page') || 'main';
+       if (id && pageType) {
+           try {
+               const r = await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, { 
+                   headers: { 'X-Access-Key': '$2a$10$c.QWLI8NIw84W3uqmH/mUez32F1LK7KPBirRW7hr1nE0mJ9CAATC6' }
+               });
+               if (!r.ok) throw new Error('Could not load invitation data.');
+               const data = (await r.json()).record;
+               const pageData = data[pageType];
+               if (!pageData) throw new Error(`Page data ('${pageType}') not found.`);
+               const rsvpTemplateFile = data.rsvp ? data.rsvp.template : 'rsvp-form.html';
+               const rsvpLink = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)}${rsvpTemplateFile}?id=${id}&page=rsvp`;
+               renderPage(pageData.blocks, pageData.settings, rsvpLink);
+           } catch (e) {
+               document.getElementById('page-content').innerHTML = `<h1>Error</h1><p>${e.message}</p>`;
+           }
+       } else {
+            document.getElementById('page-content').innerHTML = `<h1>Invitation not found</h1><p>Please check the link or provide a valid invitation ID.</p>`;
+       }
+   }
+   
+   function setupIntroAnimation() { 
+       const wrapper = document.getElementById('envelope-wrapper');
+       const envelope = document.getElementById('envelope-3d');
+       
+       if (!wrapper || !envelope) return;
+       
+       // Show envelope after model loads
+       envelope.addEventListener('load', () => {
+           envelope.classList.add('loaded');
+       });
+       
+       // Click to continue
+       wrapper.addEventListener('click', () => {
+           document.body.classList.add('intro-active');
+           setTimeout(() => {
+               wrapper.classList.add('hidden');
+               document.body.classList.remove('intro-active');
+               
+               // Confetti animation
+               confetti({
+                   particleCount: 100,
+                   spread: 70,
+                   origin: { y: 0.6 }
+               });
+           }, 1000);
+       });
+   }
+
+   if (window.self === window.top) {
+       window.addEventListener('DOMContentLoaded', () => { 
+           loadInvitationData(); 
+           setupIntroAnimation(); 
+           document.body.style.opacity = 1;
+       });
+   } else {
+       window.renderPage = renderPage;
+       const envelope = document.getElementById('envelope-wrapper');
+       if (envelope) envelope.style.display = 'none';
+       document.body.style.opacity = 1;
+   }
+   </script>
 </body>
 </html>
