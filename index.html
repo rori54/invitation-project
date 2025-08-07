@@ -889,9 +889,6 @@
     
     function createBackgroundControlsHTML(block) {
         const c = block.content;
-        // Создаем уникальный ID для инпута и передаем его в openImageLibrary
-        const uniqueInputId = `bg-image-input-${block.id}`; 
-        
         return `<hr class="style-separator">
                 <div class="control-group">
                     <label>Background Settings</label>
@@ -900,13 +897,7 @@
                             <label>Background Color</label>
                             <input type="color" data-key="backgroundColor" value="${c.backgroundColor || '#ffffff'}">
                         </div>
-                        <div class="control-group">
-                            <label>Background Image</label>
-                            <div class="image-input-group">
-                                <input type="url" data-key="backgroundImage" value="${c.backgroundImage || ''}" placeholder="https://images.unsplash.com/photo-..." id="${uniqueInputId}">
-                                <button type="button" class="browse-image-btn" onclick="openImageLibrary('${uniqueInputId}')">Browse...</button>
-                            </div>
-                        </div>
+                        ${createImageInputHTML('backgroundImage', c.backgroundImage, 'Background Image')}
                         <div class="style-controls-grid">
                             <div class="control-group">
                                 <label>Background Size</label>
@@ -1098,13 +1089,7 @@
                     <img src="${sticker.src}" style="width: 30px; height: 30px; border-radius: 4px; object-fit: contain; background: #ddd;">
                     <button class="delete-sticker-btn" title="Delete Sticker">Delete</button>
                 </div>
-                <div class="control-group"> 
-                    <label>Image URL</label> 
-                    <div class="image-input-group">
-                        <input type="url" data-key="stickers.${index}.src" value="${sticker.src}">
-                        <button type="button" class="browse-image-btn" onclick="openImageLibrary('stickers.${index}.src')">Browse...</button>
-                    </div>
-                </div>
+                ${createImageInputHTML(`stickers.${index}.src`, sticker.src, 'Image URL')}
                 <div class="style-controls-grid">
                     <div class="control-group"><label>X</label><input type="number" data-key="stickers.${index}.x" value="${Math.round(sticker.x || 0)}"></div>
                     <div class="control-group"><label>Y</label><input type="number" data-key="stickers.${index}.y" value="${Math.round(sticker.y || 0)}"></div>
@@ -1115,8 +1100,8 @@
                 </div>
                 <div class="opacity-control">
                     <label>Opacity</label>
-                    <input type="range" class="opacity-slider" min="0" max="1" step="0.1" data-key="stickers.${index}.opacity" value="${sticker.opacity || 1}">
-                    <span style="font-size: 12px; color: #666;">${Math.round((sticker.opacity || 1) * 100)}%</span>
+                    <input type="range" class="opacity-slider" min="0" max="1" step="0.1" data-key="stickers.${index}.opacity" value="${sticker.opacity !== undefined ? sticker.opacity : 1}">
+                    <span style="font-size: 12px; color: #666;">${Math.round((sticker.opacity !== undefined ? sticker.opacity : 1) * 100)}%</span>
                 </div>
             </div>`;
         }).join('');
@@ -1130,11 +1115,13 @@
     }
 
     function createImageInputHTML(dataKey, value, label) {
+        // Создаем абсолютно уникальный ID для каждого поля ввода
+        const uniqueInputId = `image-input-${Math.random().toString(36).substr(2, 9)}`;
         return `<div class="control-group">
             <label>${label}</label>
             <div class="image-input-group">
-                <input type="url" data-key="${dataKey}" value="${value || ''}" placeholder="https://images.unsplash.com/photo-...">
-                <button type="button" class="browse-image-btn" onclick="openImageLibrary('${dataKey}')">Browse...</button>
+                <input type="url" id="${uniqueInputId}" data-key="${dataKey}" value="${value || ''}" placeholder="https://images.unsplash.com/photo-...">
+                <button type="button" class="browse-image-btn" onclick="openImageLibrary('${uniqueInputId}')">Browse...</button>
             </div>
         </div>`;
     }
