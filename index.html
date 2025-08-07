@@ -675,6 +675,7 @@
     }
 
     function openImageLibrary(targetInputId) {
+        // Теперь targetInputId будет уникальным, например "bg-image-input-block-12345"
         currentImageTarget = targetInputId;
         const modal = document.getElementById('image-library-modal');
         const grid = document.getElementById('image-library-grid');
@@ -738,10 +739,12 @@
 
     function selectImage(imageUrl) {
         if (currentImageTarget) {
-            const input = document.getElementById(currentImageTarget) || document.querySelector(`input[data-key="${currentImageTarget}"]`);
+            // Теперь мы ищем элемент по его уникальному ID, который мы сохранили.
+            // Это гарантирует, что мы обновим правильное поле.
+            const input = document.getElementById(currentImageTarget); 
             if (input) {
                 input.value = imageUrl;
-                // Trigger change event to update the block
+                // Имитируем событие ввода, чтобы редактор понял, что данные изменились
                 const event = new Event('input', { bubbles: true });
                 input.dispatchEvent(event);
             }
@@ -886,6 +889,9 @@
     
     function createBackgroundControlsHTML(block) {
         const c = block.content;
+        // Создаем уникальный ID для инпута и передаем его в openImageLibrary
+        const uniqueInputId = `bg-image-input-${block.id}`; 
+        
         return `<hr class="style-separator">
                 <div class="control-group">
                     <label>Background Settings</label>
@@ -897,8 +903,8 @@
                         <div class="control-group">
                             <label>Background Image</label>
                             <div class="image-input-group">
-                                <input type="url" data-key="backgroundImage" value="${c.backgroundImage || ''}" placeholder="https://images.unsplash.com/photo-...">
-                                <button type="button" class="browse-image-btn" onclick="openImageLibrary('backgroundImage')">Browse...</button>
+                                <input type="url" data-key="backgroundImage" value="${c.backgroundImage || ''}" placeholder="https://images.unsplash.com/photo-..." id="${uniqueInputId}">
+                                <button type="button" class="browse-image-btn" onclick="openImageLibrary('${uniqueInputId}')">Browse...</button>
                             </div>
                         </div>
                         <div class="style-controls-grid">
@@ -912,8 +918,8 @@
                             </div>
                             <div class="control-group">
                                 <label>Background Opacity</label>
-                                <input type="range" class="opacity-slider" min="0" max="1" step="0.1" data-key="backgroundOpacity" value="${c.backgroundOpacity || 1}">
-                                <span style="font-size: 12px; color: #666;">${Math.round((c.backgroundOpacity || 1) * 100)}%</span>
+                                <input type="range" class="opacity-slider" min="0" max="1" step="0.1" data-key="backgroundOpacity" value="${c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1}">
+                                <span style="font-size: 12px; color: #666;">${Math.round((c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1) * 100)}%</span>
                             </div>
                         </div>
                     </div>
