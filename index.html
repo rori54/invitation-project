@@ -1389,6 +1389,7 @@
     function setupEventListeners() { 
         const editorContent = document.getElementById('editor-content'); 
 
+    // --- ЗАМЕНИТЕ ЭТУ ФУНКЦИЮ ПОЛНОСТЬЮ в index.html ---
     const handleEditorChange = (e) => {
         const input = e.target;
         const blockDiv = input.closest('.editor-block');
@@ -1423,8 +1424,12 @@
             }
             current[keys[keys.length - 1]] = value;
 
+            // --- ГЛАВНОЕ ИСПРАВЛЕНИЕ ЗДЕСЬ ---
+            // Если мы меняем выравнивание для плавающего текста...
             if (keys[0] === 'innerBlocks' && keys[2] === 'style' && keys[3] === 'textAlign') {
+                // ... и новое значение - 'center',
                 if (value === 'center') {
+                    // то принудительно возвращаем его координату X на 50.
                     const innerBlockIndex = parseInt(keys[1], 10);
                     if (pageBlocks[blockIndex]?.content?.innerBlocks?.[innerBlockIndex]) {
                         pageBlocks[blockIndex].content.innerBlocks[innerBlockIndex].x = 50;
