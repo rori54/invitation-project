@@ -179,7 +179,9 @@
 
         const isLimited = !c.fullWidth;
         const headerClasses = `hero-block ${isLimited ? 'limited-width' : ''}`;
-        const headerStyle = `aspect-ratio: ${c.aspectRatio || '16/9'}; max-width: ${isLimited ? (s.maxWidth || '800px') : 'none'}; position: relative;`;
+        // ВАЖНО: Делаем header прозрачным, если есть кастомный фон
+        const headerStyle = `aspect-ratio: ${c.aspectRatio || '16/9'}; max-width: ${isLimited ? (s.maxWidth || '800px') : 'none'}; position: relative; ${hasBg ? 'background: transparent;' : ''}`;
+        
         const imageHTML = c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'}; opacity: ${c.opacity || 1};" alt="">` : '';
         const subtitleHTML = (c.subtitle && c.subtitle.enabled) ? `<p>${makeTextEditable(c.subtitle.text, block.id, 'subtitle.style', c.subtitle.style)}</p>` : '';
         const namesHTML = (c.names && c.names.enabled) ? `<h1>${makeTextEditable(c.names.text, block.id, 'names.style', c.names.style)}</h1>` : '';
@@ -213,7 +215,7 @@
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
             ${backgroundDiv}
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; ${hasBg ? 'background: transparent;' : ''}">
                 ${titleHTML}
                 ${textHTML}
                 ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
@@ -236,7 +238,7 @@
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
             ${backgroundDiv}
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; ${hasBg ? 'background: transparent;' : ''}">
                 ${titleHTML}
                 ${imageTag}
                 ${descriptionHTML}
@@ -257,7 +259,7 @@
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
             ${backgroundDiv}
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; ${hasBg ? 'background: transparent;' : ''}">
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <ul style="list-style:none;padding:0;text-align:left;">
                     ${(c.items || []).map((i, index) => `
@@ -288,7 +290,7 @@
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
             ${backgroundDiv}
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; ${hasBg ? 'background: transparent;' : ''}">
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <div>${makeTextEditable(c.address, block.id, 'addressStyle', c.addressStyle)}</div>
                 ${imageHTML}
@@ -310,7 +312,7 @@
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
             ${backgroundDiv}
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; ${hasBg ? 'background: transparent;' : ''}">
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <div id="countdown">
                     <div class="time-block"><div id="days" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div class="label">${makeTextEditable('Days', block.id, 'labelStyle', c.labelStyle)}</div></div>
@@ -335,7 +337,7 @@
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
             ${backgroundDiv}
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; ${hasBg ? 'background: transparent;' : ''}">
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <div>${makeTextEditable(c.subtitle, block.id, 'subtitleStyle', c.subtitleStyle)}</div>
                 <div><a href="${rsvpLink}" class="rsvp-button" style="${getStyleString(c.buttonStyle)}">I'll Be There!</a></div>
