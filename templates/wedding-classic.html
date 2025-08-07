@@ -153,9 +153,26 @@
 
     const createHeroHTML = (block, s) => {
         const c = block.content;
+
+        // --- НАЧАЛО: Логика для общего фона (такая же, как в других блоках) ---
+        const hasBg = c.backgroundColor || c.backgroundImage;
+        let bgStyle = '';
+        if (hasBg) {
+            bgStyle = `background-color: ${c.backgroundColor || 'transparent'};` +
+                      `background-image: url('${c.backgroundImage || ''}');` +
+                      `background-size: ${c.backgroundSize || 'cover'};` +
+                      `background-position: center;` +
+                      `opacity: ${c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1};` +
+                      `transform: ${(c.mirrorHorizontal ? 'scaleX(-1) ' : '') + (c.mirrorVertical ? 'scaleY(-1)' : '')};`;
+        }
+        const backgroundDiv = hasBg ? `<div class="block-background" style="${bgStyle}"></div>` : '';
+        // --- КОНЕЦ: Логики для общего фона ---
+
         const isLimited = !c.fullWidth;
         const headerClasses = `hero-block ${isLimited ? 'limited-width' : ''}`;
         const headerStyle = `aspect-ratio: ${c.aspectRatio || '16/9'}; max-width: ${isLimited ? (s.maxWidth || '800px') : 'none'}; position: relative;`;
+        
+        // Это основное изображение блока Hero
         const imageHTML = c.imageUrl ? `<img class="hero-background-image" src="${c.imageUrl}" style="object-position: ${c.backgroundPosition || 'center center'}; opacity: ${c.opacity || 1};" alt="">` : '';
         
         const subtitleHTML = (c.subtitle && c.subtitle.enabled) ? `<p>${makeTextEditable(c.subtitle.text, block.id, 'subtitle.style', c.subtitle.style)}</p>` : '';
@@ -164,6 +181,7 @@
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
                     <header class="${headerClasses}" style="${headerStyle}">
+                        ${backgroundDiv}
                         ${imageHTML}
                         <div class="hero-content">
                             ${subtitleHTML}
@@ -177,13 +195,23 @@
     };
 
     const createTextBlockHTML = (block, s) => { 
-        const c = block.content; 
-        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="background-color:${c.backgroundColor}; background-image:url('${c.backgroundImage}');"></div>` : '';
+        const c = block.content;
+        const hasBg = c.backgroundColor || c.backgroundImage;
+        let bgStyle = '';
+        if (hasBg) {
+            bgStyle = `background-color: ${c.backgroundColor || 'transparent'};` +
+                      `background-image: url('${c.backgroundImage || ''}');` +
+                      `background-size: ${c.backgroundSize || 'cover'};` +
+                      `background-position: center;` +
+                      `opacity: ${c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1};` +
+                      `transform: ${(c.mirrorHorizontal ? 'scaleX(-1) ' : '') + (c.mirrorVertical ? 'scaleY(-1)' : '')};`;
+        }
+        const backgroundDiv = hasBg ? `<div class="block-background" style="${bgStyle}"></div>` : '';
         const titleHTML = c.title ? `<h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>` : ''; 
         const textHTML = c.text ? `<div>${makeTextEditable(c.text, block.id, 'textStyle', c.textStyle)}</div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative;">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative; ${hasBg ? 'background: transparent;' : ''}">
                 ${backgroundDiv}
                 ${titleHTML}
                 ${textHTML}
@@ -195,13 +223,23 @@
 
     const createImageHTML = (block, s) => { 
         const c = block.content;
-        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="background-color:${c.backgroundColor}; background-image:url('${c.backgroundImage}');"></div>` : '';
+        const hasBg = c.backgroundColor || c.backgroundImage;
+        let bgStyle = '';
+        if (hasBg) {
+            bgStyle = `background-color: ${c.backgroundColor || 'transparent'};` +
+                      `background-image: url('${c.backgroundImage || ''}');` +
+                      `background-size: ${c.backgroundSize || 'cover'};` +
+                      `background-position: center;` +
+                      `opacity: ${c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1};` +
+                      `transform: ${(c.mirrorHorizontal ? 'scaleX(-1) ' : '') + (c.mirrorVertical ? 'scaleY(-1)' : '')};`;
+        }
+        const backgroundDiv = hasBg ? `<div class="block-background" style="${bgStyle}"></div>` : '';
         const titleHTML = c.title ? `<h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>` : '';
         const imageTag = c.imageUrl ? `<img src="${c.imageUrl}" alt="${c.caption || c.title}" style="width: 100%; opacity: ${c.opacity || 1}; border-radius: 8px; margin: 15px 0;">` : '';
         const descriptionHTML = c.description ? `<div>${makeTextEditable(c.description, block.id, 'descriptionStyle', c.descriptionStyle)}</div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative;">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative; ${hasBg ? 'background: transparent;' : ''}">
                 ${backgroundDiv}
                 ${titleHTML}
                 ${imageTag}
@@ -214,10 +252,20 @@
 
     const createScheduleHTML = (block, s) => { 
         const c = block.content;
-        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="background-color:${c.backgroundColor}; background-image:url('${c.backgroundImage}');"></div>` : '';
+        const hasBg = c.backgroundColor || c.backgroundImage;
+        let bgStyle = '';
+        if (hasBg) {
+            bgStyle = `background-color: ${c.backgroundColor || 'transparent'};` +
+                      `background-image: url('${c.backgroundImage || ''}');` +
+                      `background-size: ${c.backgroundSize || 'cover'};` +
+                      `background-position: center;` +
+                      `opacity: ${c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1};` +
+                      `transform: ${(c.mirrorHorizontal ? 'scaleX(-1) ' : '') + (c.mirrorVertical ? 'scaleY(-1)' : '')};`;
+        }
+        const backgroundDiv = hasBg ? `<div class="block-background" style="${bgStyle}"></div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative;">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative; ${hasBg ? 'background: transparent;' : ''}">
                 ${backgroundDiv}
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <ul style="list-style:none;padding:0;text-align:left;">
@@ -239,11 +287,21 @@
 
     const createLocationHTML = (block, s) => { 
         const c = block.content;
-        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="background-color:${c.backgroundColor}; background-image:url('${c.backgroundImage}');"></div>` : '';
+        const hasBg = c.backgroundColor || c.backgroundImage;
+        let bgStyle = '';
+        if (hasBg) {
+            bgStyle = `background-color: ${c.backgroundColor || 'transparent'};` +
+                      `background-image: url('${c.backgroundImage || ''}');` +
+                      `background-size: ${c.backgroundSize || 'cover'};` +
+                      `background-position: center;` +
+                      `opacity: ${c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1};` +
+                      `transform: ${(c.mirrorHorizontal ? 'scaleX(-1) ' : '') + (c.mirrorVertical ? 'scaleY(-1)' : '')};`;
+        }
+        const backgroundDiv = hasBg ? `<div class="block-background" style="${bgStyle}"></div>` : '';
         const imageHTML = c.imageUrl ? `<img src="${c.imageUrl}" alt="Venue" style="width:100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-bottom: 20px; opacity:${c.opacity};">` : ''; 
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative;">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative; ${hasBg ? 'background: transparent;' : ''}">
                 ${backgroundDiv}
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <div>${makeTextEditable(c.address, block.id, 'addressStyle', c.addressStyle)}</div>
@@ -257,10 +315,20 @@
         
     const createCountdownHTML = (block, s) => { 
         const c = block.content;
-        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="background-color:${c.backgroundColor}; background-image:url('${c.backgroundImage}');"></div>` : '';
+        const hasBg = c.backgroundColor || c.backgroundImage;
+        let bgStyle = '';
+        if (hasBg) {
+            bgStyle = `background-color: ${c.backgroundColor || 'transparent'};` +
+                      `background-image: url('${c.backgroundImage || ''}');` +
+                      `background-size: ${c.backgroundSize || 'cover'};` +
+                      `background-position: center;` +
+                      `opacity: ${c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1};` +
+                      `transform: ${(c.mirrorHorizontal ? 'scaleX(-1) ' : '') + (c.mirrorVertical ? 'scaleY(-1)' : '')};`;
+        }
+        const backgroundDiv = hasBg ? `<div class="block-background" style="${bgStyle}"></div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative;">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative; ${hasBg ? 'background: transparent;' : ''}">
                 ${backgroundDiv}
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <div id="countdown">
@@ -277,10 +345,20 @@
 
     const createRsvpHTML = (block, s, rsvpLink) => { 
         const c = block.content;
-        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="background-color:${c.backgroundColor}; background-image:url('${c.backgroundImage}');"></div>` : '';
+        const hasBg = c.backgroundColor || c.backgroundImage;
+        let bgStyle = '';
+        if (hasBg) {
+            bgStyle = `background-color: ${c.backgroundColor || 'transparent'};` +
+                      `background-image: url('${c.backgroundImage || ''}');` +
+                      `background-size: ${c.backgroundSize || 'cover'};` +
+                      `background-position: center;` +
+                      `opacity: ${c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1};` +
+                      `transform: ${(c.mirrorHorizontal ? 'scaleX(-1) ' : '') + (c.mirrorVertical ? 'scaleY(-1)' : '')};`;
+        }
+        const backgroundDiv = hasBg ? `<div class="block-background" style="${bgStyle}"></div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative;">
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative; ${hasBg ? 'background: transparent;' : ''}">
                 ${backgroundDiv}
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <div>${makeTextEditable(c.subtitle, block.id, 'subtitleStyle', c.subtitleStyle)}</div>
