@@ -1423,6 +1423,18 @@
             }
             current[keys[keys.length - 1]] = value;
 
+            if (keys[0] === 'innerBlocks' && keys[2] === 'style' && keys[3] === 'textAlign') {
+                if (value === 'center') {
+                    const innerBlockIndex = parseInt(keys[1], 10);
+                    if (pageBlocks[blockIndex]?.content?.innerBlocks?.[innerBlockIndex]) {
+                        pageBlocks[blockIndex].content.innerBlocks[innerBlockIndex].x = 50;
+                        // Перерисовываем редактор, чтобы поле X обновилось
+                        renderEditor(); 
+                    }
+                }
+            }
+            // --- КОНЕЦ ГЛАВНОГО ИСПРАВЛЕНИЯ ---
+
             if (keys[0] === 'innerBlocks' && keys[2] === 'text') {
                 const innerBlockIndex = parseInt(keys[1], 10);
                 if (pageBlocks[blockIndex]?.content?.innerBlocks?.[innerBlockIndex]) {

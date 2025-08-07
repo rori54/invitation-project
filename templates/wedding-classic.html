@@ -115,7 +115,6 @@
         return `<span style="${getStyleString(styleObject)}">${processText(text)}</span>`;
     };
 
-    // --- ЗАМЕНИТЕ ЭТУ ФУНКЦИЮ в wedding-classic.html ---
     const renderInteractiveElements = (elements, blockId, type) => {
         if (!elements || elements.length === 0) return '';
         const wrapperClass = type === 'sticker' ? 'sticker-wrapper' : 'inner-block-wrapper';
@@ -123,23 +122,12 @@
 
         return elements.map((el, index) => {
             const opacityStyle = (el.opacity !== undefined) ? `opacity: ${el.opacity};` : '';
-            
             const xPos = `${el.x || 0}%`;
             const yPos = `${el.y || 0}%`;
             const widthStyle = (el.width === 'auto' || !el.width) ? 'width: auto;' : `width: ${el.width}px;`;
             
-            // --- ГЛАВНОЕ ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-            // Определяем горизонтальное смещение в зависимости от выравнивания текста.
-            let translateX = '-50%'; // По умолчанию - центр
-            if (type === 'innerBlock' && el.style && el.style.textAlign) {
-                if (el.style.textAlign === 'left') {
-                    translateX = '0%';
-                } else if (el.style.textAlign === 'right') {
-                    translateX = '-100%';
-                }
-            }
-            
-            const transformStyle = `translate(${translateX}, -50%) rotate(${el.rotation || 0}deg)`;
+            // --- ПРОСТАЯ И НАДЕЖНАЯ ЛОГИКА ---
+            const transformStyle = `translate(-50%, -50%) rotate(${el.rotation || 0}deg)`;
             
             // Применяем text-align к самому контейнеру, чтобы он работал, если задана ширина
             const textAlignStyle = (type === 'innerBlock' && el.style && el.style.textAlign) 
@@ -147,7 +135,7 @@
                 : '';
             
             const positionStyle = `left: ${xPos}; top: ${yPos}; ${widthStyle} transform: ${transformStyle}; ${opacityStyle} ${textAlignStyle}`;
-            // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
+            // --- КОНЕЦ ---
             
             let content;
             if (type === 'sticker') {
@@ -421,7 +409,7 @@
         }
     }
     
-    // --- ДОБАВЬТЕ ЭТОТ КОД В НАЧАЛО ФУНКЦИИ initInteraction() ---
+    // --- ЗАМЕНИТЕ ЭТУ ФУНКЦИЮ ПОЛНОСТЬЮ в wedding-classic.html ---
     function initInteraction() {
         if (typeof interact === 'undefined') return;
 
@@ -446,20 +434,14 @@
                     listeners: {
                         move(event) {
                             const target = event.target;
-                            // --- ИСПРАВЛЕНИЕ: Используем transform для плавного перемещения, не меняя left/top ---
                             const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
                             const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-
-                            // Обновляем позицию через transform
                             target.style.transform = `translate(${x}px, ${y}px) rotate(${parseFloat(target.getAttribute('data-rot')) || 0}deg)`;
-
-                            // Сохраняем временные пиксельные значения в data-атрибутах
                             target.setAttribute('data-x', x);
                             target.setAttribute('data-y', y);
                         },
                         start(event) {
                             const target = event.target;
-                            // При старте считываем transform и сохраняем его
                             const transform = window.getComputedStyle(target).transform;
                             let x = 0, y = 0;
                             if (transform && transform !== 'none') {
@@ -469,31 +451,26 @@
                             }
                             target.setAttribute('data-x', x);
                             target.setAttribute('data-y', y);
-                            // Сохраняем текущий угол поворота
                             target.setAttribute('data-rot', parseFloat(target.style.transform.match(/rotate\((.+)deg\)/)?.[1] || 0));
                         },
                         end(event) {
                             const target = event.target;
                             const blockWrapper = target.closest('.block-wrapper');
                             if (!blockWrapper) return;
-
                             const parent = target.parentElement;
                             if (!parent) return;
 
-                            // --- ИСПРАВЛЕННАЯ ЛОГИКА КОНВЕРТАЦИИ ---
+                            // --- ПРОСТАЯ ЛОГИКА: ВСЕГДА СЧИТАЕМ ЦЕНТР ---
                             const targetRect = target.getBoundingClientRect();
                             const parentRect = parent.getBoundingClientRect();
-
-                            // Координаты центра элемента относительно родителя
                             const centerX = (targetRect.left - parentRect.left) + targetRect.width / 2;
                             const centerY = (targetRect.top - parentRect.top) + targetRect.height / 2;
 
-                            // Конвертируем в проценты
                             const xPercent = (centerX / parent.offsetWidth) * 100;
                             const yPercent = (centerY / parent.offsetHeight) * 100;
 
                             const newProps = { x: xPercent, y: yPercent };
-   
+       
                             window.parent.postMessage({ type: target.dataset.updateType, payload: { blockId: blockWrapper.dataset.blockId, id: target.dataset.id, newProps } }, '*');
                         }
                     }
@@ -518,7 +495,7 @@
                     modifiers: [ interact.modifiers.aspectRatio({ ratio: 'preserve', equalDelta: true, enabled: (event) => event.target.dataset.type === 'sticker' }) ]
                 });
         };
-
+        
         const setupRotatable = (handleSelector) => {
             interact(handleSelector).draggable({
                 onstart: function (event) {
@@ -535,7 +512,6 @@
                     const degrees = angle * (180 / Math.PI);
                     const currentRotation = degrees + 90;
                     
-                    // --- ИСПРАВЛЕНИЕ: Комбинируем rotate с translate ---
                     const existingTransform = wrapper.style.transform.match(/translate\((.+?)\)/);
                     const translatePart = existingTransform ? `translate(${existingTransform[1]})` : 'translate(-50%, -50%)';
                     wrapper.style.transform = `${translatePart} rotate(${currentRotation}deg)`;
