@@ -85,55 +85,41 @@
         body.style-ribbon .block-wrapper:first-child { padding: 0 !important; }
         body.style-blocks .block-background { display: none !important; }
         
-        /* Animation triggers */
-        .animate-on-scroll[data-animated="false"] {
-            opacity: 0 !important;
+        /* Simple Animation System */
+        .animate-on-scroll {
+            opacity: 1 !important;
         }
 
-        .animate-on-scroll[data-animated="true"].text-fade-in { 
-            animation: fadeIn 1.5s ease-out forwards; 
-            opacity: 1;
+        .animate-on-scroll.text-fade-in.animate-trigger { 
+            animation: fadeIn 1.5s ease-out; 
         }
-        .animate-on-scroll[data-animated="true"].text-slide-up { 
-            animation: slideInUp 1.2s ease-out forwards; 
-            opacity: 1;
+        .animate-on-scroll.text-slide-up.animate-trigger { 
+            animation: slideInUp 1.2s ease-out; 
         }
-        .animate-on-scroll[data-animated="true"].text-slide-left { 
-            animation: slideInLeft 1s ease-out forwards; 
-            opacity: 1;
+        .animate-on-scroll.text-slide-left.animate-trigger { 
+            animation: slideInLeft 1s ease-out; 
         }
-        .animate-on-scroll[data-animated="true"].text-slide-right { 
-            animation: slideInRight 1s ease-out forwards; 
-            opacity: 1;
+        .animate-on-scroll.text-slide-right.animate-trigger { 
+            animation: slideInRight 1s ease-out; 
         }
-        .animate-on-scroll[data-animated="true"].text-typewriter { 
-            animation: typewriter 3s steps(20) forwards; 
-            opacity: 1;
+        .animate-on-scroll.text-typewriter.animate-trigger { 
+            animation: typewriter 3s steps(20);
             overflow: hidden;
             border-right: 3px solid #e17055;
             white-space: nowrap;
             width: 0;
         }
-        .animate-on-scroll[data-animated="true"].text-gold-shine { 
-            animation: goldShine 2s ease-out forwards; 
-            opacity: 1;
+        .animate-on-scroll.text-gold-shine.animate-trigger { 
+            animation: goldShine 2s ease-out; 
         }
-        .animate-on-scroll[data-animated="true"].text-romantic { 
-            animation: romantic 2s ease-out forwards; 
-            opacity: 1;
+        .animate-on-scroll.text-romantic.animate-trigger { 
+            animation: romantic 2s ease-out; 
         }
-        .animate-on-scroll[data-animated="true"].text-elegant-reveal { 
-            animation: elegantReveal 2s ease-out forwards; 
-            opacity: 1;
+        .animate-on-scroll.text-elegant-reveal.animate-trigger { 
+            animation: elegantReveal 2s ease-out; 
         }
-        .animate-on-scroll[data-animated="true"].text-bounce-in { 
-            animation: bounceIn 1.5s ease-out forwards; 
-            opacity: 1;
-        }
-        .animate-on-scroll[data-animated="true"].text-word-reveal span { 
-            animation: wordReveal 0.6s ease-out forwards; 
-            animation-delay: calc(var(--word-index, 0) * 0.3s); 
-            opacity: 1;
+        .animate-on-scroll.text-bounce-in.animate-trigger { 
+            animation: bounceIn 1.5s ease-out; 
         }
         
         /* Text Animations */
@@ -791,32 +777,20 @@
        document.body.style.opacity = 1;
    }
    
-        function initScrollAnimations() {
-        if (window.self !== window.top) return; // Only in live view
-        
-        console.log('Initializing scroll animations...');
+    function initScrollAnimations() {
+        if (window.self !== window.top) return;
         
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                const element = entry.target;
                 if (entry.isIntersecting) {
-                    console.log('Triggering animation for:', element);
-                    element.setAttribute('data-animated', 'true');
+                    entry.target.classList.add('animate-trigger');
                 } else {
-                    // Reset animation when element leaves viewport
-                    element.setAttribute('data-animated', 'false');
-                    // Force reflow to restart animation
-                    element.style.animation = 'none';
-                    element.offsetHeight; // trigger reflow
-                    element.style.animation = null;
+                    entry.target.classList.remove('animate-trigger');
                 }
             });
-        }, { threshold: 0.1 });
+        }, { threshold: 0.2 });
 
-        const elementsToAnimate = document.querySelectorAll('.animate-on-scroll');
-        console.log('Found elements to animate:', elementsToAnimate.length);
-        
-        elementsToAnimate.forEach(el => {
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
             observer.observe(el);
         });
     }
