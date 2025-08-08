@@ -85,173 +85,47 @@
         body.style-ribbon .block-wrapper:first-child { padding: 0 !important; }
         body.style-blocks .block-background { display: none !important; }
         
-        /* Animation System */
-        .animate-on-scroll {
-            transition: none !important;
-        }
-
-        /* Initially hide animated elements */
-        .animate-on-scroll.text-fade-in,
-        .animate-on-scroll.text-slide-up,
-        .animate-on-scroll.text-slide-left,
-        .animate-on-scroll.text-slide-right,
-        .animate-on-scroll.text-gold-shine,
-        .animate-on-scroll.text-romantic,
-        .animate-on-scroll.text-elegant-reveal,
-        .animate-on-scroll.text-bounce-in {
-            opacity: 0;
-        }
-
-        .animate-on-scroll.text-typewriter {
-            opacity: 0;
-            width: 0;
-            overflow: hidden;
-            white-space: nowrap;
-            border-right: 3px solid transparent;
-        }
-
-        .animate-on-scroll.text-word-reveal .word-part {
-            opacity: 0;
-            display: inline-block;
-        }
-
-        /* Triggered animations */
-        .animate-on-scroll.in-view.text-fade-in {
-            animation: fadeIn 1.5s ease-out forwards;
-        }
-
-        .animate-on-scroll.in-view.text-slide-up {
-            animation: slideInUp 1.2s ease-out forwards;
-        }
-
-        .animate-on-scroll.in-view.text-slide-left {
-            animation: slideInLeft 1s ease-out forwards;
-        }
-
-        .animate-on-scroll.in-view.text-slide-right {
-            animation: slideInRight 1s ease-out forwards;
-        }
-
-        .animate-on-scroll.in-view.text-typewriter {
-            opacity: 1;
-            animation: typewriter 2.5s steps(30, end) forwards;
-            border-right-color: #e17055;
-        }
-
-        .animate-on-scroll.in-view.text-gold-shine {
-            animation: goldShine 2s ease-out forwards;
-        }
-
-        .animate-on-scroll.in-view.text-romantic {
-            animation: romantic 2s ease-out forwards;
-        }
-
-        .animate-on-scroll.in-view.text-elegant-reveal {
-            animation: elegantReveal 2s ease-out forwards;
-        }
-
-        .animate-on-scroll.in-view.text-bounce-in {
-            animation: bounceIn 1.5s ease-out forwards;
-        }
-
-        .animate-on-scroll.in-view.text-word-reveal .word-part {
-            animation: wordReveal 0.6s ease-out forwards;
-        }
+        /* --- Animation System --- */
         
-        /* Text Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* 1. Keyframes Definitions */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInLeft { from { opacity: 0; transform: translateX(-100px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes typewriter { from { width: 0; } to { width: 100%; } }
+        @keyframes goldShine { 0% { opacity: 0; transform: scale(0.8); text-shadow: 0 0 5px gold; } 50% { text-shadow: 0 0 20px gold, 0 0 30px gold; } 100% { opacity: 1; transform: scale(1); text-shadow: 0 0 10px gold; } }
+        @keyframes romantic { 0% { opacity: 0; transform: scale(0.5) rotate(-10deg); filter: blur(3px); } 50% { transform: scale(1.1) rotate(2deg); filter: blur(1px); } 100% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0px); } }
+        @keyframes elegantReveal { 0% { opacity: 0; clip-path: polygon(0 50%, 0 50%, 0 50%, 0 50%); } 100% { opacity: 1; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); } }
+        @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.3) translateY(-100px); } 50% { opacity: 1; transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes wordReveal { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
 
-        @keyframes slideInUp {
-            from { opacity: 0; transform: translateY(50px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-100px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(100px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        @keyframes typewriter {
-            from { 
-                width: 0;
-            }
-            to { 
-                width: 100%;
-            }
-        }
-
-        @keyframes goldShine {
-            0% { opacity: 0; transform: scale(0.8); text-shadow: 0 0 5px gold; }
-            50% { text-shadow: 0 0 20px gold, 0 0 30px gold; }
-            100% { opacity: 1; transform: scale(1); text-shadow: 0 0 10px gold; }
-        }
-
-        @keyframes romantic {
-            0% { opacity: 0; transform: scale(0.5) rotate(-10deg); filter: blur(3px); }
-            50% { transform: scale(1.1) rotate(2deg); filter: blur(1px); }
-            100% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0px); }
-        }
-
-        @keyframes elegantReveal {
-            0% { opacity: 0; clip-path: polygon(0 50%, 0 50%, 0 50%, 0 50%); }
-            100% { opacity: 1; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
-        }
-
-        @keyframes bounceIn {
-            0% { opacity: 0; transform: scale(0.3) translateY(-100px); }
-            50% { opacity: 1; transform: scale(1.05); }
-            70% { transform: scale(0.9); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        @keyframes wordReveal {
-            0% { 
-                opacity: 0; 
-                transform: translateY(20px);
-            }
-            100% { 
-                opacity: 1; 
-                transform: translateY(0);
-            }
-        }
-
-        /* Animation Classes - готовы к анимации */
-        .text-fade-in { opacity: 0; }
-        .text-slide-up { opacity: 0; }
-        .text-slide-left { opacity: 0; }
-        .text-slide-right { opacity: 0; }
-        .text-typewriter { 
-            opacity: 0; 
-            overflow: hidden;
-            white-space: nowrap;
-            border-right: 3px solid transparent;
-        }
-        .text-typewriter.animate-trigger {
-            border-right-color: #e17055;
-        }
-        .text-typewriter.animation-complete {
-            border-right-color: transparent !important;
-        }
-        .text-gold-shine { opacity: 0; }
-        .text-romantic { opacity: 0; }
-        .text-elegant-reveal { opacity: 0; }
-        .text-bounce-in { opacity: 0; }
-        .text-word-reveal span { 
-            opacity: 0; 
-            display: inline-block;
-        }
-
-        /* Показываем текст после анимации */
-        .animate-trigger {
-            opacity: 1 !important;
+        /* 2. Initial States (before animation) */
+        .text-fade-in { opacity: 0; transform: translateY(20px); transition: .3s; }
+        .text-slide-up { opacity: 0; transform: translateY(50px); transition: .3s; }
+        .text-slide-left { opacity: 0; transform: translateX(-100px); transition: .3s; }
+        .text-slide-right { opacity: 0; transform: translateX(100px); transition: .3s; }
+        .text-typewriter { width: 0; opacity: 1; overflow: hidden; white-space: nowrap; border-right: 3px solid transparent; }
+        .text-gold-shine { opacity: 0; transform: scale(0.8); }
+        .text-romantic { opacity: 0; transform: scale(0.5) rotate(-10deg); filter: blur(3px); }
+        .text-elegant-reveal { opacity: 0; clip-path: polygon(0 50%, 0 50%, 0 50%, 0 50%); }
+        .text-bounce-in { opacity: 0; transform: scale(0.3) translateY(-100px); }
+        .text-word-reveal .word-part { opacity: 0; display: inline-block; transform: translateY(20px); }
+        
+        /* 3. Triggered States (when IN VIEW or for PREVIEW) */
+        .in-view.text-fade-in, .play-animation.text-fade-in { animation: fadeIn 1.5s ease-out forwards; }
+        .in-view.text-slide-up, .play-animation.text-slide-up { animation: slideInUp 1.2s ease-out forwards; }
+        .in-view.text-slide-left, .play-animation.text-slide-left { animation: slideInLeft 1s ease-out forwards; }
+        .in-view.text-slide-right, .play-animation.text-slide-right { animation: slideInRight 1s ease-out forwards; }
+        .in-view.text-typewriter, .play-animation.text-typewriter { animation: typewriter 2.5s steps(30, end) forwards; border-right-color: #e17055; }
+        .in-view.text-gold-shine, .play-animation.text-gold-shine { animation: goldShine 2s ease-out forwards; }
+        .in-view.text-romantic, .play-animation.text-romantic { animation: romantic 2s ease-out forwards; }
+        .in-view.text-elegant-reveal, .play-animation.text-elegant-reveal { animation: elegantReveal 2s ease-out forwards; }
+        .in-view.text-bounce-in, .play-animation.text-bounce-in { animation: bounceIn 1.5s ease-out forwards; }
+        .in-view .word-part, .play-animation .word-part { animation: wordReveal 0.6s ease-out forwards; }
+        
+        /* Cleanup for typewriter animation */
+        .in-view.text-typewriter {
+            animation-iteration-count: 1; /* Проиграть один раз */
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
@@ -282,25 +156,24 @@
 
     const makeTextEditable = (text, blockId, elementKey, styleObject) => {
         const animationClass = styleObject?.animation ? `text-${styleObject.animation}` : '';
-        
-        // In editor - no animation classes that hide text
-        if (window.self !== window.top) {
-            return `<span class="editable-text" data-block-id="${blockId}" data-element-key="${elementKey}" style="${getStyleString(styleObject)}">${processText(text)}</span>`;
-        }
-        
-        // In live view - prepare for animation
         const baseStyle = getStyleString(styleObject);
-        
-        // Word by word animation needs special handling
+        const processedText = processText(text);
+        let content = processedText;
+
+        // Для "word-reveal" разбиваем текст на слова
         if (styleObject?.animation === 'word-reveal') {
-            const words = processText(text).split(' ').map((word, i) => 
-                `<span class="word-part" style="animation-delay: ${i * 0.15}s">${word}</span>`
+            content = processedText.split(' ').map((word, i) => 
+                `<span class="word-part" style="animation-delay: ${i * 0.1}s">${word}</span>`
             ).join(' ');
-            return `<span class="${animationClass} animate-on-scroll" data-animation-type="${styleObject.animation}" style="${baseStyle}">${words}</span>`;
         }
         
-        // All other animations
-        return `<span class="${animationClass} animate-on-scroll" data-animation-type="${styleObject?.animation || ''}" style="${baseStyle}">${processText(text)}</span>`;
+        // В живом режиме добавляем класс для IntersectionObserver
+        if (window.self === window.top) {
+             return `<span class="editable-text animate-on-scroll ${animationClass}" data-block-id="${blockId}" data-element-key="${elementKey}" style="${baseStyle}">${content}</span>`;
+        } else {
+            // В редакторе не добавляем 'animate-on-scroll', чтобы IntersectionObserver не мешал
+             return `<span class="editable-text ${animationClass}" data-block-id="${blockId}" data-element-key="${elementKey}" style="${baseStyle}">${content}</span>`;
+        }
     };
 
     const renderInteractiveElements = (elements, blockId, type) => {
@@ -858,52 +731,46 @@
         if (window.self !== window.top) return;
         
         const animatedElements = document.querySelectorAll('.animate-on-scroll');
-        
         if (animatedElements.length === 0) return;
-        
-        const observer = new IntersectionObserver((entries) => {
+
+        const observer = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
-                const element = entry.target;
-                
                 if (entry.isIntersecting) {
-                    // Элемент в зоне видимости
-                    if (!element.classList.contains('in-view')) {
-                        // Добавляем класс с небольшой задержкой для стабильности
-                        requestAnimationFrame(() => {
-                            element.classList.add('in-view');
-                            
-                            // Для typewriter убираем курсор после анимации
-                            if (element.classList.contains('text-typewriter')) {
-                                setTimeout(() => {
-                                    element.style.borderRightColor = 'transparent';
-                                }, 2500);
-                            }
-                        });
-                    }
+                    entry.target.classList.add('in-view');
                 } else {
-                    // Элемент вышел из зоны видимости - сбрасываем анимацию
-                    if (element.classList.contains('in-view')) {
-                        element.classList.remove('in-view');
-                        
-                        // Для typewriter сбрасываем ширину
-                        if (element.classList.contains('text-typewriter')) {
-                            element.style.width = '0';
-                            element.style.borderRightColor = 'transparent';
-                        }
-                    }
+                    entry.target.classList.remove('in-view');
                 }
             });
-        }, { 
-            threshold: 0.1,  // Срабатывает когда 10% элемента видно
-            rootMargin: '0px 0px -10% 0px'  // Немного раньше начинаем анимацию
+        }, {
+            threshold: 0.2, // Анимация начнется, когда 20% элемента видно
+            rootMargin: "0px 0px -50px 0px" // Начинаем чуть раньше, когда скроллим вниз
         });
-        
-        // Наблюдаем за всеми элементами
+
         animatedElements.forEach(el => {
             observer.observe(el);
         });
     }
-   
+    
+    function triggerAnimationPreview(blockId, elementKey) {
+        const selector = `[data-block-id="${blockId}"][data-element-key="${elementKey}"]`;
+        const element = document.querySelector(selector);
+        
+        if (!element) return;
+        
+        // Удаляем класс, чтобы сбросить анимацию
+        element.classList.remove('play-animation');
+        
+        // Небольшая задержка, чтобы браузер успел обработать удаление класса
+        requestAnimationFrame(() => {
+            // Добавляем класс, чтобы запустить анимацию снова
+            element.classList.add('play-animation');
+
+            // Убираем класс после завершения анимации, чтобы он не мешал
+            setTimeout(() => {
+                 element.classList.remove('play-animation');
+            }, 2500); // 2.5 секунды, дольше самой длинной анимации
+        });
+    }
    </script>
 </body>
 </html>

@@ -724,12 +724,13 @@
         const inputs = toolbar.querySelectorAll('select, input');
         
         inputs.forEach(input => {
-            input.addEventListener('change', updateTextStyle);
-            input.addEventListener('input', updateTextStyle);
+            // Передаем объект события в функцию
+            input.addEventListener('change', (e) => updateTextStyle(e));
+            input.addEventListener('input', (e) => updateTextStyle(e));
         });
     }
 
-    function updateTextStyle() {
+    function updateTextStyle(event) {
         if (!currentEditingElement) return;
         
         const blockIndex = pageBlocks.findIndex(b => b.id === currentEditingElement.blockId);
@@ -760,6 +761,16 @@
         
         renderPreview();
         renderEditor();
+
+        // Если изменили анимацию, покажем превью в iframe
+        if (event && event.target.id === 'toolbar-animation') {
+            // Даем время на перерисовку DOM в iframe
+            setTimeout(() => {
+                if (iframe.contentWindow && typeof iframe.contentWindow.triggerAnimationPreview === 'function') {
+                    iframe.contentWindow.triggerAnimationPreview(currentEditingElement.blockId, currentEditingElement.elementKey);
+                }
+            }, 200);
+        }
     }
 
     function openImageLibrary(targetInputId) {
