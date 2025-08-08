@@ -189,7 +189,7 @@
         const c = block.content; 
         const bgOpacity = c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1;
         const backgroundStyle = `background-color: ${c.backgroundColor || 'transparent'}; ${c.backgroundImage ? `background-image: url('${c.backgroundImage}'); background-size: ${c.backgroundSize || 'cover'}; background-position: center; opacity: ${bgOpacity};` : ''}`;
-        const backgroundDiv = (c.backgroundColor || c.backgroundImage) && document.body.classList.contains('style-blocks') ? `<div class="block-background" style="${backgroundStyle}"></div>` : '';
+        const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${backgroundStyle}"></div>` : '';
         
         const titleHTML = c.title ? `<h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>` : ''; 
         const textHTML = c.text ? `<div>${makeTextEditable(c.text, block.id, 'textStyle', c.textStyle)}</div>` : '';
