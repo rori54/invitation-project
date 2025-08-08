@@ -85,41 +85,40 @@
         body.style-ribbon .block-wrapper:first-child { padding: 0 !important; }
         body.style-blocks .block-background { display: none !important; }
         
-        /* Simple Animation System */
-        .animate-on-scroll {
+        .animate-on-scroll.animate-trigger {
             opacity: 1 !important;
+            animation-fill-mode: forwards;
         }
 
         .animate-on-scroll.text-fade-in.animate-trigger { 
-            animation: fadeIn 1.5s ease-out; 
+            animation: fadeIn 1.5s ease-out forwards; 
         }
         .animate-on-scroll.text-slide-up.animate-trigger { 
-            animation: slideInUp 1.2s ease-out; 
+            animation: slideInUp 1.2s ease-out forwards; 
         }
         .animate-on-scroll.text-slide-left.animate-trigger { 
-            animation: slideInLeft 1s ease-out; 
+            animation: slideInLeft 1s ease-out forwards; 
         }
         .animate-on-scroll.text-slide-right.animate-trigger { 
-            animation: slideInRight 1s ease-out; 
+            animation: slideInRight 1s ease-out forwards; 
         }
         .animate-on-scroll.text-typewriter.animate-trigger { 
-            animation: typewriter 3s steps(20);
-            overflow: hidden;
-            border-right: 3px solid #e17055;
-            white-space: nowrap;
-            width: 0;
+            animation: typewriter 3s steps(40) forwards;
         }
         .animate-on-scroll.text-gold-shine.animate-trigger { 
-            animation: goldShine 2s ease-out; 
+            animation: goldShine 2s ease-out forwards; 
         }
         .animate-on-scroll.text-romantic.animate-trigger { 
-            animation: romantic 2s ease-out; 
+            animation: romantic 2s ease-out forwards; 
         }
         .animate-on-scroll.text-elegant-reveal.animate-trigger { 
-            animation: elegantReveal 2s ease-out; 
+            animation: elegantReveal 2s ease-out forwards; 
         }
         .animate-on-scroll.text-bounce-in.animate-trigger { 
-            animation: bounceIn 1.5s ease-out; 
+            animation: bounceIn 1.5s ease-out forwards; 
+        }
+        .animate-on-scroll.text-word-reveal.animate-trigger span { 
+            animation: wordReveal 0.6s ease-out forwards;
         }
         
         /* Text Animations */
@@ -144,8 +143,20 @@
         }
 
         @keyframes typewriter {
-            from { width: 0; }
-            to { width: 100%; }
+            0% { 
+                width: 0;
+                opacity: 1;
+            }
+            99% {
+                width: 100%;
+                opacity: 1;
+                border-right-color: #e17055;
+            }
+            100% { 
+                width: 100%;
+                opacity: 1;
+                border-right-color: transparent;
+            }
         }
 
         @keyframes goldShine {
@@ -177,17 +188,36 @@
             to { opacity: 1; transform: translateY(0) rotateX(0deg); }
         }
 
-        /* Animation Classes - DISABLED by default */
+        /* Animation Classes - готовы к анимации */
         .text-fade-in { opacity: 0; }
         .text-slide-up { opacity: 0; }
         .text-slide-left { opacity: 0; }
         .text-slide-right { opacity: 0; }
-        .text-typewriter { opacity: 0; width: auto; }
+        .text-typewriter { 
+            opacity: 0; 
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 3px solid transparent;
+        }
+        .text-typewriter.animate-trigger {
+            border-right-color: #e17055;
+        }
+        .text-typewriter.animation-complete {
+            border-right-color: transparent !important;
+        }
         .text-gold-shine { opacity: 0; }
         .text-romantic { opacity: 0; }
         .text-elegant-reveal { opacity: 0; }
         .text-bounce-in { opacity: 0; }
-        .text-word-reveal span { opacity: 0; }
+        .text-word-reveal span { 
+            opacity: 0; 
+            display: inline-block;
+        }
+
+        /* Показываем текст после анимации */
+        .animate-trigger {
+            opacity: 1 !important;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 </head>
@@ -220,10 +250,18 @@
         
         // In editor, wrap in a span with data attributes for the text editing toolbar
         if (window.self !== window.top) {
-            return `<span class="editable-text ${animationClass}" data-block-id="${blockId}" data-element-key="${elementKey}" style="${getStyleString(styleObject)}">${processText(text)}</span>`;
+            // В редакторе не применяем классы анимации, которые скрывают текст
+            return `<span class="editable-text" data-block-id="${blockId}" data-element-key="${elementKey}" data-animation="${styleObject?.animation || ''}" style="${getStyleString(styleObject)}">${processText(text)}</span>`;
         }
-        // In live view, apply style and animation class but WITHOUT starting animation
-        return `<span class="${animationClass} animate-on-scroll" data-animated="false" style="${getStyleString(styleObject)}">${processText(text)}</span>`;
+        // In live view, apply style and animation class
+        if (styleObject?.animation === 'word-reveal') {
+            // Разбиваем текст на слова для word-reveal анимации
+            const words = processText(text).split(' ').map((word, i) => 
+                `<span style="animation-delay: ${i * 0.1}s">${word}</span>`
+            ).join(' ');
+            return `<span class="${animationClass} animate-on-scroll" style="${getStyleString(styleObject)}">${words}</span>`;
+        }
+        return `<span class="${animationClass} animate-on-scroll" style="${getStyleString(styleObject)}">${processText(text)}</span>`;
     };
 
     const renderInteractiveElements = (elements, blockId, type) => {
@@ -782,13 +820,34 @@
         
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
+                const element = entry.target;
+                
                 if (entry.isIntersecting) {
-                    entry.target.classList.add('animate-trigger');
+                    // Элемент появился в зоне видимости
+                    if (!element.classList.contains('animate-trigger')) {
+                        element.classList.remove('animation-complete');
+                        // Небольшая задержка для сброса анимации
+                        setTimeout(() => {
+                            element.classList.add('animate-trigger');
+                            
+                            // Для typewriter убираем курсор после анимации
+                            if (element.classList.contains('text-typewriter')) {
+                                setTimeout(() => {
+                                    element.classList.add('animation-complete');
+                                }, 3000); // Длительность анимации typewriter
+                            }
+                        }, 50);
+                    }
                 } else {
-                    entry.target.classList.remove('animate-trigger');
+                    // Элемент вышел из зоны видимости
+                    element.classList.remove('animate-trigger');
+                    element.classList.remove('animation-complete');
                 }
             });
-        }, { threshold: 0.2 });
+        }, { 
+            threshold: 0.2,
+            rootMargin: '0px 0px -50px 0px' // Триггер чуть раньше
+        });
 
         document.querySelectorAll('.animate-on-scroll').forEach(el => {
             observer.observe(el);
