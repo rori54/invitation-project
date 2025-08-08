@@ -388,22 +388,22 @@
         return `#${parts.join('')}`;
     }
 
-        function renderPage(blocks, settings, rsvpLink = '#') {
-           if (!blocks || !settings) return;
-           document.body.className = '';
-           if (settings.style) document.body.classList.add(`style-${settings.style}`);
-           if (settings.displayMode) document.body.classList.add(`style-${settings.displayMode}`);
-           document.body.style.backgroundColor = settings.backgroundColor || '#f8f7f5';
-           document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? `url('${settings.backgroundImage}')` : 'none';
-           
-           const container = document.getElementById('page-content');
-           if (settings.displayMode === 'ribbon' && settings.maxWidth) {
-               container.style.maxWidth = settings.maxWidth;
-           }
-           container.innerHTML = '';
-           let countdownBlockContent = null;
+    function renderPage(blocks, settings, rsvpLink = '#') {
+       if (!blocks || !settings) return;
+       document.body.className = '';
+       if (settings.style) document.body.classList.add(`style-${settings.style}`);
+       if (settings.displayMode) document.body.classList.add(`style-${settings.displayMode}`);
+       document.body.style.backgroundColor = settings.backgroundColor || '#f8f7f5';
+       document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? `url('${settings.backgroundImage}')` : 'none';
+       
+       const container = document.getElementById('page-content');
+       if (settings.displayMode === 'ribbon' && settings.maxWidth) {
+           container.style.maxWidth = settings.maxWidth;
+       }
+       container.innerHTML = '';
+       let countdownBlockContent = null;
 
-        blocks.forEach(block => {
+       blocks.forEach(block => {
            let blockHTML = '';
            switch(block.type) {
                case 'hero': blockHTML = createHeroHTML(block, settings); break;
@@ -419,10 +419,10 @@
                default: blockHTML = `<!-- Unsupported block type: ${block.type} -->`;
            }
            container.innerHTML += blockHTML;
-        });
+       });
 
-        // Position backgrounds for ribbon mode
-        if (settings.displayMode === 'ribbon') {
+       // Position backgrounds for ribbon mode
+       if (settings.displayMode === 'ribbon') {
            setTimeout(() => {
                const blockWrappers = container.querySelectorAll('.block-wrapper');
                blockWrappers.forEach(wrapper => {
@@ -435,18 +435,19 @@
                    }
                });
            }, 50);
-        }
+       }
 
-        // Start countdown if countdown block exists
-        if (countdownBlockContent && countdownBlockContent.targetDate) {
+       // Start countdown if countdown block exists
+       if (countdownBlockContent && countdownBlockContent.targetDate) {
            startCountdown(countdownBlockContent.targetDate);
-        }
-        if (window.self !== window.top) {
+       }
+       if (window.self !== window.top) {
            setTimeout(() => {
                initInteraction();
                setupTextEditing();
-        }, 150);
-
+           }, 150);
+       }
+    }
     
    
    function initInteraction() {
