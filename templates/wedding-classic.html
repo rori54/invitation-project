@@ -155,25 +155,26 @@
     };
 
     const makeTextEditable = (text, blockId, elementKey, styleObject) => {
-        const animationClass = styleObject?.animation ? `text-${styleObject.animation}` : '';
         const baseStyle = getStyleString(styleObject);
         const processedText = processText(text);
         let content = processedText;
+        
+        // Базовый класс для всех режимов
+        let classes = 'editable-text';
 
-        // Для "word-reveal" разбиваем текст на слова
+        // Только для "живой" страницы добавляем классы для IntersectionObserver
+        if (window.self === window.top && styleObject?.animation) {
+            classes += ` animate-on-scroll text-${styleObject.animation}`;
+        }
+        
+        // Разбиваем на слова для word-reveal, если нужно
         if (styleObject?.animation === 'word-reveal') {
             content = processedText.split(' ').map((word, i) => 
                 `<span class="word-part" style="animation-delay: ${i * 0.1}s">${word}</span>`
             ).join(' ');
         }
         
-        // В живом режиме добавляем класс для IntersectionObserver
-        if (window.self === window.top) {
-             return `<span class="editable-text animate-on-scroll ${animationClass}" data-block-id="${blockId}" data-element-key="${elementKey}" style="${baseStyle}">${content}</span>`;
-        } else {
-            // В редакторе не добавляем 'animate-on-scroll', чтобы IntersectionObserver не мешал
-             return `<span class="editable-text ${animationClass}" data-block-id="${blockId}" data-element-key="${elementKey}" style="${baseStyle}">${content}</span>`;
-        }
+        return `<span class="${classes}" data-block-id="${blockId}" data-element-key="${elementKey}" style="${baseStyle}">${content}</span>`;
     };
 
     const renderInteractiveElements = (elements, blockId, type) => {
@@ -751,25 +752,36 @@
         });
     }
     
-    function triggerAnimationPreview(blockId, elementKey) {
+        // Глобальные переменные для управления предпросмотром
+    let previewTimeout;
+    const allAnimationClasses = ['text-fade-in', 'text-slide-up', 'text-slide-left', 'text-slide-right', 'text-typewriter', 'text-gold-shine', 'text-romantic', 'text-elegant-reveal', 'text-bounce-in', 'text-word-reveal'];
+
+    function triggerAnimationPreview(blockId, elementKey, animationType) {
         const selector = `[data-block-id="${blockId}"][data-element-key="${elementKey}"]`;
         const element = document.querySelector(selector);
         
         if (!element) return;
         
-        // Удаляем класс, чтобы сбросить анимацию
-        element.classList.remove('play-animation');
+        // 1. Отменяем предыдущий таймер, чтобы избежать зависаний
+        clearTimeout(previewTimeout);
         
-        // Небольшая задержка, чтобы браузер успел обработать удаление класса
-        requestAnimationFrame(() => {
-            // Добавляем класс, чтобы запустить анимацию снова
-            element.classList.add('play-animation');
+        // 2. Сбрасываем все возможные классы анимаций с элемента
+        element.classList.remove('play-animation', ...allAnimationClasses);
+        
+        // Принудительный reflow, чтобы браузер "увидел" удаление классов перед добавлением новых
+        void element.offsetWidth;
 
-            // Убираем класс после завершения анимации, чтобы он не мешал
-            setTimeout(() => {
-                 element.classList.remove('play-animation');
-            }, 2500); // 2.5 секунды, дольше самой длинной анимации
-        });
+        // Если выбрана анимация "None", ничего не делаем
+        if (!animationType) return;
+        
+        // 3. Добавляем нужный класс анимации и класс-триггер
+        const animationClass = `text-${animationType}`;
+        element.classList.add(animationClass, 'play-animation');
+        
+        // 4. Устанавливаем новый таймер для очистки после анимации
+        previewTimeout = setTimeout(() => {
+            element.classList.remove(animationClass, 'play-animation');
+        }, 2500); // 2.5 секунды, дольше самой длинной анимации
     }
    </script>
 </body>

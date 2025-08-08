@@ -767,7 +767,8 @@
             // Даем время на перерисовку DOM в iframe
             setTimeout(() => {
                 if (iframe.contentWindow && typeof iframe.contentWindow.triggerAnimationPreview === 'function') {
-                    iframe.contentWindow.triggerAnimationPreview(currentEditingElement.blockId, currentEditingElement.elementKey);
+                    // Передаем ТИП анимации для предпросмотра
+                    iframe.contentWindow.triggerAnimationPreview(currentEditingElement.blockId, currentEditingElement.elementKey, newStyles.animation);
                 }
             }, 200);
         }
