@@ -86,20 +86,20 @@
         body.style-blocks .block-background { display: none !important; }
         
         /* Animation triggers */
-        .animate-on-scroll:not(.animate-trigger) {
+        .animate-on-scroll[data-animated="false"] {
             opacity: 0;
         }
 
-        .animate-on-scroll.animate-trigger.text-fade-in { animation-play-state: running; }
-        .animate-on-scroll.animate-trigger.text-slide-up { animation-play-state: running; }
-        .animate-on-scroll.animate-trigger.text-slide-left { animation-play-state: running; }
-        .animate-on-scroll.animate-trigger.text-slide-right { animation-play-state: running; }
-        .animate-on-scroll.animate-trigger.text-typewriter { animation-play-state: running; }
-        .animate-on-scroll.animate-trigger.text-gold-shine { animation-play-state: running; }
-        .animate-on-scroll.animate-trigger.text-romantic { animation-play-state: running; }
-        .animate-on-scroll.animate-trigger.text-elegant-reveal { animation-play-state: running; }
-        .animate-on-scroll.animate-trigger.text-bounce-in { animation-play-state: running; }
-        .animate-on-scroll.animate-trigger.text-word-reveal span { animation-delay: calc(var(--word-index, 0) * 0.3s); }
+        .animate-on-scroll[data-animated="true"].text-fade-in { animation: fadeIn 1.5s ease-out forwards; }
+        .animate-on-scroll[data-animated="true"].text-slide-up { animation: slideInUp 1.2s ease-out forwards; }
+        .animate-on-scroll[data-animated="true"].text-slide-left { animation: slideInLeft 1s ease-out forwards; }
+        .animate-on-scroll[data-animated="true"].text-slide-right { animation: slideInRight 1s ease-out forwards; }
+        .animate-on-scroll[data-animated="true"].text-typewriter { animation: typewriter 3s steps(20) forwards; }
+        .animate-on-scroll[data-animated="true"].text-gold-shine { animation: goldShine 2s ease-out forwards; }
+        .animate-on-scroll[data-animated="true"].text-romantic { animation: romantic 2s ease-out forwards; }
+        .animate-on-scroll[data-animated="true"].text-elegant-reveal { animation: elegantReveal 2s ease-out forwards; }
+        .animate-on-scroll[data-animated="true"].text-bounce-in { animation: bounceIn 1.5s ease-out forwards; }
+        .animate-on-scroll[data-animated="true"].text-word-reveal span { animation: wordReveal 0.6s ease-out forwards; animation-delay: calc(var(--word-index, 0) * 0.3s); }
         
         /* Text Animations */
         @keyframes fadeIn {
@@ -211,8 +211,8 @@
         if (window.self !== window.top) {
             return `<span class="editable-text ${animationClass}" data-block-id="${blockId}" data-element-key="${elementKey}" style="${getStyleString(styleObject)}">${processText(text)}</span>`;
         }
-        // In live view, apply style and animation class
-        return `<span class="${animationClass} animate-on-scroll" style="${getStyleString(styleObject)}">${processText(text)}</span>`;
+        // In live view, apply style and animation class but WITHOUT starting animation
+        return `<span class="${animationClass} animate-on-scroll" data-animated="false" style="${getStyleString(styleObject)}">${processText(text)}</span>`;
     };
 
     const renderInteractiveElements = (elements, blockId, type) => {
@@ -766,24 +766,23 @@
        document.body.style.opacity = 1;
    }
    
-    // Animation on scroll system
-   function initScrollAnimations() {
-       if (window.self !== window.top) return; // Only in live view
-       
-       const observer = new IntersectionObserver((entries) => {
-           entries.forEach(entry => {
-               if (entry.isIntersecting) {
-                   const element = entry.target;
-                   element.classList.add('animate-trigger');
-                   observer.unobserve(element);
-               }
-           });
-       }, { threshold: 0.1 });
+    function initScrollAnimations() {
+        if (window.self !== window.top) return; // Only in live view
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const element = entry.target;
+                    element.setAttribute('data-animated', 'true');
+                    observer.unobserve(element);
+                }
+            });
+        }, { threshold: 0.1 });
 
-       document.querySelectorAll('.animate-on-scroll').forEach(el => {
-           observer.observe(el);
-       });
-   }
+        document.querySelectorAll('.animate-on-scroll[data-animated="false"]').forEach(el => {
+            observer.observe(el);
+        });
+    }
    
    </script>
 </body>
