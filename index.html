@@ -685,16 +685,28 @@
 
     // Text editing toolbar functions
     function showTextEditingToolbar(blockId, elementKey, currentStyle) {
-        const toolbar = document.getElementById('text-editing-toolbar');
-        currentEditingElement = { blockId, elementKey };
-        
-        // Populate toolbar with current values
-        document.getElementById('toolbar-font-family').value = currentStyle.fontFamily || 'Montserrat';
-        document.getElementById('toolbar-font-size').value = currentStyle.fontSize || '1rem';
-        document.getElementById('toolbar-color').value = currentStyle.color || '#333333';
-        document.getElementById('toolbar-font-weight').value = currentStyle.fontWeight || '400';
-        document.getElementById('toolbar-text-align').value = currentStyle.textAlign || 'center';
-        document.getElementById('toolbar-animation').value = currentStyle.animation || '';
+       const toolbar = document.getElementById('text-editing-toolbar');
+       currentEditingElement = { blockId, elementKey };
+       
+       // Получаем стиль элемента включая анимацию из данных блока
+       const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
+       if (blockIndex !== -1) {
+           const keys = elementKey.split('.');
+           let current = pageBlocks[blockIndex].content;
+           for (let i = 0; i < keys.length - 1; i++) {
+               current = current[keys[i]];
+           }
+           const styleKey = keys[keys.length - 1];
+           const existingStyle = current[styleKey] || {};
+           
+           // Populate toolbar with current values including animation
+           document.getElementById('toolbar-font-family').value = existingStyle.fontFamily || 'Montserrat';
+           document.getElementById('toolbar-font-size').value = existingStyle.fontSize || '1rem';
+           document.getElementById('toolbar-color').value = existingStyle.color || '#333333';
+           document.getElementById('toolbar-font-weight').value = existingStyle.fontWeight || '400';
+           document.getElementById('toolbar-text-align').value = existingStyle.textAlign || 'center';
+           document.getElementById('toolbar-animation').value = existingStyle.animation || '';
+       }
         
         toolbar.classList.add('visible');
         
