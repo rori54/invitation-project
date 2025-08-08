@@ -51,7 +51,10 @@
         .selected .rotate-handle { display: block; }
         .rotate-handle::before { content: ''; position: absolute; top: -15px; left: 50%; width: 1px; height: 15px; background: #007bff; transform: translateX(-50%); }
 
-        /* Ribbon mode styles */ body.style-ribbon .content-section, body.style-ribbon .hero-block { margin: 0 !important; border-radius: 0 !important; box-shadow: none !important; max-width: 100% !important; } body.style-ribbon #page-content { padding: 0; box-shadow: none; max-width: none; }
+        /* Ribbon mode styles */
+        .style-ribbon .content-section,
+        .style-ribbon .hero-block.limited-width { background: none !important; box-shadow: none !important; border-radius: 0 !important; margin: 0 !important; padding: 20px !important; }
+        .style-ribbon .hero-block { border-radius: 0 !important; box-shadow: none !important; }
         
         /* Block background styles */
         .block-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; border-radius: inherit; background-size: cover; background-position: center; background-repeat: no-repeat; }
@@ -67,10 +70,15 @@
         }
 
         /* Ribbon Mode Fix */
-        body.style-ribbon #page-content { background-color: #ffffff; max-width: 800px; margin: 0 auto; padding: 20px 0; box-shadow: 0 6px 25px rgba(0,0,0,0.08); }
-        body.style-ribbon .content-section, body.style-ribbon .hero-block { background: none !important; box-shadow: none !important; border: none !important; margin: 0 !important; }
-        body.style-ribbon .block-wrapper { padding: 25px 40px; }
-        body.style-ribbon .hero-block { width: 100%; max-width: none; }
+        body.style-ribbon #page-content { background-color: #ffffff; margin: 0 auto; padding: 0; box-shadow: 0 6px 25px rgba(0,0,0,0.08); }
+        body.style-ribbon .content-section, body.style-ribbon .hero-block { background: none !important; box-shadow: none !important; border: none !important; margin: 0 !important; border-radius: 0 !important; }
+        body.style-ribbon .block-wrapper { padding: 0; }
+        body.style-ribbon .hero-block { width: 100%; max-width: none; margin: 0 !important; border-radius: 0 !important; }
+        body.style-ribbon .hero-block.limited-width { margin: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+    
+        /* Block backgrounds in Ribbon mode */
+        body.style-ribbon .block-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; background-size: cover; background-position: center; background-repeat: no-repeat; }
+        body.style-ribbon .block-wrapper { position: relative; overflow: hidden; }    
     </style>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 </head>
@@ -160,18 +168,18 @@
         const dateHTML = (c.date && c.date.enabled) ? `<p>${makeTextEditable(c.date.text, block.id, 'date.style', c.date.style)}</p>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-                    <header class="${headerClasses}" style="${headerStyle}">
-                        ${c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${backgroundStyle}"></div>` : ''}
-                        ${imageHTML}
-                        <div class="hero-content">
-                            ${subtitleHTML}
-                            ${namesHTML}
-                            ${dateHTML}
-                        </div>
-                        ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
-                        ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
-                    </header>
-                </div>`;
+            ${c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${backgroundStyle}"></div>` : ''}
+            <header class="${headerClasses}" style="${headerStyle}; position: relative; z-index: 1;">
+                ${imageHTML}
+                <div class="hero-content">
+                    ${subtitleHTML}
+                    ${namesHTML}
+                    ${dateHTML}
+                </div>
+                ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
+                ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
+            </header>
+        </div>`;
     };
 
     const createTextBlockHTML = (block, s) => { 
@@ -184,16 +192,15 @@
         const textHTML = c.text ? `<div>${makeTextEditable(c.text, block.id, 'textStyle', c.textStyle)}</div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
-                ${backgroundDiv}
+            ${backgroundDiv}
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative; z-index: 1;">
                 ${titleHTML}
                 ${textHTML}
                 ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
                 ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
             </section>
-        </div>`; 
+        </div>`;
     };
-
     const createImageHTML = (block, s) => { 
         const c = block.content;
         const bgOpacity = c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1;
@@ -205,8 +212,8 @@
         const descriptionHTML = c.description ? `<div>${makeTextEditable(c.description, block.id, 'descriptionStyle', c.descriptionStyle)}</div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
-                ${backgroundDiv}
+            ${backgroundDiv}
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative; z-index: 1;">
                 ${titleHTML}
                 ${imageTag}
                 ${descriptionHTML}
@@ -223,8 +230,8 @@
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${backgroundStyle}"></div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
-                ${backgroundDiv}
+            ${backgroundDiv}
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative; z-index: 1;">
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <ul style="list-style:none;padding:0;text-align:left;">
                     ${(c.items || []).map((i, index) => `
@@ -252,8 +259,8 @@
         const imageHTML = c.imageUrl ? `<img src="${c.imageUrl}" alt="Venue" style="width:100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-bottom: 20px; opacity:${c.opacity};">` : ''; 
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
-                ${backgroundDiv}
+            ${backgroundDiv}
+            <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative; z-index: 1;">
                 <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
                 <div>${makeTextEditable(c.address, block.id, 'addressStyle', c.addressStyle)}</div>
                 ${imageHTML}
@@ -261,9 +268,8 @@
                 ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
                 ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
             </section>
-        </div>`; 
+        </div>`;
     };
-    
     const createCountdownHTML = (block, s) => { 
         const c = block.content;
         const bgOpacity = c.backgroundOpacity !== undefined ? c.backgroundOpacity : 1;
@@ -271,20 +277,20 @@
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${backgroundStyle}"></div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
-                ${backgroundDiv}
-                <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
-                <div id="countdown" data-target-date="${c.targetDate}">
-                    <div class="time-block"><div id="days" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div class="label">${makeTextEditable('Days', block.id, 'labelStyle', c.labelStyle)}</div></div>
-                    <div class="time-block"><div id="hours" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div class="label">${makeTextEditable('Hours', block.id, 'labelStyle', c.labelStyle)}</div></div>
-                    <div class="time-block"><div id="minutes" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div class="label">${makeTextEditable('Minutes', block.id, 'labelStyle', c.labelStyle)}</div></div>
-                    <div class="time-block"><div id="seconds" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div class="label">${makeTextEditable('Seconds', block.id, 'labelStyle', c.labelStyle)}</div></div>
-                </div>
-                ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
-                ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
-            </section>
-        </div>`; 
-    };
+        ${backgroundDiv}
+        <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative; z-index: 1;">
+            <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
+            <div id="countdown" data-target-date="${c.targetDate}">
+                <div class="time-block"><div id="days" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div class="label">${makeTextEditable('Days', block.id, 'labelStyle', c.labelStyle)}</div></div>
+                <div class="time-block"><div id="hours" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div class="label">${makeTextEditable('Hours', block.id, 'labelStyle', c.labelStyle)}</div></div>
+                <div class="time-block"><div id="minutes" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div class="label">${makeTextEditable('Minutes', block.id, 'labelStyle', c.labelStyle)}</div></div>
+                <div class="time-block"><div id="seconds" class="number">${makeTextEditable('00', block.id, 'numberStyle', c.numberStyle)}</div><div class="label">${makeTextEditable('Seconds', block.id, 'labelStyle', c.labelStyle)}</div></div>
+            </div>
+            ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
+            ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
+        </section>
+    </div>`;
+};
 
     const createRsvpHTML = (block, s, rsvpLink) => { 
         const c = block.content;
@@ -293,16 +299,16 @@
         const backgroundDiv = c.backgroundColor || c.backgroundImage ? `<div class="block-background" style="${backgroundStyle}"></div>` : '';
         
         return `<div class="block-wrapper" data-block-id="${block.id}">
-            <section class="content-section" style="max-width: ${s.maxWidth || '800px'};">
-                ${backgroundDiv}
-                <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
-                <div>${makeTextEditable(c.subtitle, block.id, 'subtitleStyle', c.subtitleStyle)}</div>
-                <div><a href="${rsvpLink}" class="rsvp-button" style="${getStyleString(c.buttonStyle)}">I'll Be There!</a></div>
-                ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
-                ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
-            </section>
-        </div>`; 
-    };
+        ${backgroundDiv}
+        <section class="content-section" style="max-width: ${s.maxWidth || '800px'}; position: relative; z-index: 1;">
+            <h2>${makeTextEditable(c.title, block.id, 'titleStyle', c.titleStyle)}</h2>
+            <div>${makeTextEditable(c.subtitle, block.id, 'subtitleStyle', c.subtitleStyle)}</div>
+            <div><a href="${rsvpLink}" class="rsvp-button" style="${getStyleString(c.buttonStyle)}">I'll Be There!</a></div>
+            ${renderInteractiveElements(c.stickers, block.id, 'sticker')}
+            ${renderInteractiveElements(c.innerBlocks, block.id, 'innerBlock')}
+        </section>
+    </div>` 
+};
     
     function startCountdown(targetDate) { 
         if (!targetDate) return; 
@@ -379,17 +385,20 @@
         return `#${parts.join('')}`;
     }
 
-    function renderPage(blocks, settings, rsvpLink = '#') {
-       if (!blocks || !settings) return;
-       document.body.className = '';
-       if (settings.style) document.body.classList.add(`style-${settings.style}`);
-       if (settings.displayMode) document.body.classList.add(`style-${settings.displayMode}`);
-       document.body.style.backgroundColor = settings.backgroundColor || '#f8f7f5';
-       document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? `url('${settings.backgroundImage}')` : 'none';
-       
-       const container = document.getElementById('page-content');
-       container.innerHTML = '';
-       let countdownBlockContent = null;
+        function renderPage(blocks, settings, rsvpLink = '#') {
+           if (!blocks || !settings) return;
+           document.body.className = '';
+           if (settings.style) document.body.classList.add(`style-${settings.style}`);
+           if (settings.displayMode) document.body.classList.add(`style-${settings.displayMode}`);
+           document.body.style.backgroundColor = settings.backgroundColor || '#f8f7f5';
+           document.body.style.backgroundImage = (settings.style === 'modern' && settings.backgroundImage) ? `url('${settings.backgroundImage}')` : 'none';
+           
+           const container = document.getElementById('page-content');
+           if (settings.displayMode === 'ribbon' && settings.maxWidth) {
+               container.style.maxWidth = settings.maxWidth;
+           }
+           container.innerHTML = '';
+           let countdownBlockContent = null;
 
        blocks.forEach(block => {
            let blockHTML = '';

@@ -59,7 +59,7 @@
         top: 0;
         left: 0;
     }
-    #preview-panel { padding: 0px; box-sizing: border-box; display: flex; justify-content: center; margin-left: 420px; height: 100vh; overflow-y: auto; } 
+    #preview-panel { padding: 20px; box-sizing: border-box; display: flex; justify-content: center; margin-left: 420px; height: 100vh; overflow-y: auto; } 
     #preview-wrapper { width: 100%; background: white; box-shadow: 0 5px 25px rgba(0,0,0,0.15); border-radius: 8px; overflow: hidden; height: fit-content; position: relative; } 
     iframe { width: 100%; height: 100%; border: none; display: block; } 
         
@@ -719,10 +719,15 @@
 
     function selectImage(imageUrl) {
         if (currentImageTarget) {
-            const input = document.getElementById(currentImageTarget) || document.querySelector(`input[data-key="${currentImageTarget}"]`);
+            let input = null;
+            if (currentImageTarget.startsWith('backgroundImage-')) {
+                const blockId = currentImageTarget.replace('backgroundImage-', '');
+                input = document.querySelector(`input[data-key="backgroundImage"][data-block-id="${blockId}"]`);
+            } else {
+                input = document.getElementById(currentImageTarget) || document.querySelector(`input[data-key="${currentImageTarget}"]`);
+            }
             if (input) {
                 input.value = imageUrl;
-                // Trigger change event to update the block
                 const event = new Event('input', { bubbles: true });
                 input.dispatchEvent(event);
             }
@@ -878,7 +883,7 @@
                         <div class="control-group">
                             <label>Background Image</label>
                             <div class="image-input-group">
-                                <input type="url" data-key="backgroundImage" value="${c.backgroundImage || ''}" placeholder="https://images.unsplash.com/photo-...">
+                                <input type="url" data-key="backgroundImage" value="${c.backgroundImage || ''}" placeholder="https://images.unsplash.com/photo-..." data-block-id="${block.id}">
                                 <button type="button" class="browse-image-btn" onclick="openImageLibrary('backgroundImage-${block.id}')">Browse...</button>
                             </div>
                         </div>
@@ -1490,6 +1495,14 @@
     function renderPreview() { 
         if (iframe.contentWindow && typeof iframe.contentWindow.renderPage === 'function') { 
             iframe.contentWindow.renderPage(pageBlocks, pageSettings); 
+            if (pageSettings.displayMode === 'ribbon' && pageSettings.maxWidth) {
+                setTimeout(() => {
+                    const pageContent = iframe.contentWindow.document.getElementById('page-content');
+                    if (pageContent) {
+                        pageContent.style.maxWidth = pageSettings.maxWidth;
+                    }
+                }, 100);
+            }
         } 
     }
     
@@ -1742,14 +1755,10 @@
         } 
     });
     
-    // Fix for background image library
     window.openImageLibrary = function(targetId) {
         if (targetId.startsWith('backgroundImage-')) {
             const blockId = targetId.replace('backgroundImage-', '');
-            const blockIndex = pageBlocks.findIndex(b => b.id === blockId);
-            if (blockIndex !== -1) {
-                currentImageTarget = `backgroundImage`;
-            }
+            currentImageTarget = `backgroundImage-${blockId}`;
         } else {
             currentImageTarget = targetId;
         }
