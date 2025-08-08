@@ -87,19 +87,54 @@
         
         /* Animation triggers */
         .animate-on-scroll[data-animated="false"] {
-            opacity: 0;
+            opacity: 0 !important;
         }
 
-        .animate-on-scroll[data-animated="true"].text-fade-in { animation: fadeIn 1.5s ease-out forwards; }
-        .animate-on-scroll[data-animated="true"].text-slide-up { animation: slideInUp 1.2s ease-out forwards; }
-        .animate-on-scroll[data-animated="true"].text-slide-left { animation: slideInLeft 1s ease-out forwards; }
-        .animate-on-scroll[data-animated="true"].text-slide-right { animation: slideInRight 1s ease-out forwards; }
-        .animate-on-scroll[data-animated="true"].text-typewriter { animation: typewriter 3s steps(20) forwards; }
-        .animate-on-scroll[data-animated="true"].text-gold-shine { animation: goldShine 2s ease-out forwards; }
-        .animate-on-scroll[data-animated="true"].text-romantic { animation: romantic 2s ease-out forwards; }
-        .animate-on-scroll[data-animated="true"].text-elegant-reveal { animation: elegantReveal 2s ease-out forwards; }
-        .animate-on-scroll[data-animated="true"].text-bounce-in { animation: bounceIn 1.5s ease-out forwards; }
-        .animate-on-scroll[data-animated="true"].text-word-reveal span { animation: wordReveal 0.6s ease-out forwards; animation-delay: calc(var(--word-index, 0) * 0.3s); }
+        .animate-on-scroll[data-animated="true"].text-fade-in { 
+            animation: fadeIn 1.5s ease-out forwards; 
+            opacity: 1;
+        }
+        .animate-on-scroll[data-animated="true"].text-slide-up { 
+            animation: slideInUp 1.2s ease-out forwards; 
+            opacity: 1;
+        }
+        .animate-on-scroll[data-animated="true"].text-slide-left { 
+            animation: slideInLeft 1s ease-out forwards; 
+            opacity: 1;
+        }
+        .animate-on-scroll[data-animated="true"].text-slide-right { 
+            animation: slideInRight 1s ease-out forwards; 
+            opacity: 1;
+        }
+        .animate-on-scroll[data-animated="true"].text-typewriter { 
+            animation: typewriter 3s steps(20) forwards; 
+            opacity: 1;
+            overflow: hidden;
+            border-right: 3px solid #e17055;
+            white-space: nowrap;
+            width: 0;
+        }
+        .animate-on-scroll[data-animated="true"].text-gold-shine { 
+            animation: goldShine 2s ease-out forwards; 
+            opacity: 1;
+        }
+        .animate-on-scroll[data-animated="true"].text-romantic { 
+            animation: romantic 2s ease-out forwards; 
+            opacity: 1;
+        }
+        .animate-on-scroll[data-animated="true"].text-elegant-reveal { 
+            animation: elegantReveal 2s ease-out forwards; 
+            opacity: 1;
+        }
+        .animate-on-scroll[data-animated="true"].text-bounce-in { 
+            animation: bounceIn 1.5s ease-out forwards; 
+            opacity: 1;
+        }
+        .animate-on-scroll[data-animated="true"].text-word-reveal span { 
+            animation: wordReveal 0.6s ease-out forwards; 
+            animation-delay: calc(var(--word-index, 0) * 0.3s); 
+            opacity: 1;
+        }
         
         /* Text Animations */
         @keyframes fadeIn {
@@ -156,27 +191,17 @@
             to { opacity: 1; transform: translateY(0) rotateX(0deg); }
         }
 
-        /* Animation Classes */
-        .text-fade-in { animation: fadeIn 1.5s ease-out forwards; opacity: 0; }
-        .text-slide-up { animation: slideInUp 1.2s ease-out forwards; opacity: 0; }
-        .text-slide-left { animation: slideInLeft 1s ease-out forwards; opacity: 0; }
-        .text-slide-right { animation: slideInRight 1s ease-out forwards; opacity: 0; }
-        .text-typewriter { 
-            overflow: hidden; 
-            border-right: 3px solid #e17055; 
-            white-space: nowrap; 
-            animation: typewriter 3s steps(20) 1s forwards; 
-            width: 0; 
-        }
-        .text-gold-shine { animation: goldShine 2s ease-out forwards; opacity: 0; }
-        .text-romantic { animation: romantic 2s ease-out forwards; opacity: 0; }
-        .text-elegant-reveal { animation: elegantReveal 2s ease-out forwards; opacity: 0; }
-        .text-bounce-in { animation: bounceIn 1.5s ease-out forwards; opacity: 0; }
-        .text-word-reveal span { 
-            display: inline-block; 
-            opacity: 0; 
-            animation: wordReveal 0.6s ease-out forwards; 
-        }
+        /* Animation Classes - DISABLED by default */
+        .text-fade-in { opacity: 0; }
+        .text-slide-up { opacity: 0; }
+        .text-slide-left { opacity: 0; }
+        .text-slide-right { opacity: 0; }
+        .text-typewriter { opacity: 0; width: auto; }
+        .text-gold-shine { opacity: 0; }
+        .text-romantic { opacity: 0; }
+        .text-elegant-reveal { opacity: 0; }
+        .text-bounce-in { opacity: 0; }
+        .text-word-reveal span { opacity: 0; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 </head>
@@ -766,20 +791,32 @@
        document.body.style.opacity = 1;
    }
    
-    function initScrollAnimations() {
+        function initScrollAnimations() {
         if (window.self !== window.top) return; // Only in live view
+        
+        console.log('Initializing scroll animations...');
         
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
+                const element = entry.target;
                 if (entry.isIntersecting) {
-                    const element = entry.target;
+                    console.log('Triggering animation for:', element);
                     element.setAttribute('data-animated', 'true');
-                    observer.unobserve(element);
+                } else {
+                    // Reset animation when element leaves viewport
+                    element.setAttribute('data-animated', 'false');
+                    // Force reflow to restart animation
+                    element.style.animation = 'none';
+                    element.offsetHeight; // trigger reflow
+                    element.style.animation = null;
                 }
             });
         }, { threshold: 0.1 });
 
-        document.querySelectorAll('.animate-on-scroll[data-animated="false"]').forEach(el => {
+        const elementsToAnimate = document.querySelectorAll('.animate-on-scroll');
+        console.log('Found elements to animate:', elementsToAnimate.length);
+        
+        elementsToAnimate.forEach(el => {
             observer.observe(el);
         });
     }
