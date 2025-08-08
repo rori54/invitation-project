@@ -51,10 +51,7 @@
         .selected .rotate-handle { display: block; }
         .rotate-handle::before { content: ''; position: absolute; top: -15px; left: 50%; width: 1px; height: 15px; background: #007bff; transform: translateX(-50%); }
 
-        /* Ribbon mode styles */
-        .style-ribbon .content-section,
-        .style-ribbon .hero-block.limited-width { background: none !important; box-shadow: none !important; border-radius: 0 !important; margin: 0 !important; padding: 20px !important; }
-        .style-ribbon .hero-block { border-radius: 0 !important; box-shadow: none !important; }
+        /* Ribbon mode styles */ body.style-ribbon .content-section, body.style-ribbon .hero-block { margin: 0 !important; border-radius: 0 !important; box-shadow: none !important; max-width: 100% !important; } body.style-ribbon #page-content { padding: 0; box-shadow: none; max-width: none; }
         
         /* Block background styles */
         .block-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; border-radius: inherit; background-size: cover; background-position: center; background-repeat: no-repeat; }
