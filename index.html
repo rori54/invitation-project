@@ -758,7 +758,6 @@
 
     // Setup file upload for images
     document.getElementById('file-input').addEventListener('change', async (e) => { 
-        e.target.value = '';
         if (e.target.files.length === 0) return;
         
         const file = e.target.files[0];
