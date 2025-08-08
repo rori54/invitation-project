@@ -84,6 +84,22 @@
         body.style-ribbon .hero-block .hero-background-image { border-radius: 0 !important; }
         body.style-ribbon .block-wrapper:first-child { padding: 0 !important; }
         body.style-blocks .block-background { display: none !important; }
+        
+        /* Animation triggers */
+        .animate-on-scroll:not(.animate-trigger) {
+            opacity: 0;
+        }
+
+        .animate-on-scroll.animate-trigger.text-fade-in { animation-play-state: running; }
+        .animate-on-scroll.animate-trigger.text-slide-up { animation-play-state: running; }
+        .animate-on-scroll.animate-trigger.text-slide-left { animation-play-state: running; }
+        .animate-on-scroll.animate-trigger.text-slide-right { animation-play-state: running; }
+        .animate-on-scroll.animate-trigger.text-typewriter { animation-play-state: running; }
+        .animate-on-scroll.animate-trigger.text-gold-shine { animation-play-state: running; }
+        .animate-on-scroll.animate-trigger.text-romantic { animation-play-state: running; }
+        .animate-on-scroll.animate-trigger.text-elegant-reveal { animation-play-state: running; }
+        .animate-on-scroll.animate-trigger.text-bounce-in { animation-play-state: running; }
+        .animate-on-scroll.animate-trigger.text-word-reveal span { animation-delay: calc(var(--word-index, 0) * 0.3s); }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 </head>
@@ -112,12 +128,14 @@
     };
 
     const makeTextEditable = (text, blockId, elementKey, styleObject) => {
+        const animationClass = styleObject?.animation ? `text-${styleObject.animation}` : '';
+        
         // In editor, wrap in a span with data attributes for the text editing toolbar
         if (window.self !== window.top) {
-            return `<span class="editable-text" data-block-id="${blockId}" data-element-key="${elementKey}" style="${getStyleString(styleObject)}">${processText(text)}</span>`;
+            return `<span class="editable-text ${animationClass}" data-block-id="${blockId}" data-element-key="${elementKey}" style="${getStyleString(styleObject)}">${processText(text)}</span>`;
         }
-        // In live view, just apply style and return text
-        return `<span style="${getStyleString(styleObject)}">${processText(text)}</span>`;
+        // In live view, apply style and animation class
+        return `<span class="${animationClass} animate-on-scroll" style="${getStyleString(styleObject)}">${processText(text)}</span>`;
     };
 
     const renderInteractiveElements = (elements, blockId, type) => {
@@ -621,6 +639,7 @@
                const rsvpTemplateFile = data.rsvp ? data.rsvp.template : 'rsvp-form.html';
                const rsvpLink = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)}${rsvpTemplateFile}?id=${id}&page=rsvp`;
                renderPage(pageData.blocks, pageData.settings, rsvpLink);
+               setTimeout(initScrollAnimations, 100);
            } catch (e) {
                document.getElementById('page-content').innerHTML = `<h1>Error</h1><p>${e.message}</p>`;
            }
@@ -669,6 +688,26 @@
        if (envelope) envelope.style.display = 'none';
        document.body.style.opacity = 1;
    }
+   
+    // Animation on scroll system
+   function initScrollAnimations() {
+       if (window.self !== window.top) return; // Only in live view
+       
+       const observer = new IntersectionObserver((entries) => {
+           entries.forEach(entry => {
+               if (entry.isIntersecting) {
+                   const element = entry.target;
+                   element.classList.add('animate-trigger');
+                   observer.unobserve(element);
+               }
+           });
+       }, { threshold: 0.1 });
+
+       document.querySelectorAll('.animate-on-scroll').forEach(el => {
+           observer.observe(el);
+       });
+   }
+   
    </script>
 </body>
 </html>
