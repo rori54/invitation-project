@@ -60,7 +60,7 @@
         left: 0;
     }
     #preview-panel { padding: 20px; box-sizing: border-box; display: flex; justify-content: center; margin-left: 420px; height: 100vh; overflow-y: auto; } 
-    #preview-wrapper { width: 100%; background: white; box-shadow: 0 5px 25px rgba(0,0,0,0.15); border-radius: 8px; overflow: hidden; height: fit-content; position: relative; } 
+    #preview-wrapper { width: 100%; background: white; box-shadow: 0 5px 25px rgba(0,0,0,0.15); border-radius: 8px; overflow: visible; height: fit-content; position: relative; } 
     iframe { width: 100%; height: 100%; border: none; display: block; } 
         
         /* Text editing toolbar */
@@ -510,6 +510,8 @@
     let currentElementBlock = null; 
     let currentEditingElement = null;
     let isCustomerMode = false;
+    let toolbarListeners = [];
+    let updateStyleDebounceTimer;
     
     const defaultTextStyle = { fontFamily: 'Montserrat', fontSize: '1rem', color: '#333333', fontWeight: '400' };
     const defaultTitleStyle = { fontFamily: 'Playfair Display', fontSize: '2.2rem', color: '#111111', fontWeight: '700' };
@@ -540,7 +542,10 @@
                     fullWidth: true,
                     backgroundColor: '',
                     backgroundOpacity: 1,
-                    backgroundSize: 'cover'
+                    backgroundSize: 'cover',
+                    backgroundPositionX: 50,
+                    backgroundPositionY: 50,
+                    blockOpacity: 1
                 }
             }, 
             { 
@@ -555,7 +560,10 @@
                     backgroundColor: '',
                     backgroundImage: '',
                     backgroundOpacity: 1,
-                    backgroundSize: 'cover'
+                    backgroundSize: 'cover',
+                    backgroundPositionX: 50,
+                    backgroundPositionY: 50,
+                    blockOpacity: 1
                 }
             }, 
             { 
@@ -570,7 +578,10 @@
                     backgroundColor: '',
                     backgroundImage: '',
                     backgroundOpacity: 1,
-                    backgroundSize: 'cover'
+                    backgroundSize: 'cover',
+                    backgroundPositionX: 50,
+                    backgroundPositionY: 50,
+                    blockOpacity: 1
                 }
             },
             { 
@@ -603,7 +614,10 @@
                     backgroundColor: '',
                     backgroundImage: '',
                     backgroundOpacity: 1,
-                    backgroundSize: 'cover'
+                    backgroundSize: 'cover',
+                    backgroundPositionX: 50,
+                    backgroundPositionY: 50,
+                    blockOpacity: 1
                 }
             }, 
             { 
@@ -621,7 +635,10 @@
                     backgroundColor: '',
                     backgroundImage: '',
                     backgroundOpacity: 1,
-                    backgroundSize: 'cover'
+                    backgroundSize: 'cover',
+                    backgroundPositionX: 50,
+                    backgroundPositionY: 50,
+                    blockOpacity: 1
                 }
             }, 
             { 
@@ -637,7 +654,10 @@
                     backgroundColor: '',
                     backgroundImage: '',
                     backgroundOpacity: 1,
-                    backgroundSize: 'cover'
+                    backgroundSize: 'cover',
+                    backgroundPositionX: 50,
+                    backgroundPositionY: 50,
+                    blockOpacity: 1
                }
            }
         ] 
@@ -717,16 +737,36 @@
     function hideTextEditingToolbar() {
         document.getElementById('text-editing-toolbar').classList.remove('visible');
         currentEditingElement = null;
+        
+        // Очищаем обработчики событий
+        toolbarListeners.forEach(({ element, type, handler }) => {
+            element.removeEventListener(type, handler);
+        });
+        toolbarListeners = [];
     }
 
     function setupToolbarEventListeners() {
+        // Удаляем старые обработчики
+        toolbarListeners.forEach(({ element, type, handler }) => {
+            element.removeEventListener(type, handler);
+        });
+        toolbarListeners = [];
+        
         const toolbar = document.getElementById('text-editing-toolbar');
         const inputs = toolbar.querySelectorAll('select, input');
         
         inputs.forEach(input => {
-            // Передаем объект события в функцию
-            input.addEventListener('change', (e) => updateTextStyle(e));
-            input.addEventListener('input', (e) => updateTextStyle(e));
+            const changeHandler = (e) => updateTextStyle(e);
+            const inputHandler = (e) => updateTextStyle(e);
+            
+            input.addEventListener('change', changeHandler);
+            input.addEventListener('input', inputHandler);
+            
+            // Сохраняем для последующего удаления
+            toolbarListeners.push(
+                { element: input, type: 'change', handler: changeHandler },
+                { element: input, type: 'input', handler: inputHandler }
+            );
         });
     }
 
@@ -759,18 +799,23 @@
         Object.assign(existingStyle, newStyles);
         current[styleKey] = existingStyle;
         
+        // Debounce для renderEditor чтобы избежать множественных перерисовок
+        clearTimeout(updateStyleDebounceTimer);
+        updateStyleDebounceTimer = setTimeout(() => {
+            renderEditor();
+        }, 300);
+        
+        // renderPreview вызываем сразу для быстрого отклика
         renderPreview();
-        renderEditor();
 
         // Если изменили анимацию, покажем превью в iframe
         if (event && event.target.id === 'toolbar-animation') {
             // Даем время на перерисовку DOM в iframe
             setTimeout(() => {
                 if (iframe.contentWindow && typeof iframe.contentWindow.triggerAnimationPreview === 'function') {
-                    // Передаем ТИП анимации для предпросмотра
                     iframe.contentWindow.triggerAnimationPreview(currentEditingElement.blockId, currentEditingElement.elementKey, newStyles.animation);
                 }
-            }, 200);
+            }, 100); // Уменьшили задержку
         }
     }
 
@@ -1020,7 +1065,28 @@
                                 <span style="font-size: 12px; color: #666;">${Math.round((c.backgroundOpacity || 1) * 100)}%</span>
                             </div>
                         </div>
+                        <div class="control-group">
+                            <label>Background Position</label>
+                            <div class="style-controls-grid">
+                                <div>
+                                    <label style="font-size: 12px;">Horizontal (X)</label>
+                                    <input type="range" class="opacity-slider" min="0" max="100" step="1" data-key="backgroundPositionX" value="${c.backgroundPositionX || 50}">
+                                    <span style="font-size: 12px; color: #666;">${c.backgroundPositionX || 50}%</span>
+                                </div>
+                                <div>
+                                    <label style="font-size: 12px;">Vertical (Y)</label>
+                                    <input type="range" class="opacity-slider" min="0" max="100" step="1" data-key="backgroundPositionY" value="${c.backgroundPositionY || 50}">
+                                    <span style="font-size: 12px; color: #666;">${c.backgroundPositionY || 50}%</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                </div>
+                <hr class="style-separator">
+                <div class="control-group">
+                    <label>Block Opacity</label>
+                    <input type="range" class="opacity-slider" min="0" max="1" step="0.1" data-key="blockOpacity" value="${c.blockOpacity || 1}">
+                    <span style="font-size: 12px; color: #666;">${Math.round((c.blockOpacity || 1) * 100)}%</span>
                 </div>`;
     }
 
@@ -1033,8 +1099,8 @@
                         ${textContentField}
                         ${createStyleControlsHTML(`innerBlocks.${index}.style`, innerBlock.style, { textAlign: true, color: true, size: true, weight: true, family: true })}
                         <div class="style-controls-grid">
-                            <div class="control-group"><label>X (%)</label><input type="number" data-key="innerBlocks.${index}.x" value="${Math.round(innerBlock.x || 50)}"></div>
-                            <div class="control-group"><label>Y (%)</label><input type="number" data-key="innerBlocks.${index}.y" value="${Math.round(innerBlock.y || 50)}"></div>
+                            <div class="control-group"><label>X (%)</label><input type="number" min="-50" max="150" data-key="innerBlocks.${index}.x" value="${Math.round(innerBlock.x || 50)}"></div>
+                            <div class="control-group"><label>Y (%)</label><input type="number" min="-50" max="150" data-key="innerBlocks.${index}.y" value="${Math.round(innerBlock.y || 50)}"></div>
                         </div>
                         <div class="style-controls-grid">
                             <div class="control-group"><label>Width (px)</label><input type="number" data-key="innerBlocks.${index}.width" value="${Math.round(innerBlock.width || 200)}"></div>
@@ -1095,7 +1161,10 @@
                 backgroundColor: '',
                 backgroundImage: '',
                 backgroundOpacity: 1,
-                backgroundSize: 'cover'
+                backgroundSize: 'cover',
+                backgroundPositionX: 50,
+                backgroundPositionY: 50,
+                blockOpacity: 1
             } 
         }; 
 
@@ -1209,8 +1278,8 @@
                    </div>
                </div>
                <div class="style-controls-grid">
-                   <div class="control-group"><label>X (%)</label><input type="number" data-key="stickers.${index}.x" value="${Math.round(sticker.x || 50)}"></div>
-                   <div class="control-group"><label>Y (%)</label><input type="number" data-key="stickers.${index}.y" value="${Math.round(sticker.y || 50)}"></div>
+                   <div class="control-group"><label>X (%)</label><input type="number" min="-50" max="150" data-key="stickers.${index}.x" value="${Math.round(sticker.x || 50)}"></div>
+                   <div class="control-group"><label>Y (%)</label><input type="number" min="-50" max="150" data-key="stickers.${index}.y" value="${Math.round(sticker.y || 50)}"></div>
                </div>
                <div class="style-controls-grid">
                    <div class="control-group"><label>Width (px)</label><input type="number" data-key="stickers.${index}.width" value="${Math.round(sticker.width || 100)}"></div>
